@@ -6,6 +6,37 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <PropertyGroup Label="NugetProperties">
+    <Authors>Kebechet</Authors>
+    <IsPackable>true</IsPackable>
+    <PackageId>Kebechet.Maui.MicrosoftClarity.Android</PackageId>
+    <Description>Contains bindings for https://learn.microsoft.com/en-us/clarity/mobile-sdk/android-sdk</Description>
+    <RepositoryUrl>https://github.com/Kebechet/Maui.MicrosoftClarity/src/Maui.MicrosoftClarity.Android</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Kebechet/Maui.MicrosoftClarity/src/Maui.MicrosoftClarity.Android</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageIcon>icon.png</PackageIcon>
+    <Version>2.4.0.0</Version>
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Xamarin.AndroidX.Work.Runtime" Version="2.9.0.5" />
     <PackageReference Include="Xamarin.AndroidX.Work.Work.Runtime.Ktx" Version="2.9.0.5" />

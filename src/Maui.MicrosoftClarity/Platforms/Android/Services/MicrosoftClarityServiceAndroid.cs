@@ -3,6 +3,7 @@ using Com.Microsoft.Clarity.Models;
 
 namespace Maui.MicrosoftClarity.Services;
 
+//https://learn.microsoft.com/en-us/clarity/mobile-sdk/android-sdk
 public partial class MicrosoftClarityService
 {
     public partial void Initialize(string projectId)
