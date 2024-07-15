@@ -21,11 +21,11 @@ public partial class MicrosoftClarityService
 
     public partial void Resume();
 
-    public partial void SetCustomUserId(string customUserId);
+    public partial bool SetCustomUserId(string customUserId);
 
-    public partial void SetCustomTag(string key, string value);
+    public partial bool SetCustomTag(string key, string value);
 
-    public partial void SetCurrentScreenName(string screenName);
+    public partial bool SetCurrentScreenName(string screenName);
 
-    public partial void SetCustomSessionId(string customSessionId);
+    public partial bool SetCustomSessionId(string customSessionId);
 }

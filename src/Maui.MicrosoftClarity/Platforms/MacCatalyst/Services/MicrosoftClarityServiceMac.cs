@@ -14,20 +14,24 @@ public partial class MicrosoftClarityService
     {
     }
 
-    public partial void SetCustomUserId(string customUserId)
+    public partial bool SetCustomUserId(string customUserId)
     {
+        return true;
     }
 
-    public partial void SetCustomTag(string key, string value)
+    public partial bool SetCustomTag(string key, string value)
     {
+        return true;
     }
 
-    public partial void SetCurrentScreenName(string screenName)
+    public partial bool SetCurrentScreenName(string screenName)
     {
+        return true;
     }
 
-    public partial void SetCustomSessionId(string customSessionId)
+    public partial bool SetCustomSessionId(string customSessionId)
     {
+        return true;
     }
 
     //wrapper methods

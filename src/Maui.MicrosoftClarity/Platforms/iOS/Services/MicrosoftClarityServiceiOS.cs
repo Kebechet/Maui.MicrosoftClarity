@@ -58,51 +58,55 @@ public partial class MicrosoftClarityService
         }
     }
 
-    public partial void SetCustomUserId(string customUserId)
+    public partial bool SetCustomUserId(string customUserId)
     {
         try
         {
-            ClaritySDK.SetCustomUserId(customUserId);
+            return ClaritySDK.SetCustomUserId(customUserId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(SetCustomUserId));
+            return false;
         }
     }
 
-    public partial void SetCustomTag(string key, string value)
+    public partial bool SetCustomTag(string key, string value)
     {
         try
         {
-            ClaritySDK.SetCustomTagWithKey(key, value);
+            return ClaritySDK.SetCustomTagWithKey(key, value);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(SetCustomTag));
+            return false;
         }
     }
 
-    public partial void SetCurrentScreenName(string screenName)
+    public partial bool SetCurrentScreenName(string screenName)
     {
         try
         {
-            ClaritySDK.SetCurrentScreenNameWithName(screenName);
+            return ClaritySDK.SetCurrentScreenNameWithName(screenName);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(SetCurrentScreenName));
+            return false;
         }
     }
 
-    public partial void SetCustomSessionId(string customSessionId)
+    public partial bool SetCustomSessionId(string customSessionId)
     {
         try
         {
-            ClaritySDK.SetCustomSessionId(customSessionId);
+            return ClaritySDK.SetCustomSessionId(customSessionId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(SetCustomSessionId));
+            return false;
         }
     }
 

@@ -30,8 +30,8 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>1.0.0</Version>
-    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+    <Version>1.0.1</Version>
+    <PackageReleaseNotes>Fixed return type of Set methods</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

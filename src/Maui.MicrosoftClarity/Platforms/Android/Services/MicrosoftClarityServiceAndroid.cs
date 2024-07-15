@@ -63,51 +63,55 @@ public partial class MicrosoftClarityService
         }
     }
 
-    public partial void SetCustomUserId(string customUserId)
+    public partial bool SetCustomUserId(string customUserId)
     {
         try
         {
-            Clarity.SetCustomUserId(customUserId);
+            return (bool)Clarity.SetCustomUserId(customUserId)!;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(SetCustomUserId));
+            return false;
         }
     }
 
-    public partial void SetCustomTag(string key, string value)
+    public partial bool SetCustomTag(string key, string value)
     {
         try
         {
-            Clarity.SetCustomTag(key, value);
+            return Clarity.SetCustomTag(key, value)!;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(SetCustomTag));
+            return false;
         }
     }
 
-    public partial void SetCurrentScreenName(string screenName)
+    public partial bool SetCurrentScreenName(string screenName)
     {
         try
         {
-            Clarity.SetCurrentScreenName(screenName);
+            return (bool)Clarity.SetCurrentScreenName(screenName)!;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(SetCurrentScreenName));
+            return false;
         }
     }
 
-    public partial void SetCustomSessionId(string customSessionId)
+    public partial bool SetCustomSessionId(string customSessionId)
     {
         try
         {
-            Clarity.SetCustomSessionId(customSessionId);
+            return (bool)Clarity.SetCustomSessionId(customSessionId)!;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(SetCustomSessionId));
+            return false;
         }
     }
 
@@ -116,13 +120,7 @@ public partial class MicrosoftClarityService
     {
         try
         {
-            var isPaused = Clarity.IsPaused();
-            if (isPaused is null)
-            {
-                return false;
-            }
-
-            return (bool)isPaused;
+            return (bool)Clarity.IsPaused()!;
         }
         catch (Exception ex)
         {
