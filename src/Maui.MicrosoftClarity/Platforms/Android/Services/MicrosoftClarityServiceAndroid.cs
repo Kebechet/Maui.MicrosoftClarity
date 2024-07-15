@@ -8,10 +8,16 @@ public partial class MicrosoftClarityService
 {
     public partial void Initialize(string projectId)
     {
+        var logLevel = LogLevel.None;
+
+#if DEBUG
+       logLevel = LogLevel.Verbose;
+#endif
+
         var config = new ClarityConfig(
             projectId,
             null, // Default user id
-            LogLevel.None!,
+            logLevel!,
             false, // Disallow metered network usage
             true, // Enable web view capturing
             ["*"], // Allowed domains
