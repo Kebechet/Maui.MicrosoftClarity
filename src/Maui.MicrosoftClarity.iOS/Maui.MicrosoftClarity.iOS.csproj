@@ -1,0 +1,78 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-ios</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <SupportedOSPlatformVersion>14.2</SupportedOSPlatformVersion>
+    <IsBindingProject>true</IsBindingProject>
+    <NoBindingEmbedding>false</NoBindingEmbedding>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NugetProperties">
+    <Authors>Kebechet</Authors>
+    <IsPackable>true</IsPackable>
+    <PackageId>Kebechet.Maui.MicrosoftClarity.iOS</PackageId>
+    <Description>Contains bindings for https://learn.microsoft.com/en-us/clarity/mobile-sdk/ios-sdk</Description>
+    <RepositoryUrl>https://github.com/Kebechet/Maui.MicrosoftClarity/src/Maui.MicrosoftClarity.iOS</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Kebechet/Maui.MicrosoftClarity/src/Maui.MicrosoftClarity.iOS</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageIcon>icon.png</PackageIcon>
+    <Version>1.0.0</Version>
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
+    <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
+  </ItemGroup>
+
+  <!--<ItemGroup>
+    <None Include="nativelib\Clarity.xcframework\.DS_Store" />
+    <None Include="nativelib\Clarity.xcframework\ios-arm64\.DS_Store" />
+    <None Include="nativelib\Clarity.xcframework\ios-arm64\Clarity.framework\.DS_Store" />
+  </ItemGroup>-->
+
+  <ItemGroup>
+    <NativeReference Include="nativelib\Clarity.xcframework">
+      <Kind>Framework</Kind>
+      <!-- Specifies a space-delimited list of platform Frameworks required by the native library. -->
+      <Frameworks>Foundation UIKit</Frameworks>
+      <!--Additional linker flags that are required for linking the native library to an application.-->
+      <!--<LinkerFlags></LinkerFlags>-->
+      <!-- This value should be set to a string containing a space-delimited list of platform Frameworks (e.g. "CoreBluetooth NewsstandKit Twitter"). -->
+      <WeakFrameworks></WeakFrameworks>
+      <!-- Specifies whether or not the -force_load clang argument is required when linking this native library. -->
+      <ForceLoad>False</ForceLoad>
+      <!-- Specifies whether or not the native library requires linking with the GCC Exception Handling library (libgcc_eh). -->
+      <NeedsGccExceptionHandling>False</NeedsGccExceptionHandling>
+      <!-- Specifies whether or not the native library is a C++ library. -->
+      <IsCxx>False</IsCxx>
+      <!-- This value should be set to true to let Xamarin.iOS determine whether ForceLoad is required or not. -->
+      <SmartLink>True</SmartLink>
+    </NativeReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="nativelib\" />
+  </ItemGroup>
+</Project>
