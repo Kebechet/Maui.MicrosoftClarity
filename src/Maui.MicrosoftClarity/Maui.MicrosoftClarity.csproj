@@ -19,7 +19,7 @@
     <Authors>Kebechet</Authors>
     <IsPackable>true</IsPackable>
     <PackageId>Kebechet.Maui.MicrosoftClarity</PackageId>
-    <Description>Serves as an abstraction around Microsof tClarity Android and iOS SDKs</Description>
+    <Description>Serves as an abstraction around Microsoft Clarity Android and iOS SDKs</Description>
     <RepositoryUrl>https://github.com/Kebechet/Maui.MicrosoftClarity</RepositoryUrl>
     <PackageProjectUrl>https://github.com/Kebechet/Maui.MicrosoftClarity</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -31,7 +31,7 @@
     <DebugType>embedded</DebugType>
     <PackageIcon>icon.png</PackageIcon>
     <Version>1.0.0</Version>
-    <PackageReleaseNotes>Bumped Android package version</PackageReleaseNotes>
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -57,11 +57,11 @@
 	</ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-android'">
-    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.Android" Version="2.4.0.5" />
+    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.Android" Version="2.4.0.2" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-ios'">
-    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.iOS" Version="1.0.1.2" />
+    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.iOS" Version="1.0.1.1" />
   </ItemGroup>
 
 </Project>

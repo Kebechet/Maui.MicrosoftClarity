@@ -19,7 +19,7 @@ public partial class App : Application {
     }
 }
 ```
-and also override there method `OnStart()` to call `_revenueCat.Initialize` with your revenueCat apiKey (this key is platform dependant).
+and also override there method `OnStart()` to call `_microsoftClarityService.Initialize` with your project id.
 
 ```csharp
 protected override void OnStart() {
@@ -43,8 +43,6 @@ So that you dont have to specify platform for this package and it's calls, also 
 - `true` for bool returns
 - `new List<>` for collections
 - `string.Empty` for string values
-
-Example of such dummy class: [RevenueCatBillingWindows.cs](Maui.RevenueCat.InAppBilling/Platforms/Windows/RevenueCatBillingWindows.cs)
 
 ## Exception behavior
 - Library will throw exceptions only in case developer did some mistake
