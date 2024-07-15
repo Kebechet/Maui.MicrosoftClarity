@@ -3,7 +3,7 @@ using Foundation;
 using ObjCRuntime;
 using UIKit;
 
-namespace Binding
+namespace MicrosoftClarityiOS
 {
 	// @interface ClarityConfig : NSObject
 	[BaseType (typeof(NSObject), Name = "_TtC7Clarity13ClarityConfig")]

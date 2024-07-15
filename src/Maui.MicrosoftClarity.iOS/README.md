@@ -10,7 +10,7 @@
 The versioning scheme of `Maui.MicrosoftClarity.iOS` is derived from the versioning of original native android package.
 
 ### Example:
-| Origninal android lib | Maui.MicrosoftClarity.iOS | Note |
+| Origninal lib version | Maui.MicrosoftClarity.iOS | Note |
 |:--|:--|:--|
 | 3.4.1 | 3.4.1.0 | First version of bindings for 3.4.1 |
 | 3.4.1 | 3.4.1.17 | Bindings for 3.4.1 containing fixes |
@@ -27,7 +27,7 @@ The versioning scheme of `Maui.MicrosoftClarity.iOS` is derived from the version
   - this command generated `ApiDefinitions.cs` and `StructsAndEnums.cs` files
 
 ### Adjusting generated files
-- I have removed all `Verify` attributeseb6ff9d8207a3545f89ddf28639cb3c0f79)
+- I have removed all `Verify` attributes
 - ✅ - Done 
 
 # License

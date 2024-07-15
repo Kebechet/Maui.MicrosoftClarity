@@ -22,8 +22,8 @@
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>1.0.0</Version>
-    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+    <Version>1.0.1</Version>
+    <PackageReleaseNotes>Using change</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

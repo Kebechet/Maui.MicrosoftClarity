@@ -1,6 +1,6 @@
 using ObjCRuntime;
 
-namespace Binding
+namespace MicrosoftClarityiOS
 {
 	[Native]
 	public enum ApplicationFramework : long
