@@ -33,6 +33,7 @@ protected override void OnStart() {
 Because of MAUI and VS bugs:
 - https://github.com/xamarin/xamarin-macios/issues/19229
 - https://developercommunity.visualstudio.com/t/MAUI---Cannot-create-native-types-when-d/10180586
+- potential workaround: https://github.com/dotnet/maui/issues/10800#issuecomment-1301564278
 
 this won't work in iOS simulator(simulator from MAC), local device(iPhone connected to Windows) neither in remote device(iPhone connected to MAC)
 
