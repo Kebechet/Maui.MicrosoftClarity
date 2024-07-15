@@ -1,7 +1,16 @@
-﻿namespace Maui.MicrosoftClarity.Services;
+﻿using Microsoft.Extensions.Logging;
+
+namespace Maui.MicrosoftClarity.Services;
 
 public partial class MicrosoftClarityService
 {
+    private readonly ILogger<MicrosoftClarityService> _logger;
+
+    public MicrosoftClarityService(ILogger<MicrosoftClarityService> logger)
+    {
+        _logger = logger;
+    }
+
     public partial void Initialize(string projectId);
 
     public bool IsPaused => IsPausedMethod();

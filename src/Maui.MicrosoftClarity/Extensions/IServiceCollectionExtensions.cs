@@ -4,7 +4,7 @@ namespace Maui.MicrosoftClarity.Extensions;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddMicrosoftClarity(this IServiceCollection services, string projectId)
+    public static IServiceCollection AddMicrosoftClarity(this IServiceCollection services)
     {
         services.AddSingleton<MicrosoftClarityService>();
 

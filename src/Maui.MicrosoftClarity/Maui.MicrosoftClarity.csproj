@@ -15,14 +15,53 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
 
+  <PropertyGroup Label="NugetProperties">
+    <Authors>Kebechet</Authors>
+    <IsPackable>true</IsPackable>
+    <PackageId>Kebechet.Maui.MicrosoftClarity</PackageId>
+    <Description>Serves as an abstraction around Microsof tClarity Android and iOS SDKs</Description>
+    <RepositoryUrl>https://github.com/Kebechet/Maui.MicrosoftClarity</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Kebechet/Maui.MicrosoftClarity</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <RepositoryType>git</RepositoryType>
+    <OutputType>Library</OutputType>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+    <PackageIcon>icon.png</PackageIcon>
+    <Version>1.0.0</Version>
+    <PackageReleaseNotes>Bumped Android package version</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+
+    <None Include="..\..\icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 	</ItemGroup>
 
-
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-android'">
-    <ProjectReference Include="..\Maui.MicrosoftClarity.Android\Maui.MicrosoftClarity.Android.csproj" />
+    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.Android" Version="2.4.0.5" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-ios'">
+    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.iOS" Version="1.0.1.2" />
   </ItemGroup>
 
 </Project>
