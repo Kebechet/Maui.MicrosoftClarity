@@ -11,8 +11,8 @@
     <IsPackable>true</IsPackable>
     <PackageId>Kebechet.Maui.MicrosoftClarity.Android</PackageId>
     <Description>Contains bindings for https://learn.microsoft.com/en-us/clarity/mobile-sdk/android-sdk</Description>
-    <RepositoryUrl>https://github.com/Kebechet/Maui.MicrosoftClarity/src/Maui.MicrosoftClarity.Android</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/Kebechet/Maui.MicrosoftClarity/src/Maui.MicrosoftClarity.Android</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Kebechet/Maui.MicrosoftClarity/tree/main/src/Maui.MicrosoftClarity.Android</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Kebechet/Maui.MicrosoftClarity/tree/main/src/Maui.MicrosoftClarity.Android</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryType>git</RepositoryType>

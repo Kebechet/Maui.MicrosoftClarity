@@ -15,8 +15,8 @@
     <IsPackable>true</IsPackable>
     <PackageId>Kebechet.Maui.MicrosoftClarity.iOS</PackageId>
     <Description>Contains bindings for https://learn.microsoft.com/en-us/clarity/mobile-sdk/ios-sdk</Description>
-    <RepositoryUrl>https://github.com/Kebechet/Maui.MicrosoftClarity/src/Maui.MicrosoftClarity.iOS</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/Kebechet/Maui.MicrosoftClarity/src/Maui.MicrosoftClarity.iOS</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Kebechet/Maui.MicrosoftClarity/tree/main/src/Maui.MicrosoftClarity.iOS</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Kebechet/Maui.MicrosoftClarity/tree/main/src/Maui.MicrosoftClarity.iOS</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <RepositoryType>git</RepositoryType>
