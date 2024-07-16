@@ -6,7 +6,7 @@ using UIKit;
 namespace MicrosoftClarityiOS
 {
 	// @interface ClarityConfig : NSObject
-	[BaseType (typeof(NSObject))]
+	[BaseType (typeof(NSObject), Name = "_TtC7Clarity13ClarityConfig")]
 	[DisableDefaultCtor]
 	interface ClarityConfig
 	{
@@ -17,7 +17,7 @@ namespace MicrosoftClarityiOS
 	}
 
 	// @interface ClaritySDK : NSObject
-	[BaseType (typeof(NSObject))]
+	[BaseType (typeof(NSObject), Name = "_TtC7Clarity10ClaritySDK")]
 	interface ClaritySDK
 	{
 		// +(void)initializeWithConfig:(ClarityConfig * _Nonnull)config;
