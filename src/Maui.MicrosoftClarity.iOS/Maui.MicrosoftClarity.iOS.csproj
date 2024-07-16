@@ -22,7 +22,7 @@
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>1.0.1.2-preview1</Version>
+    <Version>1.0.1.2-preview2</Version>
     <PackageReleaseNotes>Stability</PackageReleaseNotes>
   </PropertyGroup>
 
@@ -60,15 +60,15 @@
       <!--Additional linker flags that are required for linking the native library to an application.-->
       <!--<LinkerFlags></LinkerFlags>-->
       <!-- This value should be set to a string containing a space-delimited list of platform Frameworks (e.g. "CoreBluetooth NewsstandKit Twitter"). -->
-      <WeakFrameworks></WeakFrameworks>
+      <!--<WeakFrameworks></WeakFrameworks>-->
       <!-- Specifies whether or not the -force_load clang argument is required when linking this native library. -->
-      <ForceLoad>True</ForceLoad>
+      <ForceLoad>False</ForceLoad>
       <!-- Specifies whether or not the native library requires linking with the GCC Exception Handling library (libgcc_eh). -->
-      <NeedsGccExceptionHandling>False</NeedsGccExceptionHandling>
+      <!--<NeedsGccExceptionHandling>False</NeedsGccExceptionHandling>-->
       <!-- Specifies whether or not the native library is a C++ library. -->
-      <IsCxx>False</IsCxx>
+      <!--<IsCxx>False</IsCxx>-->
       <!-- This value should be set to true to let Xamarin.iOS determine whether ForceLoad is required or not. -->
-      <SmartLink>False</SmartLink>
+      <SmartLink>True</SmartLink>
     </NativeReference>
   </ItemGroup>
 
