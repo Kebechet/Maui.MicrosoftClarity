@@ -35,9 +35,6 @@ Because of MAUI and VS bugs:
 - https://developercommunity.visualstudio.com/t/MAUI---Cannot-create-native-types-when-d/10180586
 - potential workaround: https://github.com/dotnet/maui/issues/10800#issuecomment-1301564278
 
-this won't work in iOS simulator(simulator from MAC), local device(iPhone connected to Windows) neither in remote device(iPhone connected to MAC)
-
-
 ## Dummy classes
 
 So that you dont have to specify platform for this package and it's calls, also Windows and MacCatalyst are added with dummy implementations. When you call one of their methods you will always get:
