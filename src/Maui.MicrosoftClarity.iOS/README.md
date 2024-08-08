@@ -2,9 +2,10 @@
 
 # Maui.MicrosoftClarity.iOS
 - it contains bindings for Microsoft Clarity iOS library
-	- https://clarity.microsoft.com/
+    - https://clarity.microsoft.com/
     - https://learn.microsoft.com/en-us/clarity/mobile-sdk/ios-sdk
-	- https://github.com/microsoft/clarity
+    - https://github.com/microsoft/clarity
+- changelog: https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#ios-sdk-changelog
 
 ## Versioning Scheme
 The versioning scheme of `Maui.MicrosoftClarity.iOS` is derived from the versioning of original native android package.
@@ -28,7 +29,11 @@ The versioning scheme of `Maui.MicrosoftClarity.iOS` is derived from the version
 
 ### Adjusting generated files
 - I have removed all `Verify` attributes
-- ✅ - Done 
+- ✅ - Done
+
+### ⚠️ Binding build
+Currently it is not possible to build the binding from Windows with connected MAC. So you have to build this binding directly from the MAC. The final size of the nuget should be `>6MB`
+- Issue: https://github.com/xamarin/xamarin-macios/issues/20905#issuecomment-2275166543
 
 # License
 This repository is licensed with the [MIT](LICENSE.txt) license.
