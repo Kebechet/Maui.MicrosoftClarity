@@ -2,9 +2,10 @@
 
 # Maui.MicrosoftClarity.Android
 - it contains bindings for Microsoft Clarity Android library
-	- https://clarity.microsoft.com/
+    - https://clarity.microsoft.com/
     - https://learn.microsoft.com/en-us/clarity/mobile-sdk/android-sdk
-	- https://github.com/microsoft/clarity
+    - https://github.com/microsoft/clarity
+- changelog: https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#android-sdk-changelog
 
 ## Versioning Scheme
 The versioning scheme of `Maui.MicrosoftClarity.Android` is derived from the versioning of original native android package.
