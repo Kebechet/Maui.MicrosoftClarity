@@ -1,10 +1,10 @@
 ﻿[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/kebechet)
 
 # Maui.MicrosoftClarity.iOS
-- it contains bindings for Microsoft Clarity iOS library
-    - https://clarity.microsoft.com/
-    - https://learn.microsoft.com/en-us/clarity/mobile-sdk/ios-sdk
-    - https://github.com/microsoft/clarity
+This repo contains bindings for Microsoft Clarity iOS library
+- https://clarity.microsoft.com/
+- https://learn.microsoft.com/en-us/clarity/mobile-sdk/ios-sdk
+- https://github.com/microsoft/clarity
 - changelog: https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#ios-sdk-changelog
 
 ## Versioning Scheme
