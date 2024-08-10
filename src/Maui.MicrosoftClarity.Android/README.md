@@ -1,6 +1,9 @@
 ﻿[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/kebechet)
 
 # Maui.MicrosoftClarity.Android
+![NuGet Version](https://img.shields.io/nuget/v/Kebechet.Maui.MicrosoftClarity.Android)
+![NuGet Downloads](https://img.shields.io/nuget/dt/Kebechet.Maui.MicrosoftClarity.Android)
+
 Thic repo contains bindings for Microsoft Clarity Android library
 - https://clarity.microsoft.com/
 - https://learn.microsoft.com/en-us/clarity/mobile-sdk/android-sdk
