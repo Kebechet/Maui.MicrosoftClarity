@@ -1,6 +1,9 @@
-﻿[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/kebechet)
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/kebechet)
 
 # Maui.MicrosoftClarity
+![NuGet Version](https://img.shields.io/nuget/v/Kebechet.Maui.MicrosoftClarity)
+![NuGet Downloads](https://img.shields.io/nuget/dt/Kebechet.Maui.MicrosoftClarity)
+
 Wrapper for [Microsoft Clarity for mobile](https://clarity.microsoft.com/)
 
 ## Usage
