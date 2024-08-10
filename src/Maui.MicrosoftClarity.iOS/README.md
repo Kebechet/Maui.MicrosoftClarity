@@ -1,6 +1,9 @@
 ﻿[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/kebechet)
 
 # Maui.MicrosoftClarity.iOS
+![NuGet Version](https://img.shields.io/nuget/v/Kebechet.Maui.MicrosoftClarity.iOS)
+![NuGet Downloads](https://img.shields.io/nuget/dt/Kebechet.Maui.MicrosoftClarity.iOS)
+
 This repo contains bindings for Microsoft Clarity iOS library
 - https://clarity.microsoft.com/
 - https://learn.microsoft.com/en-us/clarity/mobile-sdk/ios-sdk
