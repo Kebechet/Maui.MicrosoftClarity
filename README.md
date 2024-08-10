@@ -1,6 +1,7 @@
 ﻿[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/kebechet)
 
 # Maui.MicrosoftClarity
+Wrapper for [Microsoft Clarity for mobile](https://clarity.microsoft.com/)
 
 ## Usage
 Firstly register package installer in your `MauiProgram.cs`
