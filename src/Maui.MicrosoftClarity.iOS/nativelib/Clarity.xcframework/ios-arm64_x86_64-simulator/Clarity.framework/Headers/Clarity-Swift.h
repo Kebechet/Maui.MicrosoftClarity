@@ -310,7 +310,14 @@ enum LogLevel : NSInteger;
 
 SWIFT_CLASS("_TtC7Clarity13ClarityConfig")
 @interface ClarityConfig : NSObject
-- (nonnull instancetype)initWithProjectId:(NSString * _Nonnull)projectId userId:(NSString * _Nullable)userId logLevel:(enum LogLevel)logLevel allowMeteredNetworkUsage:(BOOL)allowMeteredNetworkUsage enableWebViewCapture:(BOOL)enableWebViewCapture disableOnLowEndDevices:(BOOL)disableOnLowEndDevices applicationFramework:(enum ApplicationFramework)applicationFramework OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithProjectId:(NSString * _Nonnull)projectId;
+@property (nonatomic, copy) NSString * _Nullable userId;
+@property (nonatomic) enum LogLevel logLevel;
+@property (nonatomic) BOOL allowMeteredNetworkUsage;
+@property (nonatomic) BOOL enableWebViewCapture;
+@property (nonatomic) BOOL disableOnLowEndDevices;
+@property (nonatomic) enum ApplicationFramework applicationFramework;
+@property (nonatomic) BOOL enableSwiftUI_Experimental;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -665,7 +672,14 @@ enum LogLevel : NSInteger;
 
 SWIFT_CLASS("_TtC7Clarity13ClarityConfig")
 @interface ClarityConfig : NSObject
-- (nonnull instancetype)initWithProjectId:(NSString * _Nonnull)projectId userId:(NSString * _Nullable)userId logLevel:(enum LogLevel)logLevel allowMeteredNetworkUsage:(BOOL)allowMeteredNetworkUsage enableWebViewCapture:(BOOL)enableWebViewCapture disableOnLowEndDevices:(BOOL)disableOnLowEndDevices applicationFramework:(enum ApplicationFramework)applicationFramework OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithProjectId:(NSString * _Nonnull)projectId;
+@property (nonatomic, copy) NSString * _Nullable userId;
+@property (nonatomic) enum LogLevel logLevel;
+@property (nonatomic) BOOL allowMeteredNetworkUsage;
+@property (nonatomic) BOOL enableWebViewCapture;
+@property (nonatomic) BOOL disableOnLowEndDevices;
+@property (nonatomic) enum ApplicationFramework applicationFramework;
+@property (nonatomic) BOOL enableSwiftUI_Experimental;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end

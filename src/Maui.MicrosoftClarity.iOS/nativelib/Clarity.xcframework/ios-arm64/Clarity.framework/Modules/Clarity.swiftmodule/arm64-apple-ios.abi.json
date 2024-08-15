@@ -934,13 +934,6 @@
       },
       {
         "kind": "Import",
-        "name": "WebKit",
-        "printedName": "WebKit",
-        "declKind": "Import",
-        "moduleName": "Clarity"
-      },
-      {
-        "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
         "declKind": "Import",
@@ -1429,7 +1422,37 @@
           {
             "kind": "Constructor",
             "name": "init",
-            "printedName": "init(projectId:userId:logLevel:allowMeteredNetworkUsage:enableWebViewCapture:disableOnLowEndDevices:applicationFramework:)",
+            "printedName": "init(projectId:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "ClarityConfig",
+                "printedName": "Clarity.ClarityConfig",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)initWithProjectId:",
+            "mangledName": "$s7Clarity0A6ConfigC9projectIdACSS_tcfc",
+            "moduleName": "Clarity",
+            "objc_name": "initWithProjectId:",
+            "declAttributes": [
+              "Convenience",
+              "AccessControl",
+              "ObjC"
+            ],
+            "init_kind": "Convenience"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(projectId:userId:logLevel:allowMeteredNetworkUsage:enableWebViewCapture:disableOnLowEndDevices:applicationFramework:enableSwiftUI_Experimental:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -1492,18 +1515,663 @@
                 "printedName": "Clarity.ApplicationFramework",
                 "hasDefaultArg": true,
                 "usr": "c:@M@Clarity@E@ApplicationFramework"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "hasDefaultArg": true,
+                "usr": "s:Sb"
               }
             ],
             "declKind": "Constructor",
-            "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)initWithProjectId:userId:logLevel:allowMeteredNetworkUsage:enableWebViewCapture:disableOnLowEndDevices:applicationFramework:",
-            "mangledName": "$s7Clarity0A6ConfigC9projectId04userD08logLevel24allowMeteredNetworkUsage20enableWebViewCapture22disableOnLowEndDevices20applicationFrameworkACSS_SSSgAA03LogG0OS3bAA011ApplicationV0Otcfc",
+            "usr": "s:7Clarity0A6ConfigC9projectId04userD08logLevel24allowMeteredNetworkUsage20enableWebViewCapture22disableOnLowEndDevices20applicationFramework0L20SwiftUI_ExperimentalACSS_SSSgAA03LogG0OS3bAA011ApplicationV0OSbtcfc",
+            "mangledName": "$s7Clarity0A6ConfigC9projectId04userD08logLevel24allowMeteredNetworkUsage20enableWebViewCapture22disableOnLowEndDevices20applicationFramework0L20SwiftUI_ExperimentalACSS_SSSgAA03LogG0OS3bAA011ApplicationV0OSbtcfc",
             "moduleName": "Clarity",
-            "objc_name": "initWithProjectId:userId:logLevel:allowMeteredNetworkUsage:enableWebViewCapture:disableOnLowEndDevices:applicationFramework:",
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Var",
+            "name": "userId",
+            "printedName": "userId",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@Clarity@objc(cs)ClarityConfig(py)userId",
+            "mangledName": "$s7Clarity0A6ConfigC6userIdSSSgvp",
+            "moduleName": "Clarity",
             "declAttributes": [
               "AccessControl",
               "ObjC"
             ],
-            "init_kind": "Designated"
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "Swift.String?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)userId",
+                "mangledName": "$s7Clarity0A6ConfigC6userIdSSSgvg",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "Swift.String?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)setUserId:",
+                "mangledName": "$s7Clarity0A6ConfigC6userIdSSSgvs",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:7Clarity0A6ConfigC6userIdSSSgvM",
+                "mangledName": "$s7Clarity0A6ConfigC6userIdSSSgvM",
+                "moduleName": "Clarity",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "logLevel",
+            "printedName": "logLevel",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "LogLevel",
+                "printedName": "Clarity.LogLevel",
+                "usr": "c:@M@Clarity@E@LogLevel"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@Clarity@objc(cs)ClarityConfig(py)logLevel",
+            "mangledName": "$s7Clarity0A6ConfigC8logLevelAA03LogD0Ovp",
+            "moduleName": "Clarity",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "LogLevel",
+                    "printedName": "Clarity.LogLevel",
+                    "usr": "c:@M@Clarity@E@LogLevel"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)logLevel",
+                "mangledName": "$s7Clarity0A6ConfigC8logLevelAA03LogD0Ovg",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "LogLevel",
+                    "printedName": "Clarity.LogLevel",
+                    "usr": "c:@M@Clarity@E@LogLevel"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)setLogLevel:",
+                "mangledName": "$s7Clarity0A6ConfigC8logLevelAA03LogD0Ovs",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:7Clarity0A6ConfigC8logLevelAA03LogD0OvM",
+                "mangledName": "$s7Clarity0A6ConfigC8logLevelAA03LogD0OvM",
+                "moduleName": "Clarity",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "allowMeteredNetworkUsage",
+            "printedName": "allowMeteredNetworkUsage",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@Clarity@objc(cs)ClarityConfig(py)allowMeteredNetworkUsage",
+            "mangledName": "$s7Clarity0A6ConfigC24allowMeteredNetworkUsageSbvp",
+            "moduleName": "Clarity",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)allowMeteredNetworkUsage",
+                "mangledName": "$s7Clarity0A6ConfigC24allowMeteredNetworkUsageSbvg",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)setAllowMeteredNetworkUsage:",
+                "mangledName": "$s7Clarity0A6ConfigC24allowMeteredNetworkUsageSbvs",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:7Clarity0A6ConfigC24allowMeteredNetworkUsageSbvM",
+                "mangledName": "$s7Clarity0A6ConfigC24allowMeteredNetworkUsageSbvM",
+                "moduleName": "Clarity",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "enableWebViewCapture",
+            "printedName": "enableWebViewCapture",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@Clarity@objc(cs)ClarityConfig(py)enableWebViewCapture",
+            "mangledName": "$s7Clarity0A6ConfigC20enableWebViewCaptureSbvp",
+            "moduleName": "Clarity",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)enableWebViewCapture",
+                "mangledName": "$s7Clarity0A6ConfigC20enableWebViewCaptureSbvg",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)setEnableWebViewCapture:",
+                "mangledName": "$s7Clarity0A6ConfigC20enableWebViewCaptureSbvs",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:7Clarity0A6ConfigC20enableWebViewCaptureSbvM",
+                "mangledName": "$s7Clarity0A6ConfigC20enableWebViewCaptureSbvM",
+                "moduleName": "Clarity",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "disableOnLowEndDevices",
+            "printedName": "disableOnLowEndDevices",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@Clarity@objc(cs)ClarityConfig(py)disableOnLowEndDevices",
+            "mangledName": "$s7Clarity0A6ConfigC22disableOnLowEndDevicesSbvp",
+            "moduleName": "Clarity",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)disableOnLowEndDevices",
+                "mangledName": "$s7Clarity0A6ConfigC22disableOnLowEndDevicesSbvg",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)setDisableOnLowEndDevices:",
+                "mangledName": "$s7Clarity0A6ConfigC22disableOnLowEndDevicesSbvs",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:7Clarity0A6ConfigC22disableOnLowEndDevicesSbvM",
+                "mangledName": "$s7Clarity0A6ConfigC22disableOnLowEndDevicesSbvM",
+                "moduleName": "Clarity",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "applicationFramework",
+            "printedName": "applicationFramework",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "ApplicationFramework",
+                "printedName": "Clarity.ApplicationFramework",
+                "usr": "c:@M@Clarity@E@ApplicationFramework"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@Clarity@objc(cs)ClarityConfig(py)applicationFramework",
+            "mangledName": "$s7Clarity0A6ConfigC20applicationFrameworkAA011ApplicationD0Ovp",
+            "moduleName": "Clarity",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ApplicationFramework",
+                    "printedName": "Clarity.ApplicationFramework",
+                    "usr": "c:@M@Clarity@E@ApplicationFramework"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)applicationFramework",
+                "mangledName": "$s7Clarity0A6ConfigC20applicationFrameworkAA011ApplicationD0Ovg",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ApplicationFramework",
+                    "printedName": "Clarity.ApplicationFramework",
+                    "usr": "c:@M@Clarity@E@ApplicationFramework"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)setApplicationFramework:",
+                "mangledName": "$s7Clarity0A6ConfigC20applicationFrameworkAA011ApplicationD0Ovs",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:7Clarity0A6ConfigC20applicationFrameworkAA011ApplicationD0OvM",
+                "mangledName": "$s7Clarity0A6ConfigC20applicationFrameworkAA011ApplicationD0OvM",
+                "moduleName": "Clarity",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "enableSwiftUI_Experimental",
+            "printedName": "enableSwiftUI_Experimental",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@Clarity@objc(cs)ClarityConfig(py)enableSwiftUI_Experimental",
+            "mangledName": "$s7Clarity0A6ConfigC26enableSwiftUI_ExperimentalSbvp",
+            "moduleName": "Clarity",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)enableSwiftUI_Experimental",
+                "mangledName": "$s7Clarity0A6ConfigC26enableSwiftUI_ExperimentalSbvg",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@Clarity@objc(cs)ClarityConfig(im)setEnableSwiftUI_Experimental:",
+                "mangledName": "$s7Clarity0A6ConfigC26enableSwiftUI_ExperimentalSbvs",
+                "moduleName": "Clarity",
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:7Clarity0A6ConfigC26enableSwiftUI_ExperimentalSbvM",
+                "mangledName": "$s7Clarity0A6ConfigC26enableSwiftUI_ExperimentalSbvM",
+                "moduleName": "Clarity",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
           },
           {
             "kind": "Constructor",
@@ -1674,6 +2342,20 @@
         "declAttributes": [
           "RawDocComment"
         ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "Clarity"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Clarity"
       },
       {
         "kind": "Import",
@@ -2120,6 +2802,13 @@
       },
       {
         "kind": "Import",
+        "name": "SwiftUI",
+        "printedName": "SwiftUI",
+        "declKind": "Import",
+        "moduleName": "Clarity"
+      },
+      {
+        "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
         "declKind": "Import",
@@ -2460,6 +3149,13 @@
       },
       {
         "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "Clarity"
+      },
+      {
+        "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
         "declKind": "Import",
@@ -2552,13 +3248,6 @@
         "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
-        "declKind": "Import",
-        "moduleName": "Clarity"
-      },
-      {
-        "kind": "Import",
-        "name": "WebKit",
-        "printedName": "WebKit",
         "declKind": "Import",
         "moduleName": "Clarity"
       },
@@ -2597,6 +3286,20 @@
         "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "Clarity"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "Clarity"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
         "declKind": "Import",
         "moduleName": "Clarity"
       },
@@ -2740,6 +3443,121 @@
         "printedName": "CoreTelephony",
         "declKind": "Import",
         "moduleName": "Clarity"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "View",
+        "printedName": "View",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "clarityMask",
+            "printedName": "clarityMask()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "OpaqueTypeArchetype",
+                "printedName": "some SwiftUI.View",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "View",
+                    "printedName": "SwiftUI.View",
+                    "usr": "s:7SwiftUI4ViewP"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:7SwiftUI4ViewP7ClarityE11clarityMaskQryF",
+            "mangledName": "$s7SwiftUI4ViewP7ClarityE11clarityMaskQryF",
+            "moduleName": "Clarity",
+            "genericSig": "<τ_0_0 where τ_0_0 : SwiftUI.View>",
+            "sugared_genericSig": "<Self where Self : SwiftUI.View>",
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "clarityUnmask",
+            "printedName": "clarityUnmask()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "OpaqueTypeArchetype",
+                "printedName": "some SwiftUI.View",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "View",
+                    "printedName": "SwiftUI.View",
+                    "usr": "s:7SwiftUI4ViewP"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:7SwiftUI4ViewP7ClarityE13clarityUnmaskQryF",
+            "mangledName": "$s7SwiftUI4ViewP7ClarityE13clarityUnmaskQryF",
+            "moduleName": "Clarity",
+            "genericSig": "<τ_0_0 where τ_0_0 : SwiftUI.View>",
+            "sugared_genericSig": "<Self where Self : SwiftUI.View>",
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "clarityFontNameHint",
+            "printedName": "clarityFontNameHint(name:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "OpaqueTypeArchetype",
+                "printedName": "some SwiftUI.View",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "View",
+                    "printedName": "SwiftUI.View",
+                    "usr": "s:7SwiftUI4ViewP"
+                  }
+                ]
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:7SwiftUI4ViewP7ClarityE19clarityFontNameHint4nameQrSS_tF",
+            "mangledName": "$s7SwiftUI4ViewP7ClarityE19clarityFontNameHint4nameQrSS_tF",
+            "moduleName": "Clarity",
+            "genericSig": "<τ_0_0 where τ_0_0 : SwiftUI.View>",
+            "sugared_genericSig": "<Self where Self : SwiftUI.View>",
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Protocol",
+        "usr": "s:7SwiftUI4ViewP",
+        "mangledName": "$s7SwiftUI4ViewP",
+        "moduleName": "SwiftUI",
+        "genericSig": "<τ_0_0.Body : SwiftUI.View>",
+        "sugared_genericSig": "<Self.Body : SwiftUI.View>",
+        "intro_Macosx": "10.15",
+        "intro_iOS": "13.0",
+        "intro_tvOS": "13.0",
+        "intro_watchOS": "6.0",
+        "declAttributes": [
+          "TypeEraser",
+          "Available",
+          "Available",
+          "Available",
+          "Available"
+        ],
+        "isExternal": true
       }
     ],
     "json_format_version": 8
@@ -2748,105 +3566,105 @@
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "Array",
-      "offset": 7030,
+      "offset": 6902,
       "length": 28,
       "value": "[\"image\", \"glyphs\", \"rects\"]"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "BooleanLiteral",
-      "offset": 8108,
+      "offset": 7980,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 8146,
+      "offset": 8018,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 8435,
+      "offset": 8307,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 8535,
+      "offset": 8407,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "BooleanLiteral",
-      "offset": 22980,
+      "offset": 22844,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 30830,
+      "offset": 30686,
       "length": 13,
       "value": "\"drawingMode\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 38831,
+      "offset": 38687,
       "length": 5,
       "value": "\"_id\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 6927,
+      "offset": 6799,
       "length": 20,
       "value": "\"Clarity.DisplayListXmlParser\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 40736,
+      "offset": 40890,
       "length": 17,
       "value": "\"displayList.xml\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 41462,
+      "offset": 41616,
       "length": 15,
       "value": "\"Clarity.NamedColorSpace\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 42765,
+      "offset": 42919,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 42788,
+      "offset": 42942,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 42821,
+      "offset": 42975,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 42849,
+      "offset": 43003,
       "length": 1,
       "value": "0"
     },
@@ -6554,51 +7372,30 @@
       "value": "\"Clarity.MutationEvent\""
     },
     {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/TypefaceCollection.swift",
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Repositories\/FontInfoRepository.swift",
       "kind": "IntegerLiteral",
       "offset": 208,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/TypefaceCollection.swift",
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Repositories\/FontInfoRepository.swift",
       "kind": "BooleanLiteral",
-      "offset": 316,
+      "offset": 304,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/TypefaceCollection.swift",
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Repositories\/FontInfoRepository.swift",
       "kind": "BooleanLiteral",
-      "offset": 1197,
+      "offset": 3433,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/TypefaceCollection.swift",
-      "kind": "BooleanLiteral",
-      "offset": 2228,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/TypefaceCollection.swift",
-      "kind": "BooleanLiteral",
-      "offset": 5200,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/TypefaceCollection.swift",
-      "kind": "BooleanLiteral",
-      "offset": 5718,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/TypefaceCollection.swift",
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Repositories\/FontInfoRepository.swift",
       "kind": "Array",
-      "offset": 6021,
+      "offset": 7343,
       "length": 2455,
       "value": "[\"zero\", \"zero.tnum\", \"zero.dnom\", \"zero.numr\", \"zero.subs\", \"zero.sups\", \"zero.sc\", \"zero.1\", \"zero.1.tnum\", \"zero.1.dnom\", \"zero.1.numr\", \"zero.1.subs\", \"zero.1.sups\", \"zero.1.sc\", \"one\", \"one.tnum\", \"one.dnom\", \"one.numr\", \"one.subs\", \"one.sups\", \"one.sc\", \"two\", \"two.tnum\", \"two.dnom\", \"two.numr\", \"two.subs\", \"two.sups\", \"two.sc\", \"three\", \"three.tnum\", \"three.dnom\", \"three.numr\", \"three.subs\", \"three.sups\", \"three.sc\", \"four\", \"four.tnum\", \"four.dnom\", \"four.numr\", \"four.subs\", \"four.sups\", \"four.sc\", \"four.1\", \"four.1.tnum\", \"four.1.dnom\", \"four.1.numr\", \"four.1.subs\", \"four.1.sups\", \"four.1.sc\", \"five\", \"five.tnum\", \"five.dnom\", \"five.numr\", \"five.subs\", \"five.sups\", \"five.sc\", \"six\", \"six.tnum\", \"six.dnom\", \"six.numr\", \"six.subs\", \"six.sups\", \"six.sc\", \"six.1\", \"six.1.tnum\", \"six.1.dnom\", \"six.1.numr\", \"six.1.subs\", \"six.1.sups\", \"six.1.sc\", \"seven\", \"seven.tnum\", \"seven.dnom\", \"seven.numr\", \"seven.subs\", \"seven.sups\", \"seven.sc\", \"eight\", \"eight.tnum\", \"eight.dnom\", \"eight.numr\", \"eight.subs\", \"eight.sups\", \"eight.sc\", \"nine\", \"nine.tnum\", \"nine.dnom\", \"nine.numr\", \"nine.subs\", \"nine.sups\", \"nine.sc\", \"nine.1\", \"nine.1.tnum\", \"nine.1.dnom\", \"nine.1.numr\", \"nine.1.subs\", \"nine.1.sups\", \"nine.1.sc\", \"zerosmaller\", \"onesmaller\", \"twosmaller\", \"threesmaller\", \"foursmaller\", \"fivesmaller\", \"sixsmaller\", \"sevensmaller\", \"eightsmaller\", \"ninesmaller\", \"zerosmall\", \"onesmall\", \"twosmall\", \"threesmall\", \"foursmall\", \"fivesmall\", \"sixsmall\", \"sevensmall\", \"eightsmall\", \"ninesmall\"]"
     },
@@ -7067,555 +7864,604 @@
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 342,
-      "length": 11,
-      "value": "\"Resources\""
+      "offset": 336,
+      "length": 13,
+      "value": "\"cached_data\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 390,
-      "length": 24,
-      "value": "\"https:\/\/www.clarity.ms\""
+      "offset": 384,
+      "length": 95,
+      "value": "\"\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 511,
-      "length": 26,
-      "value": "\"ClarityLivePlayerBaseUrl\""
+      "offset": 408,
+      "length": 1,
+      "value": "\"\/version_\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 635,
-      "length": 30,
-      "value": "\"https:\/\/www.clarity.ms\/eus2\/\""
+      "offset": 454,
+      "length": 1,
+      "value": "\"_\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 700,
-      "length": 25,
-      "value": "\"https:\/\/www.clarity.ms\/\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 764,
-      "length": 39,
-      "value": "\"https:\/\/clarity.microsoft.com\/player\/\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 847,
-      "length": 3,
-      "value": "\"#\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 896,
-      "length": 3,
-      "value": "\".\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 946,
-      "length": 3,
-      "value": "\"&\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 1004,
-      "length": 3,
-      "value": "\"*\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 1074,
-      "length": 20,
-      "value": "\"CFBundleIdentifier\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 1110,
-      "length": 21,
-      "value": "\"<BUNDLE_IDENTIFIER>\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 1192,
-      "length": 28,
-      "value": "\"CFBundleShortVersionString\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 1236,
-      "length": 15,
-      "value": "\"<APP_VERSION>\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 1316,
-      "length": 17,
-      "value": "\"CFBundleVersion\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 1349,
-      "length": 20,
-      "value": "\"<APP_BUILD_NUMBER>\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2068,
-      "length": 23,
-      "value": "\"com.microsoft.clarity\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2123,
-      "length": 24,
-      "value": "\"CLARITY_CONFIG_FETCHED\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2182,
-      "length": 19,
-      "value": "\"CLARITY_ACTIVATED\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2237,
-      "length": 21,
-      "value": "\"LEAN_MODE_ACTIVATED\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2286,
-      "length": 12,
-      "value": "\"REPORT_URL\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2326,
-      "length": 12,
-      "value": "\"INGEST_URL\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2368,
-      "length": 14,
-      "value": "\"MASKING_MODE\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2418,
-      "length": 26,
-      "value": "\"MASKED_WEB_ELEMENTS_LIST\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2482,
-      "length": 28,
-      "value": "\"UNMASKED_WEB_ELEMENTS_LIST\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2549,
-      "length": 29,
-      "value": "\"MASKED_NATIVE_ELEMENTS_LIST\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2619,
-      "length": 31,
-      "value": "\"UNMASKED_NATIVE_ELEMENTS_LIST\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2685,
-      "length": 44,
-      "value": "\"BUNDLE_FONTS_PATHS_\""
-    },
-    {
-      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 2728,
+      "offset": 478,
       "length": 1,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 2760,
+      "offset": 513,
+      "length": 32,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 533,
+      "length": 1,
+      "value": "\"\/fonts_info\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 590,
+      "length": 11,
+      "value": "\"Resources\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 638,
+      "length": 24,
+      "value": "\"https:\/\/www.clarity.ms\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 759,
+      "length": 26,
+      "value": "\"ClarityLivePlayerBaseUrl\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 883,
+      "length": 30,
+      "value": "\"https:\/\/www.clarity.ms\/eus2\/\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 948,
+      "length": 25,
+      "value": "\"https:\/\/www.clarity.ms\/\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1012,
+      "length": 39,
+      "value": "\"https:\/\/clarity.microsoft.com\/player\/\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1095,
+      "length": 3,
+      "value": "\"#\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1144,
+      "length": 3,
+      "value": "\".\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1194,
+      "length": 3,
+      "value": "\"&\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1252,
+      "length": 3,
+      "value": "\"*\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1322,
+      "length": 20,
+      "value": "\"CFBundleIdentifier\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1358,
+      "length": 21,
+      "value": "\"<BUNDLE_IDENTIFIER>\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1440,
+      "length": 28,
+      "value": "\"CFBundleShortVersionString\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1484,
+      "length": 15,
+      "value": "\"<APP_VERSION>\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1564,
+      "length": 17,
+      "value": "\"CFBundleVersion\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 1597,
+      "length": 20,
+      "value": "\"<APP_BUILD_NUMBER>\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2468,
+      "length": 23,
+      "value": "\"com.microsoft.clarity\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2523,
+      "length": 24,
+      "value": "\"CLARITY_CONFIG_FETCHED\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2582,
+      "length": 19,
+      "value": "\"CLARITY_ACTIVATED\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2637,
+      "length": 21,
+      "value": "\"LEAN_MODE_ACTIVATED\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2686,
+      "length": 12,
+      "value": "\"REPORT_URL\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2726,
+      "length": 12,
+      "value": "\"INGEST_URL\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2768,
+      "length": 14,
+      "value": "\"MASKING_MODE\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2818,
+      "length": 26,
+      "value": "\"MASKED_WEB_ELEMENTS_LIST\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2882,
+      "length": 28,
+      "value": "\"UNMASKED_WEB_ELEMENTS_LIST\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 2949,
+      "length": 29,
+      "value": "\"MASKED_NATIVE_ELEMENTS_LIST\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3019,
+      "length": 31,
+      "value": "\"UNMASKED_NATIVE_ELEMENTS_LIST\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3085,
+      "length": 44,
+      "value": "\"BUNDLE_FONTS_PATHS_\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3128,
+      "length": 1,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
+      "kind": "StringLiteral",
+      "offset": 3160,
       "length": 9,
       "value": "\"USER_ID\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 2803,
+      "offset": 3203,
       "length": 12,
       "value": "\"SESSION_ID\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 2850,
+      "offset": 3250,
       "length": 13,
       "value": "\"PAGE_NUMBER\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 2942,
+      "offset": 3342,
       "length": 6,
       "value": "999997"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 2982,
+      "offset": 3382,
       "length": 6,
       "value": "999998"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3022,
+      "offset": 3422,
       "length": 7,
       "value": "8999999"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3061,
+      "offset": 3461,
       "length": 7,
       "value": "8999998"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3096,
+      "offset": 3496,
       "length": 7,
       "value": "8999997"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3137,
+      "offset": 3537,
       "length": 7,
       "value": "8999996"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3228,
+      "offset": 3628,
       "length": 2,
       "value": "30"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3233,
+      "offset": 3633,
       "length": 4,
       "value": "1000"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3305,
+      "offset": 3705,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3309,
+      "offset": 3709,
       "length": 4,
       "value": "1000"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3367,
+      "offset": 3767,
       "length": 3,
       "value": "100"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3396,
+      "offset": 3796,
       "length": 2,
       "value": "36"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3438,
+      "offset": 3838,
       "length": 3,
       "value": "255"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3484,
+      "offset": 3884,
       "length": 3,
       "value": "255"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3532,
+      "offset": 3932,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 3582,
+      "offset": 3982,
       "length": 3,
       "value": "5.0"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3702,
+      "offset": 4102,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 3751,
+      "offset": 4151,
       "length": 1,
       "value": "5"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 3828,
+      "offset": 4228,
       "length": 14,
       "value": "\"Content-Hash\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 3882,
+      "offset": 4282,
       "length": 14,
       "value": "\"Content-Path\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 3936,
+      "offset": 4336,
       "length": 14,
       "value": "\"Content-Type\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 3986,
+      "offset": 4386,
       "length": 8,
       "value": "\"Accept\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 4041,
+      "offset": 4441,
       "length": 17,
       "value": "\"Accept-Encoding\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 4105,
+      "offset": 4505,
       "length": 20,
       "value": "\"ApplicationPackage\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 4171,
+      "offset": 4571,
       "length": 21,
       "value": "\"Application Version\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 4233,
+      "offset": 4633,
       "length": 17,
       "value": "\"Clarity Version\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 4288,
+      "offset": 4688,
       "length": 14,
       "value": "\"Package Name\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 4338,
+      "offset": 4738,
       "length": 23,
       "value": "\"Application Framework\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 4400,
+      "offset": 4800,
       "length": 8,
       "value": "\"userId\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 4450,
+      "offset": 4850,
       "length": 11,
       "value": "\"sessionId\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 4537,
+      "offset": 4937,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 4583,
+      "offset": 4983,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 4635,
+      "offset": 5035,
       "length": 4,
       "value": "1000"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 4675,
+      "offset": 5075,
       "length": 17,
       "value": "\"Untitled Screen\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 4764,
+      "offset": 5164,
       "length": 5,
       "value": "32767"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 4800,
+      "offset": 5200,
       "length": 9,
       "value": "\"visible\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 4839,
+      "offset": 5239,
       "length": 8,
       "value": "\"hidden\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 4932,
+      "offset": 5332,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 5002,
+      "offset": 5402,
       "length": 23,
       "value": "\"Clarity:TapRecognizer\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 5051,
+      "offset": 5451,
       "length": 27,
       "value": "\"Clarity:DeadTapRecognizer\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 5106,
+      "offset": 5506,
       "length": 29,
       "value": "\"Clarity:DoubleTapRecognizer\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 5164,
+      "offset": 5564,
       "length": 30,
       "value": "\"Clarity:IgnoredTapRecognizer\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 5218,
+      "offset": 5618,
       "length": 25,
       "value": "\"Clarity:TouchRecognizer\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "BooleanLiteral",
-      "offset": 5361,
+      "offset": 5761,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "BooleanLiteral",
-      "offset": 5399,
+      "offset": 5799,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 5456,
+      "offset": 5856,
       "length": 2,
       "value": "30"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 5489,
+      "offset": 5889,
       "length": 7,
-      "value": "\"1.0.0\""
+      "value": "\"2.0.0\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Models\/UserInteraction\/Click.swift",
@@ -8901,21 +9747,35 @@
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/ClarityConfig.swift",
       "kind": "BooleanLiteral",
-      "offset": 525,
+      "offset": 90,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/ClarityConfig.swift",
       "kind": "BooleanLiteral",
-      "offset": 569,
+      "offset": 878,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/ClarityConfig.swift",
+      "kind": "BooleanLiteral",
+      "offset": 922,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/ClarityConfig.swift",
       "kind": "BooleanLiteral",
-      "offset": 614,
+      "offset": 967,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/ClarityConfig.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1079,
       "length": 5,
       "value": "false"
     },
@@ -10691,6 +11551,13 @@
       "value": "\"Z\""
     },
     {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/SizedObjectCache.swift",
+      "kind": "IntegerLiteral",
+      "offset": 306,
+      "length": 1,
+      "value": "0"
+    },
+    {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/ExternalDependencies\/SwiftProtobuf\/Google_Protobuf_Any+Extensions.swift",
       "kind": "StringLiteral",
       "offset": 751,
@@ -11973,171 +12840,227 @@
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 234,
+      "length": 1,
+      "value": "5"
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 238,
+      "length": 4,
+      "value": "1024"
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
+      "kind": "IntegerLiteral",
+      "offset": 245,
+      "length": 4,
+      "value": "1024"
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "FloatLiteral",
-      "offset": 257,
+      "offset": 314,
       "length": 3,
       "value": "0.9"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "FloatLiteral",
-      "offset": 269,
+      "offset": 326,
       "length": 3,
       "value": "0.9"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "FloatLiteral",
-      "offset": 280,
+      "offset": 337,
       "length": 3,
       "value": "0.9"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "FloatLiteral",
-      "offset": 292,
+      "offset": 349,
       "length": 4,
       "value": "0.75"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "Array",
-      "offset": 347,
+      "offset": 404,
       "length": 13,
       "value": "[\"VKMapView\"]"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "Array",
-      "offset": 413,
+      "offset": 470,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "Array",
-      "offset": 463,
+      "offset": 520,
       "length": 14,
       "value": "[\"ImageLayer\"]"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "Array",
-      "offset": 583,
+      "offset": 644,
+      "length": 19,
+      "value": "[\"ColorShapeLayer\"]"
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
+      "kind": "Array",
+      "offset": 769,
       "length": 39,
       "value": "[\"RNSVGSvgView\", \"LottieAnimationView\"]"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
+      "kind": "Array",
+      "offset": 921,
+      "length": 43,
+      "value": "[\"_UIContextMenuActionsOnlyViewController\"]"
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "IntegerLiteral",
-      "offset": 803,
+      "offset": 1144,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "Dictionary",
-      "offset": 975,
+      "offset": 1316,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "Dictionary",
-      "offset": 1034,
+      "offset": 1455,
+      "length": 3,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
+      "kind": "Dictionary",
+      "offset": 1507,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "BooleanLiteral",
-      "offset": 6397,
+      "offset": 7153,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "BooleanLiteral",
-      "offset": 6437,
+      "offset": 7193,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "BooleanLiteral",
-      "offset": 16042,
+      "offset": 17355,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "BooleanLiteral",
-      "offset": 16082,
+      "offset": 17395,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "Array",
-      "offset": 16126,
+      "offset": 17439,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "BooleanLiteral",
-      "offset": 16191,
+      "offset": 17504,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "Array",
-      "offset": 17506,
+      "offset": 18819,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "BooleanLiteral",
-      "offset": 17536,
+      "offset": 18849,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "Array",
-      "offset": 19779,
+      "offset": 21979,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "IntegerLiteral",
-      "offset": 31561,
+      "offset": 36123,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "IntegerLiteral",
-      "offset": 31566,
+      "offset": 36128,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "IntegerLiteral",
-      "offset": 31632,
+      "offset": 36194,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
       "kind": "IntegerLiteral",
-      "offset": 31637,
+      "offset": 36199,
       "length": 1,
       "value": "1"
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
+      "kind": "Array",
+      "offset": 36296,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Helpers\/DisplayListCapturer.swift",
+      "kind": "Array",
+      "offset": 36351,
+      "length": 2,
+      "value": "[]"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Models\/Ingest\/Analytics\/Resize.swift",
@@ -13325,14 +14248,14 @@
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/DiContainer.swift",
       "kind": "IntegerLiteral",
-      "offset": 2431,
+      "offset": 2387,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/DiContainer.swift",
       "kind": "IntegerLiteral",
-      "offset": 2453,
+      "offset": 2409,
       "length": 1,
       "value": "0"
     },
@@ -13780,49 +14703,49 @@
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Managers\/CaptureManager.swift",
       "kind": "StringLiteral",
-      "offset": 536,
+      "offset": 467,
       "length": 18,
       "value": "\"displayListQueue\""
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Managers\/CaptureManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 614,
+      "offset": 545,
       "length": 2,
       "value": "-1"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Managers\/CaptureManager.swift",
       "kind": "Array",
-      "offset": 674,
+      "offset": 605,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Managers\/CaptureManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 735,
+      "offset": 666,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Managers\/CaptureManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 763,
+      "offset": 694,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Managers\/CaptureManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 803,
+      "offset": 734,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Managers\/CaptureManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 837,
+      "offset": 768,
       "length": 5,
       "value": "false"
     },
@@ -13858,6 +14781,20 @@
       "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Models\/Display\/Resources\/TextBlob.swift",
       "kind": "BooleanLiteral",
       "offset": 253,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Models\/FontInfo.swift",
+      "kind": "BooleanLiteral",
+      "offset": 899,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/amralaa\/Projects\/clarity-ios\/Clarity\/Clarity\/Models\/FontInfo.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1473,
       "length": 5,
       "value": "false"
     },

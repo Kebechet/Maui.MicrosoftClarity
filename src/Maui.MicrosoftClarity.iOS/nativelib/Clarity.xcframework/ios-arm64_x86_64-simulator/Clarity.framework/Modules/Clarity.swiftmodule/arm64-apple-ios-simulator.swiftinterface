@@ -10,6 +10,7 @@ import Dispatch
 import Foundation
 import Foundation/*.Data*/
 import Swift
+import SwiftUI
 import SystemConfiguration
 import UIKit
 import WebKit
@@ -53,7 +54,36 @@ import zlib
   }
 }
 @objc public class ClarityConfig : ObjectiveC.NSObject {
-  @objc public init(projectId: Swift.String, userId: Swift.String? = nil, logLevel: Clarity.LogLevel = .none, allowMeteredNetworkUsage: Swift.Bool = false, enableWebViewCapture: Swift.Bool = true, disableOnLowEndDevices: Swift.Bool = false, applicationFramework: Clarity.ApplicationFramework = .native)
+  @objc convenience public init(projectId: Swift.String)
+  public init(projectId: Swift.String, userId: Swift.String? = nil, logLevel: Clarity.LogLevel = .none, allowMeteredNetworkUsage: Swift.Bool = false, enableWebViewCapture: Swift.Bool = true, disableOnLowEndDevices: Swift.Bool = false, applicationFramework: Clarity.ApplicationFramework = .native, enableSwiftUI_Experimental: Swift.Bool = false)
+  @objc public var userId: Swift.String? {
+    @objc get
+    @objc set
+  }
+  @objc public var logLevel: Clarity.LogLevel {
+    @objc get
+    @objc set
+  }
+  @objc public var allowMeteredNetworkUsage: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc public var enableWebViewCapture: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc public var disableOnLowEndDevices: Swift.Bool {
+    @objc get
+    @objc set
+  }
+  @objc public var applicationFramework: Clarity.ApplicationFramework {
+    @objc get
+    @objc set
+  }
+  @objc public var enableSwiftUI_Experimental: Swift.Bool {
+    @objc get
+    @objc set
+  }
   @objc deinit
 }
 @objc public enum ApplicationFramework : Swift.Int {
@@ -66,6 +96,14 @@ import zlib
   public var rawValue: Swift.Int {
     get
   }
+}
+extension SwiftUI.View {
+  public func clarityMask() -> some SwiftUI.View
+  
+  public func clarityUnmask() -> some SwiftUI.View
+  
+  public func clarityFontNameHint(name: Swift.String) -> some SwiftUI.View
+  
 }
 extension Clarity.LogLevel : Swift.Equatable {}
 extension Clarity.LogLevel : Swift.Hashable {}
