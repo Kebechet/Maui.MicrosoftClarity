@@ -16,15 +16,14 @@ public partial class MicrosoftClarityService
 
         try
         {
-            var config = new ClarityConfig(
-                projectId,
-                null, // Default user id
-                logLevel,
-                false, // Allow metered network usage
-                true, // Enable web view capturing
-                false, // Disable on low-end devices
-                ApplicationFramework.Native
-            );
+            var config = new ClarityConfig(projectId)
+            {
+                LogLevel = logLevel,
+                AllowMeteredNetworkUsage = false,
+                EnableWebViewCapture = true,
+                DisableOnLowEndDevices = false,
+                ApplicationFramework = ApplicationFramework.Native
+            };
 
             ClaritySDK.InitializeWithConfig(config);
         }
