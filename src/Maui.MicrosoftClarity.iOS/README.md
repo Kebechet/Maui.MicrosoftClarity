@@ -27,7 +27,7 @@ The versioning scheme of `Maui.MicrosoftClarity.iOS` is derived from the version
 - I have extracted the `.zip` on my MAC desktop
 - started terminal, then `cd ~/Desktop`
 - firstly check what versions of xcode SDKs you have installed by `sharpie xcode -sdks` and use the `iphoneosXX.Y` version you have
-- I used command `sharpie bind --sdk=iphoneos17.2 --output="BindingOutput" --namespace="Binding" --scope="Clarity.xcframework/ios-arm64/Clarity.framework/Headers" "Clarity.xcframework/ios-arm64/Clarity.framework/Headers/Clarity-Swift.h"`
+- I used command `sharpie bind --sdk=iphoneos17.2 --output="ClarityBindingOutput" --namespace="MicrosoftClarityiOS" --scope="Clarity.xcframework/ios-arm64/Clarity.framework/Headers" "Clarity.xcframework/ios-arm64/Clarity.framework/Headers/Clarity-Swift.h"`
   - this command generated `ApiDefinitions.cs` and `StructsAndEnums.cs` files
 
 ### Adjusting generated files
