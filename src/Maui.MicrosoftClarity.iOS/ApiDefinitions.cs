@@ -111,5 +111,10 @@ namespace MicrosoftClarityiOS
         [Static]
         [Export("setCurrentScreenNameWithName:")]
         bool SetCurrentScreenNameWithName([NullAllowed] string name);
+
+        // +(BOOL)setOnNewSessionStartedCallback:(void (^ _Nonnull)(NSString * _Nonnull))callback;
+        [Static]
+        [Export("setOnNewSessionStartedCallback:")]
+        bool SetOnNewSessionStartedCallback(Action<NSString> callback);
     }
 }

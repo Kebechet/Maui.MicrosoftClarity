@@ -27,7 +27,7 @@ The versioning scheme of `Maui.MicrosoftClarity.iOS` is derived from the version
 - I have extracted the `.zip` on my MAC desktop
 - started terminal, then `cd ~/Desktop`
 - firstly check what versions of xcode SDKs you have installed by `sharpie xcode -sdks` and use the `iphoneosXX.Y` version you have
-- I used command `sharpie bind --sdk=iphoneos17.2 --output="ClarityBindingOutput" --namespace="MicrosoftClarityiOS" --scope="Clarity.xcframework/ios-arm64/Clarity.framework/Headers" "Clarity.xcframework/ios-arm64/Clarity.framework/Headers/Clarity-Swift.h"`
+- I used command `sharpie bind --sdk=iphoneos17.5 --output="ClarityBindingOutput" --namespace="MicrosoftClarityiOS" --scope="Clarity.xcframework/ios-arm64/Clarity.framework/Headers" "Clarity.xcframework/ios-arm64/Clarity.framework/Headers/Clarity-Swift.h"`
   - this command generated `ApiDefinitions.cs` and `StructsAndEnums.cs` files
 
 ### Adjusting generated files
@@ -37,6 +37,7 @@ The versioning scheme of `Maui.MicrosoftClarity.iOS` is derived from the version
 ### ⚠️ Binding build
 Currently it is not possible to build the binding from Windows with connected MAC. So you have to build this binding directly from the MAC. The final size of the nuget should be `>6MB`
 - Issue: https://github.com/xamarin/xamarin-macios/issues/20905#issuecomment-2275166543
+- from `.xcframework` remove all `*.swiftmodule` directories
 
 # License
 This repository is licensed with the [MIT](LICENSE.txt) license.
