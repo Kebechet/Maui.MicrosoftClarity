@@ -308,14 +308,78 @@ typedef SWIFT_ENUM(NSInteger, ApplicationFramework, open) {
 @class NSString;
 enum LogLevel : NSInteger;
 
+/// A class that allows you to configure the Clarity SDK behavior.
+/// <ul>
+///   <li>
+///     projectId: the Clarity’s project id to send the data to. You can get it from the Clarity dashboard.
+///   </li>
+///   <li>
+///     userId: an id that is associated with the Clarity sessions.
+///     <ul>
+///       <li>
+///         This value is sticky across different application runs or Clarity sessions.
+///       </li>
+///       <li>
+///         The id must be a base-36 string and smaller than the upper limit of <code>1Z141Z4</code>.
+///         <ul>
+///           <li>
+///             If you need more flexibility, consider using <code>setCustomUserId()</code>.
+///           </li>
+///         </ul>
+///       </li>
+///       <li>
+///         If no user ID is provided, a randomly generated one is used.
+///       </li>
+///       <li>
+///         If an invalid ID is provided, it will be set as a custom user id, and a random one is then generated for the user id field.
+///       </li>
+///     </ul>
+///   </li>
+///   <li>
+///     logLevel: the level of logs that Clarity should report in the application log stream.
+///   </li>
+///   <li>
+///     applicationFramework: signals to the SDK which framework is being used to develop the current application. You should not need to set this parameter on your own.
+///   </li>
+/// </ul>
 SWIFT_CLASS("_TtC7Clarity13ClarityConfig")
 @interface ClarityConfig : NSObject
+/// Initializes a new instance of the ClarityConfig class.
+/// \param projectId the Clarity’s project id to send the data to. You can get it from the Clarity dashboard.
+///
 - (nonnull instancetype)initWithProjectId:(NSString * _Nonnull)projectId;
+/// An id that is associated with the Clarity sessions.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         This value is sticky across different application runs or Clarity sessions.
+///       </li>
+///       <li>
+///         The id must be a base-36 string and smaller than the upper limit of <code>1Z141Z4</code>.
+///         <ul>
+///           <li>
+///             If you need more flexibility, consider using <code>setCustomUserId()</code>.
+///           </li>
+///         </ul>
+///       </li>
+///       <li>
+///         If no user ID is provided, a randomly generated one is used.
+///       </li>
+///       <li>
+///         If an invalid ID is provided, it will be set as a custom user id, and a random one is then generated for the user id field.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
 @property (nonatomic, copy) NSString * _Nullable userId;
+/// The level of logs that Clarity should report in the application log stream.
 @property (nonatomic) enum LogLevel logLevel;
 @property (nonatomic) BOOL allowMeteredNetworkUsage;
 @property (nonatomic) BOOL enableWebViewCapture;
 @property (nonatomic) BOOL disableOnLowEndDevices;
+/// Signals to the SDK which framework is being used to develop the current application. You should not need to set this parameter on your own.
 @property (nonatomic) enum ApplicationFramework applicationFramework;
 @property (nonatomic) BOOL enableSwiftUI_Experimental;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
@@ -326,21 +390,191 @@ SWIFT_CLASS("_TtC7Clarity13ClarityConfig")
 
 SWIFT_CLASS("_TtC7Clarity10ClaritySDK")
 @interface ClaritySDK : NSObject
+/// Initializes Clarity to start capturing the current session data.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         This function must be called on the main thread only.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
+/// \param config the config that tunes the SDK behavior (e.g., which project to send to, what user id to use, …etc)
+///
 + (void)initializeWithConfig:(ClarityConfig * _Nonnull)config;
+/// Initializes Clarity to start capturing the current session data.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         This function must be called on the main thread only.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
+/// \param config the config that tunes the SDK behavior (e.g., which project to send to, what user id to use, …etc)
+///
+/// \param onClarityInitialized a callback to be called once Clarity initialization is completed (note: Clarity session might start a little bit after initialization).
+///
 + (void)initializeWithConfig:(ClarityConfig * _Nonnull)config onClarityInitialized:(void (^ _Nonnull)(void))onClarityInitialized;
+/// Pauses the Clarity capturing logic until a call to the <code>resume</code> function is made.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         This function must be called on the main thread only.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
 + (void)pause;
+/// Resumes the Clarity capturing logic if, and only if, it was paused by an earlier call to the <code>pause</code> function.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         This function must be called on the main thread only.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
 + (void)resume;
+/// Returns <code>true</code> if Clarity is currently in the paused state based on an earlier call to the <code>pause</code> function.
 + (BOOL)isPaused SWIFT_WARN_UNUSED_RESULT;
+/// Masks a certain UIView so that Clarity does not capture any text or images of this view (i.e., content is replaced with placeholders).
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         This function must be called on the main thread only.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
 + (void)maskView:(UIView * _Nonnull)view;
+/// Unmasks a certain UIView so that Clarity captures its content even if it’s a child of another masked view or if it’s inside a masked screen.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         This function must be called on the main thread only.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
 + (void)unmaskView:(UIView * _Nonnull)view;
+/// Sets a custom user id for the current session which can then be used to filter the sessions on the Clarity dashboard.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         This function must be called on the main thread only.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
+/// Returns: <code>true</code> if setting the custom user id succeeded.
 + (BOOL)setCustomUserId:(NSString * _Nonnull)customUserId;
+/// Sets a custom session id for the current session which can then be used to filter the sessions on the Clarity dashboard.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         This function must be called on the main thread only.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
+/// Returns: <code>true</code> if setting the custom session id succeeded
 + (BOOL)setCustomSessionId:(NSString * _Nonnull)customSessionId;
+/// Returns the ongoing Clarity session id if a session has already started.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         This is particularly useful to link Clarity’s sessions with other telemetry services.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
+/// Returns: the current session id in case there’s an active session; otherwise, it returns null.
 + (NSString * _Nullable)getCurrentSessionId SWIFT_WARN_UNUSED_RESULT;
+/// Returns the ongoing Clarity session URL on the Clarity dashboard if a session has already started.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         This is particularly useful to link Clarity’s sessions with other telemetry services.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
+/// Returns: the current session URL in case there’s an active session; otherwise, it returns null.
 + (NSString * _Nullable)getCurrentSessionUrl SWIFT_WARN_UNUSED_RESULT;
+/// Sets a custom tag for the current session which can then be used to filter the sessions on the Clarity dashboard.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         This function must be called on the main thread only.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
+/// Returns: <code>true</code> if setting the custom tag succeeded
 + (BOOL)setCustomTagWithKey:(NSString * _Nonnull)key value:(NSString * _Nonnull)value;
+/// Sets a custom screen name for the current screen on React Native applications only.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         The screen name is added as a component name and you can filter on that on the dashboard as well.
+///       </li>
+///       <li>
+///         This function cannot be used unless your app is a React Native one.
+///       </li>
+///       <li>
+///         This function must be called on the main thread only.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
+/// Returns: <code>true</code> if setting the custom screen name succeeded
 + (BOOL)setCurrentScreenNameWithName:(NSString * _Nullable)name;
+/// Sets a callback that will be called whenever a new session of Clarity has started. The callback should take the session id as a string.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         If you call this function to set a callback after a session has already started, we’ll call the callback right away with the existing session id.
+///       </li>
+///       <li>
+///         The callback is guaranteed to run on the main thread.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
+/// Returns: <code>true</code> if setting the callback succeeded.
+/// \param callback the callback to be called each time a new session has started.
+///
++ (BOOL)setOnNewSessionStartedCallback:(void (^ _Nonnull)(NSString * _Nonnull))callback;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
 
 typedef SWIFT_ENUM(NSInteger, LogLevel, open) {
   LogLevelVerbose = 0,
@@ -350,6 +584,7 @@ typedef SWIFT_ENUM(NSInteger, LogLevel, open) {
   LogLevelError = 4,
   LogLevelNone = 5,
 };
+
 
 
 #endif

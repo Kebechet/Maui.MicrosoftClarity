@@ -6,11 +6,11 @@
 	<dict>
 		<key>ios-arm64/Clarity.framework/Clarity</key>
 		<data>
-		VS3p+hxHo9eX5yD6nS600vvaTLk=
+		y1UmcU4Av2WeZe90uNO+eBQFef8=
 		</data>
 		<key>ios-arm64/Clarity.framework/Headers/Clarity-Swift.h</key>
 		<data>
-		jMikkToBJPzdxnuO5KFjYICjnwQ=
+		2DzWeCKGRQMmy/l1gOAWUA3ghmA=
 		</data>
 		<key>ios-arm64/Clarity.framework/Headers/Clarity.h</key>
 		<data>
@@ -22,27 +22,31 @@
 		</data>
 		<key>ios-arm64/Clarity.framework/Info.plist</key>
 		<data>
-		XSNvon70FQSUWmoeuagYpBSoWIU=
+		OkcG6hS1OWX8CKQpvUThJs8GTik=
 		</data>
 		<key>ios-arm64/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		fBTPRzZLbu5qw1PRFptSTMB1g1I=
+		2U74rq2NIZpu8cfnraQyri40XQ4=
 		</data>
 		<key>ios-arm64/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
-		8pZLvj1SSFzBQ+Pm4YVK5T5bNxY=
+		nkgf3/2yCwrElqqDik3MA+EMGg4=
 		</data>
 		<key>ios-arm64/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<data>
-		k4jot6b6UDlnXZckFVmV0xYblnQ=
+		U+8ImNWaDhPsNVtPvl+iowDyDa0=
 		</data>
 		<key>ios-arm64/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<data>
-		8pZLvj1SSFzBQ+Pm4YVK5T5bNxY=
+		nkgf3/2yCwrElqqDik3MA+EMGg4=
 		</data>
 		<key>ios-arm64/Clarity.framework/Modules/module.modulemap</key>
 		<data>
 		jU1ptFWGv7hcxkCuopxj9lDPhsc=
+		</data>
+		<key>ios-arm64/Clarity.framework/PrivacyInfo.xcprivacy</key>
+		<data>
+		PpWoPOlCD3UnokXWkKmGO2xMb+U=
 		</data>
 		<key>ios-arm64/Clarity.framework/clarity.js</key>
 		<data>
@@ -50,11 +54,11 @@
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Clarity</key>
 		<data>
-		k1xwvFAWjlUxwBr4Mpi2jePzDuM=
+		RvjahpT1yBbZ2oluNiZ+8rNGOLs=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Headers/Clarity-Swift.h</key>
 		<data>
-		TZp6zrw5UCKC/vEcngP8Lo97sLw=
+		AwYRT2IatMEFldskDEmA1sFT5t8=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Headers/Clarity.h</key>
 		<data>
@@ -66,47 +70,51 @@
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Info.plist</key>
 		<data>
-		zF69VbTd6usLZmHWvjRMwGJbTqg=
+		vl/CSrsBjcYfdkBNZ8png52wbss=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		fpn/INK1H2lTJK2im413r+KUc1M=
+		jhVrZ4Bg97VnfP6mzK+jSQxKfJQ=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		LoKjd9+RCdX7dS8dB3opjkZNTdI=
+		rtLo1almlje1mv4SYoxFKbg1oPU=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		qfOG+mmBNjuqqhqB3HFVB/OXOBE=
+		pQhReIlVrYOpiCPj8KFuhLSLf0c=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		LoKjd9+RCdX7dS8dB3opjkZNTdI=
+		rtLo1almlje1mv4SYoxFKbg1oPU=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		fpn/INK1H2lTJK2im413r+KUc1M=
+		jhVrZ4Bg97VnfP6mzK+jSQxKfJQ=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		zXfK8VYNdtBtAiuJoPdJ317MoUw=
+		auy1OAYZiPIK34/f8S6FreqhbkM=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		tp8ihEfr4ONwuihw8xCMLJAqsyk=
+		SY07d4/uLeglLcYGTtRA2ZKRFlE=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		zXfK8VYNdtBtAiuJoPdJ317MoUw=
+		auy1OAYZiPIK34/f8S6FreqhbkM=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/module.modulemap</key>
 		<data>
 		jU1ptFWGv7hcxkCuopxj9lDPhsc=
 		</data>
+		<key>ios-arm64_x86_64-simulator/Clarity.framework/PrivacyInfo.xcprivacy</key>
+		<data>
+		PpWoPOlCD3UnokXWkKmGO2xMb+U=
+		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/_CodeSignature/CodeResources</key>
 		<data>
-		AIiXIn9C3bBAK5uKrJC0tMPCy0k=
+		HT/xotShakcm0EvCgxTvz4yY74Q=
 		</data>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/clarity.js</key>
 		<data>
@@ -119,22 +127,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			VS3p+hxHo9eX5yD6nS600vvaTLk=
+			y1UmcU4Av2WeZe90uNO+eBQFef8=
 			</data>
 			<key>hash2</key>
 			<data>
-			9gY9EqV1VZ8RhWBHGtJpse3T2EA0LXkp5hm9gZ7iGj8=
+			3leJyPgxk7hYTaq425uNdMt4Xp+FhjA0nXX58NllnQU=
 			</data>
 		</dict>
 		<key>ios-arm64/Clarity.framework/Headers/Clarity-Swift.h</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			jMikkToBJPzdxnuO5KFjYICjnwQ=
+			2DzWeCKGRQMmy/l1gOAWUA3ghmA=
 			</data>
 			<key>hash2</key>
 			<data>
-			e+bdq8TkSik0D+rnAQ9VjvzQvaY0FiiitxNmn9Rzsxs=
+			vTRMzKjEMDH4kczFbkzuXYLUSUh4qvdUINqBT+DaHD4=
 			</data>
 		</dict>
 		<key>ios-arm64/Clarity.framework/Headers/Clarity.h</key>
@@ -163,55 +171,55 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			XSNvon70FQSUWmoeuagYpBSoWIU=
+			OkcG6hS1OWX8CKQpvUThJs8GTik=
 			</data>
 			<key>hash2</key>
 			<data>
-			IoZ6oW+FXh2E2D4XTfRuYBPFOZvID7GNzfk+dwJWad0=
+			64GYRTyzKxksrm3HMpcWLGdhfil6rOKJslgkUllUsPs=
 			</data>
 		</dict>
 		<key>ios-arm64/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios.abi.json</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			fBTPRzZLbu5qw1PRFptSTMB1g1I=
+			2U74rq2NIZpu8cfnraQyri40XQ4=
 			</data>
 			<key>hash2</key>
 			<data>
-			E6yWl9/92HUvLS3rirQPyiFObiNo8CeC1y2SfjDzta8=
+			tGg+r0ffhHmyriwtFXMun7tMok1mHZCoadVvcRXmxMs=
 			</data>
 		</dict>
 		<key>ios-arm64/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			8pZLvj1SSFzBQ+Pm4YVK5T5bNxY=
+			nkgf3/2yCwrElqqDik3MA+EMGg4=
 			</data>
 			<key>hash2</key>
 			<data>
-			XEAR220fEYTQVGCQIEuAWc3T/pELrE4zyK/L4TAxuTw=
+			JqtZMJnHTBISfiAQ2GDPHTkxy/WZvrzeuIkdeQ/r9m0=
 			</data>
 		</dict>
 		<key>ios-arm64/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			k4jot6b6UDlnXZckFVmV0xYblnQ=
+			U+8ImNWaDhPsNVtPvl+iowDyDa0=
 			</data>
 			<key>hash2</key>
 			<data>
-			MmIs0F80IHg4rPnv/8gYUdBCL+gEQgZ6mr28y0urYmY=
+			ir7YIaWzIdcCquJDV4C5O6acze44QrDV9+JG1YCw4oA=
 			</data>
 		</dict>
 		<key>ios-arm64/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			8pZLvj1SSFzBQ+Pm4YVK5T5bNxY=
+			nkgf3/2yCwrElqqDik3MA+EMGg4=
 			</data>
 			<key>hash2</key>
 			<data>
-			XEAR220fEYTQVGCQIEuAWc3T/pELrE4zyK/L4TAxuTw=
+			JqtZMJnHTBISfiAQ2GDPHTkxy/WZvrzeuIkdeQ/r9m0=
 			</data>
 		</dict>
 		<key>ios-arm64/Clarity.framework/Modules/module.modulemap</key>
@@ -223,6 +231,17 @@
 			<key>hash2</key>
 			<data>
 			Ibt86i2N9K5mnxhufvm35s1pgfX6N0RnlJDVkiFjnnw=
+			</data>
+		</dict>
+		<key>ios-arm64/Clarity.framework/PrivacyInfo.xcprivacy</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			PpWoPOlCD3UnokXWkKmGO2xMb+U=
+			</data>
+			<key>hash2</key>
+			<data>
+			/sQkxbNYZTZDWd27+CtgxzOUVlXxpgDz6utr2TqwJM4=
 			</data>
 		</dict>
 		<key>ios-arm64/Clarity.framework/clarity.js</key>
@@ -240,22 +259,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			k1xwvFAWjlUxwBr4Mpi2jePzDuM=
+			RvjahpT1yBbZ2oluNiZ+8rNGOLs=
 			</data>
 			<key>hash2</key>
 			<data>
-			pSujc/tFzzLxR/zdF347JH4z7AhOdi7oX4UATKCntOQ=
+			WeeUf81QHvrEjiuSHnnl4+RetFFCHS7/HXQEyq6DdLQ=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Headers/Clarity-Swift.h</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			TZp6zrw5UCKC/vEcngP8Lo97sLw=
+			AwYRT2IatMEFldskDEmA1sFT5t8=
 			</data>
 			<key>hash2</key>
 			<data>
-			p5/gBjoJXJomAF6hTUKAO/nVykQccsLneTS9qivuBKM=
+			pO8EVe1ornPeddumYxDrTsVVVY87sDtjwhAo+eYRku0=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Headers/Clarity.h</key>
@@ -284,99 +303,99 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			zF69VbTd6usLZmHWvjRMwGJbTqg=
+			vl/CSrsBjcYfdkBNZ8png52wbss=
 			</data>
 			<key>hash2</key>
 			<data>
-			/pZOHZGDCft7ZQkcZkMLcHOI2BBdT4bZ6pW5qI10Ugk=
+			xrtTAf9J4wjZ7x6seYzzkOWvfBdVFrUHoq6WhGahKHM=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			fpn/INK1H2lTJK2im413r+KUc1M=
+			jhVrZ4Bg97VnfP6mzK+jSQxKfJQ=
 			</data>
 			<key>hash2</key>
 			<data>
-			nv/gB+4RendE8cm0332RV5mvwSF8BjjOuG8X6JRPxto=
+			hKbp+4akN1v9ddwu3kls64XeiG2Gdsz4VylyPdPlogM=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			LoKjd9+RCdX7dS8dB3opjkZNTdI=
+			rtLo1almlje1mv4SYoxFKbg1oPU=
 			</data>
 			<key>hash2</key>
 			<data>
-			2FYVRLbX5b/myCYA8D4hl3cMPjj1IpOdeU1/zqNniyU=
+			lfseSR9GW5bmcwb2eNpvohyZ+eClp1BGJJcQ2Lq/dHg=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			qfOG+mmBNjuqqhqB3HFVB/OXOBE=
+			pQhReIlVrYOpiCPj8KFuhLSLf0c=
 			</data>
 			<key>hash2</key>
 			<data>
-			JaJ70c7X7WMUsnEhNJ/kKpdWH+a7jGLtHz12BixxV0k=
+			u/XiT08UWviqndW5LM/yiji/Xxf1KBGx+NCmhrP1PUU=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			LoKjd9+RCdX7dS8dB3opjkZNTdI=
+			rtLo1almlje1mv4SYoxFKbg1oPU=
 			</data>
 			<key>hash2</key>
 			<data>
-			2FYVRLbX5b/myCYA8D4hl3cMPjj1IpOdeU1/zqNniyU=
+			lfseSR9GW5bmcwb2eNpvohyZ+eClp1BGJJcQ2Lq/dHg=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			fpn/INK1H2lTJK2im413r+KUc1M=
+			jhVrZ4Bg97VnfP6mzK+jSQxKfJQ=
 			</data>
 			<key>hash2</key>
 			<data>
-			nv/gB+4RendE8cm0332RV5mvwSF8BjjOuG8X6JRPxto=
+			hKbp+4akN1v9ddwu3kls64XeiG2Gdsz4VylyPdPlogM=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			zXfK8VYNdtBtAiuJoPdJ317MoUw=
+			auy1OAYZiPIK34/f8S6FreqhbkM=
 			</data>
 			<key>hash2</key>
 			<data>
-			BjilGCo5iIApb9FaN0sVWgVi1Q3I5ahXI1RIAQTPb9E=
+			YLz8oLmhwBnNacyF/7sJX+1AywD7UTGvejBbFeZrUzc=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			tp8ihEfr4ONwuihw8xCMLJAqsyk=
+			SY07d4/uLeglLcYGTtRA2ZKRFlE=
 			</data>
 			<key>hash2</key>
 			<data>
-			Fbwx8xQNLKyRuZYkuDqwJEiZ8khOjL+kCJymZnZvxfQ=
+			kaIgIF67Pfid8g38c8SMh+Psuxc8+qITbpU6UPCUWjs=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			zXfK8VYNdtBtAiuJoPdJ317MoUw=
+			auy1OAYZiPIK34/f8S6FreqhbkM=
 			</data>
 			<key>hash2</key>
 			<data>
-			BjilGCo5iIApb9FaN0sVWgVi1Q3I5ahXI1RIAQTPb9E=
+			YLz8oLmhwBnNacyF/7sJX+1AywD7UTGvejBbFeZrUzc=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/Modules/module.modulemap</key>
@@ -390,15 +409,26 @@
 			Ibt86i2N9K5mnxhufvm35s1pgfX6N0RnlJDVkiFjnnw=
 			</data>
 		</dict>
+		<key>ios-arm64_x86_64-simulator/Clarity.framework/PrivacyInfo.xcprivacy</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			PpWoPOlCD3UnokXWkKmGO2xMb+U=
+			</data>
+			<key>hash2</key>
+			<data>
+			/sQkxbNYZTZDWd27+CtgxzOUVlXxpgDz6utr2TqwJM4=
+			</data>
+		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/_CodeSignature/CodeResources</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			AIiXIn9C3bBAK5uKrJC0tMPCy0k=
+			HT/xotShakcm0EvCgxTvz4yY74Q=
 			</data>
 			<key>hash2</key>
 			<data>
-			ITgJ2xFzLxhLUXaQm2yb/CFKWvnAQ+sXjdIxNkq5glA=
+			d7/xj0ZYwwq5ORM1p0WgFy3I5MeSFhBU5on4IZyxrD8=
 			</data>
 		</dict>
 		<key>ios-arm64_x86_64-simulator/Clarity.framework/clarity.js</key>
