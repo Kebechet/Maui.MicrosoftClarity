@@ -1,0 +1,11 @@
+framework module Clarity {
+  umbrella header "Clarity.h"
+  export *
+
+  module * { export * }
+}
+
+module Clarity.Swift {
+  header "Clarity-Swift.h"
+  requires objc
+}
