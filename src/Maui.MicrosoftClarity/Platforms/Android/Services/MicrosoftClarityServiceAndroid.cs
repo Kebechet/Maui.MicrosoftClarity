@@ -17,19 +17,12 @@ public partial class MicrosoftClarityService
 
         try
         {
-            var config = new ClarityConfig(
-                projectId,
-                null, // Default user id
-                logLevel!,
-                false, // Disallow metered network usage
-                true, // Enable web view capturing
-                ["*"], // Allowed domains
-                ApplicationFramework.Native!,
-                [], // Allowed activities
-                [], // Disallowed activities (ignore activities)
-                false, // Disable on low-end devices
-                null //maximumDailyNetworkUsageInMB
-            );
+            var config = new ClarityConfig(projectId)
+            {
+                UserId = null,
+                LogLevel = logLevel!,
+                ApplicationFramework = ApplicationFramework.Native!,
+            };
 
             Clarity.Initialize(Platform.CurrentActivity, config);
         }
@@ -114,6 +107,18 @@ public partial class MicrosoftClarityService
             return false;
         }
     }
+
+    //public partial void StartNewSession()
+    //{
+    //    try
+    //    {
+    //        Clarity.StartNewSession();
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(StartNewSession));
+    //    }
+    //}
 
     //wrapper methods
     public bool IsPausedMethod()

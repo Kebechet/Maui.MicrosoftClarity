@@ -30,8 +30,8 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>1.0.6</Version>
-    <PackageReleaseNotes>Updated iOS package to newest version</PackageReleaseNotes>
+    <Version>1.0.7</Version>
+    <PackageReleaseNotes>Updated Android package to the newest version</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -57,7 +57,7 @@
 	</ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-android'">
-    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.Android" Version="2.4.0.2" />
+    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.Android" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-ios'">
