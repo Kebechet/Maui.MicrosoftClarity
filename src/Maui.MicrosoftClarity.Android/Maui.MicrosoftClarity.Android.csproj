@@ -18,8 +18,8 @@
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>2.4.0.2</Version>
-    <PackageReleaseNotes>Improved package compatibility</PackageReleaseNotes>
+    <Version>3.0.0.0</Version>
+    <PackageReleaseNotes>Updated to latest library version</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,6 +40,7 @@
   <ItemGroup>
     <PackageReference Include="Xamarin.AndroidX.Work.Runtime" Version="2.8.1" />
     <PackageReference Include="Xamarin.AndroidX.Work.Work.Runtime.Ktx" Version="2.8.1" />
+    <PackageReference Include="Xamarin.Android.Binding.InstallReferrer" Version="2.2.0" />
     <PackageReference Include="Xamarin.Protobuf.JavaLite" Version="3.23.2" />
     <PackageReference Include="Xamarin.Kotlin.StdLib" Version="2.0.0" />
 

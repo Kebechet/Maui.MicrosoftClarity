@@ -23,7 +23,7 @@ The versioning scheme of `Maui.MicrosoftClarity.Android` is derived from the ver
 - To start create a project `Android Java library binding`
 - Then files of the the library have to be downloaded. 
 - Download native library from: [mvnrepository.com](https://mvnrepository.com/artifact/com.microsoft.clarity/clarity) to 
-	download the [Clarity v2.4.0](https://mvnrepository.com/artifact/com.microsoft.clarity/clarity/2.4.0) android library.
+	download the [Clarity v3.0.0](https://mvnrepository.com/artifact/com.microsoft.clarity/clarity/3.0.0) android library.
 - Click: `files->View all`. You have to download there files:
   - `.aar` that contains the compiled library and 
   - `-sources.jar` that is used in binding process for documenting the library.
