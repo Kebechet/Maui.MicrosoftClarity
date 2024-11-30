@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>DemoApp</title>
     <base href="/" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/app.css" />
-    <link rel="stylesheet" href="DemoApp.styles.css" />
+    <!-- For MAUI Blazor to record session correctly all CSS files must be publicly accessible from internet (cant be local only) -->
+    <link rel="stylesheet" href="https://satisfitstorage.blob.core.windows.net/clarity-nuget-demo/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://satisfitstorage.blob.core.windows.net/clarity-nuget-demo/app.css" />
+    <link rel="stylesheet" href="https://satisfitstorage.blob.core.windows.net/clarity-nuget-demo/MainLayout.razor.css" />
+    <link rel="stylesheet" href="https://satisfitstorage.blob.core.windows.net/clarity-nuget-demo/NavMenu.razor.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
 </head>
 

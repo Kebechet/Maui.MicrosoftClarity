@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Maui.MicrosoftClarity.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace DemoApp;
 public static class MauiProgram
@@ -15,8 +16,10 @@ public static class MauiProgram
 
         builder.Services.AddMauiBlazorWebView();
 
+        builder.Services.AddMicrosoftClarity();
+
 #if DEBUG
-		builder.Services.AddBlazorWebViewDeveloperTools();
+        builder.Services.AddBlazorWebViewDeveloperTools();
 		builder.Logging.AddDebug();
 #endif
 

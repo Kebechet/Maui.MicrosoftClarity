@@ -63,4 +63,8 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\src\Maui.MicrosoftClarity\Maui.MicrosoftClarity.csproj" />
+    </ItemGroup>
+
 </Project>
