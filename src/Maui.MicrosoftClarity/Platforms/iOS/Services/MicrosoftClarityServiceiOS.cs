@@ -19,9 +19,6 @@ public partial class MicrosoftClarityService
             var config = new ClarityConfig(projectId)
             {
                 LogLevel = logLevel,
-                AllowMeteredNetworkUsage = false,
-                EnableWebViewCapture = true,
-                DisableOnLowEndDevices = false,
                 ApplicationFramework = ApplicationFramework.Native
             };
 
@@ -87,7 +84,7 @@ public partial class MicrosoftClarityService
     {
         try
         {
-            return ClaritySDK.SetCurrentScreenNameWithName(screenName);
+            return ClaritySDK.SetCurrentScreenName(screenName);
         }
         catch (Exception ex)
         {
