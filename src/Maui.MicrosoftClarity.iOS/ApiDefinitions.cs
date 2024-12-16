@@ -14,48 +14,31 @@ namespace MicrosoftClarityiOS
         [Export("initWithProjectId:")]
         NativeHandle Constructor(string projectId);
 
-        // @property (copy, nonatomic) NSString * _Nullable userId;
-        [NullAllowed, Export("userId")]
+        // @property (copy, nonatomic) SWIFT_DEPRECATED_MSG("This property is deprecated and would be removed in a future major version. Use `ClaritySDK.setCustomUserId(_:)` instead.") NSString * userId __attribute__((deprecated("This property is deprecated and would be removed in a future major version. Use `ClaritySDK.setCustomUserId(_:)` instead.")));
+        [Export("userId")]
         string UserId { get; set; }
 
         // @property (nonatomic) enum LogLevel logLevel;
         [Export("logLevel", ArgumentSemantic.Assign)]
         LogLevel LogLevel { get; set; }
 
-        // @property (nonatomic) BOOL allowMeteredNetworkUsage;
-        [Export("allowMeteredNetworkUsage")]
-        bool AllowMeteredNetworkUsage { get; set; }
-
-        // @property (nonatomic) BOOL enableWebViewCapture;
-        [Export("enableWebViewCapture")]
-        bool EnableWebViewCapture { get; set; }
-
-        // @property (nonatomic) BOOL disableOnLowEndDevices;
-        [Export("disableOnLowEndDevices")]
-        bool DisableOnLowEndDevices { get; set; }
-
         // @property (nonatomic) enum ApplicationFramework applicationFramework;
         [Export("applicationFramework", ArgumentSemantic.Assign)]
         ApplicationFramework ApplicationFramework { get; set; }
 
-        // @property (nonatomic) BOOL enableSwiftUI_Experimental;
-        [Export("enableSwiftUI_Experimental")]
-        bool EnableSwiftUI_Experimental { get; set; }
+        // @property (copy, nonatomic) void (^ _Nullable)(NSString * _Nonnull, NSString * _Nullable) customSignalsCallback;
+        [NullAllowed, Export("customSignalsCallback", ArgumentSemantic.Copy)]
+        Action<NSString, NSString> CustomSignalsCallback { get; set; }
     }
 
     // @interface ClaritySDK : NSObject
     [BaseType(typeof(NSObject), Name = "_TtC7Clarity10ClaritySDK")]
     interface ClaritySDK
     {
-        // +(void)initializeWithConfig:(ClarityConfig * _Nonnull)config;
+        // +(BOOL)initializeWithConfig:(ClarityConfig * _Nonnull)config;
         [Static]
         [Export("initializeWithConfig:")]
-        void InitializeWithConfig(ClarityConfig config);
-
-        // +(void)initializeWithConfig:(ClarityConfig * _Nonnull)config onClarityInitialized:(void (^ _Nonnull)(void))onClarityInitialized;
-        [Static]
-        [Export("initializeWithConfig:onClarityInitialized:")]
-        void InitializeWithConfig(ClarityConfig config, Action onClarityInitialized);
+        bool InitializeWithConfig(ClarityConfig config);
 
         // +(void)pause;
         [Static]
@@ -71,6 +54,11 @@ namespace MicrosoftClarityiOS
         [Static]
         [Export("isPaused")]
         bool IsPaused { get; }
+
+        // +(BOOL)startNewSessionWithCallback:(void (^ _Nullable)(NSString * _Nonnull))callback;
+        [Static]
+        [Export("startNewSessionWithCallback:")]
+        bool StartNewSessionWithCallback([NullAllowed] Action<NSString> callback);
 
         // +(void)maskView:(UIView * _Nonnull)view;
         [Static]
@@ -92,7 +80,7 @@ namespace MicrosoftClarityiOS
         [Export("setCustomSessionId:")]
         bool SetCustomSessionId(string customSessionId);
 
-        // +(NSString * _Nullable)getCurrentSessionId __attribute__((warn_unused_result("")));
+        // +(NSString * _Nullable)getCurrentSessionId __attribute__((warn_unused_result(""))) __attribute__((deprecated("This function is deprecated and will be removed in a future major version. Please use `ClaritySDK.getCurrentSessionUrl()` instead.")));
         [Static]
         [NullAllowed, Export("getCurrentSessionId")]
         string CurrentSessionId { get; }
@@ -107,14 +95,19 @@ namespace MicrosoftClarityiOS
         [Export("setCustomTagWithKey:value:")]
         bool SetCustomTagWithKey(string key, string value);
 
-        // +(BOOL)setCurrentScreenNameWithName:(NSString * _Nullable)name;
+        // +(BOOL)sendCustomEventWithValue:(NSString * _Nonnull)value;
         [Static]
-        [Export("setCurrentScreenNameWithName:")]
-        bool SetCurrentScreenNameWithName([NullAllowed] string name);
+        [Export("sendCustomEventWithValue:")]
+        bool SendCustomEventWithValue(string value);
 
-        // +(BOOL)setOnNewSessionStartedCallback:(void (^ _Nonnull)(NSString * _Nonnull))callback;
+        // +(BOOL)setCurrentScreenName:(NSString * _Nullable)name;
         [Static]
-        [Export("setOnNewSessionStartedCallback:")]
-        bool SetOnNewSessionStartedCallback(Action<NSString> callback);
+        [Export("setCurrentScreenName:")]
+        bool SetCurrentScreenName([NullAllowed] string name);
+
+        // +(BOOL)setOnSessionStartedCallback:(void (^ _Nonnull)(NSString * _Nonnull))callback;
+        [Static]
+        [Export("setOnSessionStartedCallback:")]
+        bool SetOnSessionStartedCallback(Action<NSString> callback);
     }
 }
