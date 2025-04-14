@@ -13,7 +13,7 @@ function startClarity(webViewID, webViewRenderNodeId, maskSelectors, unmaskSelec
 }
 
 function startClarityInternal(webViewID, webViewRenderNodeId, maskSelectors, unmaskSelectors, maskContentFlag, messageHandlerName){
-  if(typeof window["clarity"] === "undefined" || window["clarity"]["v"] === "-1" ) {
+  if(!window["clarity"] || window["clarity"]["v"] === "-1" ) {
       window["clarityhybrid"]("start", webViewID, webViewRenderNodeId, maskSelectors, unmaskSelectors, maskContentFlag, messageHandlerName);
       // Overriding window clarity variable to safe-gate against Clarity for Web starting later
       window["clarity"] = function() {
@@ -27,7 +27,7 @@ function startClarityInternal(webViewID, webViewRenderNodeId, maskSelectors, unm
 }
 
 function stopClarity() {
-  if (typeof window["clarityhybrid"] !== undefined){
+  if (window["clarityhybrid"]) {
       window["clarityhybrid"]("stop");
   }
 }

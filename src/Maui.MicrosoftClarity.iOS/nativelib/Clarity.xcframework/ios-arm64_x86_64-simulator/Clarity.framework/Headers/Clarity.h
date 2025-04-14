@@ -8,4 +8,5 @@ FOUNDATION_EXPORT const unsigned char ClarityVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <Clarity/PublicHeader.h>
 
+#import <Clarity/ClarityInternalHelpers.h>
 #import <Clarity/FloatParser.h>
