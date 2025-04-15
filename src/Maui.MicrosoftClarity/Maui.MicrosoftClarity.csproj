@@ -30,8 +30,8 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>1.0.8</Version>
-    <PackageReleaseNotes>Updated iOS package to the newest version</PackageReleaseNotes>
+    <Version>2.0.0</Version>
+    <PackageReleaseNotes>.NET9 + Updated native libs to the newest version</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -57,11 +57,11 @@
 	</ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0-android'">
-    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.Android" Version="3.0.0" />
+    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.Android" Version="3.2.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0-ios'">
-    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.iOS" Version="3.0.2" />
+    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.iOS" Version="3.0.7.1" />
   </ItemGroup>
 
 </Project>
