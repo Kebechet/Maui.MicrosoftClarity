@@ -24,7 +24,7 @@ public partial class MicrosoftClarityService
                 ApplicationFramework = ApplicationFramework.Native!,
             };
 
-            Clarity.Initialize(Platform.CurrentActivity, config);
+            ClaritySdk.Initialize(Platform.CurrentActivity, config);
         }
         catch (Exception ex)
         {
@@ -36,7 +36,7 @@ public partial class MicrosoftClarityService
     {
         try
         {
-            Clarity.Pause();
+            ClaritySdk.Pause();
         }
         catch (Exception ex)
         {
@@ -48,7 +48,7 @@ public partial class MicrosoftClarityService
     {
         try
         {
-            Clarity.Resume();
+            ClaritySdk.Resume();
         }
         catch (Exception ex)
         {
@@ -60,7 +60,7 @@ public partial class MicrosoftClarityService
     {
         try
         {
-            return (bool)Clarity.SetCustomUserId(customUserId)!;
+            return (bool)ClaritySdk.SetCustomUserId(customUserId)!;
         }
         catch (Exception ex)
         {
@@ -73,7 +73,7 @@ public partial class MicrosoftClarityService
     {
         try
         {
-            return Clarity.SetCustomTag(key, value)!;
+            return ClaritySdk.SetCustomTag(key, value)!;
         }
         catch (Exception ex)
         {
@@ -86,7 +86,7 @@ public partial class MicrosoftClarityService
     {
         try
         {
-            return (bool)Clarity.SetCurrentScreenName(screenName)!;
+            return (bool)ClaritySdk.SetCurrentScreenName(screenName)!;
         }
         catch (Exception ex)
         {
@@ -99,7 +99,7 @@ public partial class MicrosoftClarityService
     {
         try
         {
-            return (bool)Clarity.SetCustomSessionId(customSessionId)!;
+            return (bool)ClaritySdk.SetCustomSessionId(customSessionId)!;
         }
         catch (Exception ex)
         {
@@ -112,7 +112,7 @@ public partial class MicrosoftClarityService
     //{
     //    try
     //    {
-    //        Clarity.StartNewSession();
+    //        ClaritySdk.StartNewSession();
     //    }
     //    catch (Exception ex)
     //    {
@@ -125,7 +125,7 @@ public partial class MicrosoftClarityService
     {
         try
         {
-            return (bool)Clarity.IsPaused()!;
+            return (bool)ClaritySdk.IsPaused()!;
         }
         catch (Exception ex)
         {
@@ -137,7 +137,7 @@ public partial class MicrosoftClarityService
     {
         try
         {
-            return Clarity.CurrentSessionId;
+            return ClaritySdk.CurrentSessionId;
         }
         catch (Exception ex)
         {
@@ -149,7 +149,7 @@ public partial class MicrosoftClarityService
     {
         try
         {
-            return Clarity.CurrentSessionUrl;
+            return ClaritySdk.CurrentSessionUrl;
         }
         catch (Exception ex)
         {

@@ -6,11 +6,15 @@
 	<dict>
 		<key>Headers/Clarity-Swift.h</key>
 		<data>
-		3tx8YuxNqCeuhJg27IKSHDonB8s=
+		omQz3TSIILwu5pQcpChWC6HY1Jo=
 		</data>
 		<key>Headers/Clarity.h</key>
 		<data>
-		8YfLVxH/bNZffwML7eFvg/uKnO4=
+		cWjUtWOjesDCt76u3m2Lyf4n10s=
+		</data>
+		<key>Headers/ClarityInternalHelpers.h</key>
+		<data>
+		lJQPY/h0i/lH+YevmGTx7JENJ6k=
 		</data>
 		<key>Headers/FloatParser.h</key>
 		<data>
@@ -18,11 +22,11 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		ePV2JbwQQI4gSYUYehVP0Rt30eg=
+		ILfxQIOes3Eca755Mp+tpCzZtWw=
 		</data>
 		<key>Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		a9CvlpiP2gftepDudXUZyudUvq0=
+		f+XDLuP2pbocfrPgz8rKz/xB6mo=
 		</data>
 		<key>Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
@@ -30,7 +34,7 @@
 		</data>
 		<key>Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		i1reX+/zkfZ0uyfG2WkdCu6SxOw=
+		E75/APZUyEeHi6rYvy8yC5wtWhU=
 		</data>
 		<key>Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<data>
@@ -38,11 +42,11 @@
 		</data>
 		<key>Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		RqR6Ex7qJIRn9TH/XrVD9F5tu58=
+		rCCC+QKNtIM6cQ9LmAtIEvWn6yM=
 		</data>
 		<key>Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		a9CvlpiP2gftepDudXUZyudUvq0=
+		f+XDLuP2pbocfrPgz8rKz/xB6mo=
 		</data>
 		<key>Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
@@ -50,7 +54,7 @@
 		</data>
 		<key>Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		guw7vqozag4uxE62t92O70NyHBE=
+		QYcJOp8E+82EzCUWBKYRUM9jBqA=
 		</data>
 		<key>Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
@@ -58,7 +62,7 @@
 		</data>
 		<key>Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		DJlJnh4JusCqZOqei4LapRqouMI=
+		hjBlK29Fdeu7JeG3TqD4UvVRJec=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -70,7 +74,7 @@
 		</data>
 		<key>clarity.js</key>
 		<data>
-		AOx+amMTmiIUGei8UrWLS8r/fDQ=
+		Jx1eE/GGTRvLigkYezcn7y1jLXc=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -79,14 +83,21 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			MBNjnNrgzcLJrGrO087aVyNjBV0jXwFy/rvPwC1kh6I=
+			wUs2nyGh49Z3o9eXuwHHH99+U39OjRsbV9CbNJWnuFc=
 			</data>
 		</dict>
 		<key>Headers/Clarity.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			XGf0ZiVTNKGLnMhFrovCsVh/m1rV3NpOuGmqUnOElIs=
+			ntzuP6n8PqIxThANE6roEKK+NGg6tNc2wC1AMT2d59I=
+			</data>
+		</dict>
+		<key>Headers/ClarityInternalHelpers.h</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			pqnFF9ztE2aoVjB4uynMd9KL6sQbBr1UR02Ka63OkUE=
 			</data>
 		</dict>
 		<key>Headers/FloatParser.h</key>
@@ -100,7 +111,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			3pnrI+5LXPgizUzzZFDXJlskogvJOjpJyYNToWkspCA=
+			+VRIyU3mD7No2/TDvYiaxfl4VeZq8lyWE93us0mEbSA=
 			</data>
 		</dict>
 		<key>Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
@@ -114,7 +125,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			CGDDw9kpn8pFQ+u5KZl9KI2cxu+DIKuLH3NfJHUaHVE=
+			LsCxDPH2768B/b/+WhkXGP6LkANQwlch91ZXIdS22Zc=
 			</data>
 		</dict>
 		<key>Modules/Clarity.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
@@ -128,14 +139,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			7LaBvaiLv7MkED4I00WC3r2YIbja2gBIIJbPuQAaI8s=
+			Vd24prEubp5N7jsOqIFGH6An9Gz3EFephhb7IZsgpow=
 			</data>
 		</dict>
 		<key>Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			3pnrI+5LXPgizUzzZFDXJlskogvJOjpJyYNToWkspCA=
+			+VRIyU3mD7No2/TDvYiaxfl4VeZq8lyWE93us0mEbSA=
 			</data>
 		</dict>
 		<key>Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
@@ -149,7 +160,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			vEYr+Itfm7BYaxBtPevKH0XyFNSg6m154dJjnsvdZLM=
+			kqRSOjgccbt7waN9zxL67fn6tURJoDMi89ls2/44uak=
 			</data>
 		</dict>
 		<key>Modules/Clarity.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
@@ -163,7 +174,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			7Q0Ai9+gAWa7idrkhkBXK7r2wc74YmnWs71x+dwzlY8=
+			mhMwbuOZ0ok7KJ8T96cSGK+f0ijNkObiPoIwQIVdgNU=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
@@ -184,7 +195,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			WbyC/f/U3QSAVfCpXSEW9bDlWaQ3PeAkG3HoJ4SBu1A=
+			AI8GgIwrBnR3YlkrFSLYeRqEdBqqHCP/9LfdpLjctZA=
 			</data>
 		</dict>
 	</dict>

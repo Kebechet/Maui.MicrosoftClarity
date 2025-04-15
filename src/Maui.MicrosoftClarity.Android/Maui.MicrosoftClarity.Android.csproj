@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0-android</TargetFramework>
+    <TargetFramework>net9.0-android</TargetFramework>
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -18,7 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>3.0.0.0</Version>
+    <Version>3.2.0.0</Version>
     <PackageReleaseNotes>Updated to latest library version</PackageReleaseNotes>
   </PropertyGroup>
 
@@ -41,7 +41,7 @@
     <PackageReference Include="Xamarin.AndroidX.Work.Runtime" Version="2.8.1" />
     <PackageReference Include="Xamarin.AndroidX.Work.Work.Runtime.Ktx" Version="2.8.1" />
     <PackageReference Include="Xamarin.Android.Binding.InstallReferrer" Version="2.2.0" />
-    <PackageReference Include="Xamarin.Protobuf.JavaLite" Version="3.23.2" />
+    <PackageReference Include="Xamarin.Protobuf.JavaLite" Version="3.25.3" />
     <PackageReference Include="Xamarin.Kotlin.StdLib" Version="2.0.0" />
 
     <!--fixed build error "androidx.collection.ArrayMapKt is defined multiple times"-->
