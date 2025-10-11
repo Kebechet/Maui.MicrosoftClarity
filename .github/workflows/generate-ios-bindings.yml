@@ -140,9 +140,10 @@ jobs:
           unzip -q "$FRAMEWORK_ZIP"
           echo "✅ Extraction complete"
 
-          echo "🧹 Removing .swiftmodule directories (required for Windows build)..."
+          echo "🧹 Removing .swiftmodule and .dSYM directories (required for Windows build)..."
           find "$FRAMEWORK_DIR" -type d -name "*.swiftmodule" -exec rm -rf {} + 2>/dev/null || true
-          echo "✅ .swiftmodule directories removed"
+          find "$FRAMEWORK_DIR" -type d -name "*.dSYM" -exec rm -rf {} + 2>/dev/null || true
+          echo "✅ .swiftmodule and .dSYM directories removed"
 
           echo "📁 Framework structure:"
           ls -la "$FRAMEWORK_DIR"
@@ -260,6 +261,20 @@ jobs:
           path: src/Maui.MicrosoftClarity.iOS/ClarityBindingOutput/StructsAndEnums.cs
           retention-days: 30
 
+      - name: Prepare xcframework for upload
+        run: |
+          cd src/Maui.MicrosoftClarity.iOS
+          # Create a temporary directory with the desired structure
+          mkdir -p artifact-temp
+          cp -r Clarity.xcframework artifact-temp/
+
+      - name: Upload Clarity.xcframework (without .swiftmodule)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Clarity-xcframework-${{ env.CLARITY_VERSION }}
+          path: src/Maui.MicrosoftClarity.iOS/artifact-temp/
+          retention-days: 30
+
       - name: Create Summary
         run: |
           cd src/Maui.MicrosoftClarity.iOS
@@ -292,8 +307,9 @@ jobs:
           echo "### 📥 Artifacts" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "The generated binding files are available as workflow artifacts:" >> $GITHUB_STEP_SUMMARY
-          echo "- ApiDefinitions.cs" >> $GITHUB_STEP_SUMMARY
-          echo "- StructsAndEnums.cs" >> $GITHUB_STEP_SUMMARY
+          echo "- **ApiDefinitions.cs** - C# API definitions" >> $GITHUB_STEP_SUMMARY
+          echo "- **StructsAndEnums.cs** - C# structs and enums" >> $GITHUB_STEP_SUMMARY
+          echo "- **Clarity-xcframework-$CLARITY_VERSION** - Complete Clarity.xcframework (without .swiftmodule and .dSYM directories)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📝 Next Steps:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

@@ -95,6 +95,11 @@ namespace MicrosoftClarityiOS
         [Export("setCustomTagWithKey:value:")]
         bool SetCustomTagWithKey(string key, string value);
 
+        // +(BOOL)setCustomTagWithKey:(NSString * _Nonnull)key values:(NSSet<NSString *> * _Nonnull)values;
+        [Static]
+        [Export("setCustomTagWithKey:values:")]
+        bool SetCustomTagWithKey(string key, NSSet<NSString> values);
+
         // +(BOOL)sendCustomEventWithValue:(NSString * _Nonnull)value;
         [Static]
         [Export("sendCustomEventWithValue:")]
