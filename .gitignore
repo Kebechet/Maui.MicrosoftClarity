@@ -399,3 +399,6 @@ FodyWeavers.xsd
 
 # Visual Studio for Mac
 **/.DS_Store
+
+# Claude Code
+.claude/

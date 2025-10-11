@@ -1,0 +1,227 @@
+name: Generate iOS Bindings with Objective Sharpie
+
+on:
+  workflow_dispatch:
+    inputs:
+      clarity_version:
+        description: 'Clarity framework version'
+        required: true
+        default: '1.0.0'
+        type: string
+
+jobs:
+  generate-bindings:
+    name: Generate iOS Bindings
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Objective Sharpie
+        run: |
+          echo "📦 Installing Objective Sharpie..."
+          brew install --cask objectivesharpie || echo "⚠️  Objective Sharpie may already be installed"
+          sharpie -v
+
+      - name: Display SDK Information
+        run: |
+          echo "🔍 Available iOS SDKs:"
+          sharpie xcode -sdks | grep iphoneos || true
+
+          IOS_SDK=$(sharpie xcode -sdks 2>/dev/null | grep iphoneos | tail -1 | awk '{print $1}')
+          echo "✅ Selected iOS SDK: $IOS_SDK"
+          echo "IOS_SDK=$IOS_SDK" >> $GITHUB_ENV
+
+      - name: Download Clarity Framework
+        run: |
+          echo "⬇️  Downloading Clarity v${{ inputs.clarity_version }} framework..."
+          cd src/Maui.MicrosoftClarity.iOS
+
+          FRAMEWORK_URL="https://clarityappsresources.blob.core.windows.net/ios-public/Clarity-${{ inputs.clarity_version }}.xcframework.zip"
+          FRAMEWORK_ZIP="Clarity-${{ inputs.clarity_version }}.xcframework.zip"
+
+          curl -L -o "$FRAMEWORK_ZIP" "$FRAMEWORK_URL"
+          ls -lh "$FRAMEWORK_ZIP"
+          echo "✅ Download complete"
+
+      - name: Extract Framework
+        run: |
+          echo "📦 Extracting framework..."
+          cd src/Maui.MicrosoftClarity.iOS
+
+          FRAMEWORK_ZIP="Clarity-${{ inputs.clarity_version }}.xcframework.zip"
+          FRAMEWORK_DIR="Clarity.xcframework"
+
+          unzip -q "$FRAMEWORK_ZIP"
+          echo "✅ Extraction complete"
+
+          echo "🧹 Removing .swiftmodule directories (required for Windows build)..."
+          find "$FRAMEWORK_DIR" -type d -name "*.swiftmodule" -exec rm -rf {} + 2>/dev/null || true
+          echo "✅ .swiftmodule directories removed"
+
+          echo "📁 Framework structure:"
+          ls -la "$FRAMEWORK_DIR"
+
+      - name: Verify Framework Structure
+        run: |
+          echo "🔍 Verifying framework structure..."
+          cd src/Maui.MicrosoftClarity.iOS
+
+          FRAMEWORK_DIR="Clarity.xcframework"
+          FRAMEWORK_HEADERS="$FRAMEWORK_DIR/ios-arm64/Clarity.framework/Headers"
+          SWIFT_HEADER="$FRAMEWORK_HEADERS/Clarity-Swift.h"
+
+          if [ ! -f "$SWIFT_HEADER" ]; then
+            echo "❌ Error: Swift header not found at $SWIFT_HEADER"
+            exit 1
+          fi
+
+          echo "✅ Framework structure verified"
+          echo "  Headers: $FRAMEWORK_HEADERS"
+          echo "  Swift Header: $SWIFT_HEADER"
+
+      - name: Generate Bindings with Objective Sharpie
+        run: |
+          echo "⚙️  Generating bindings with Objective Sharpie..."
+          cd src/Maui.MicrosoftClarity.iOS
+
+          FRAMEWORK_DIR="Clarity.xcframework"
+          OUTPUT_DIR="ClarityBindingOutput"
+          NAMESPACE="MicrosoftClarityiOS"
+          FRAMEWORK_HEADERS="$FRAMEWORK_DIR/ios-arm64/Clarity.framework/Headers"
+          SWIFT_HEADER="$FRAMEWORK_HEADERS/Clarity-Swift.h"
+
+          echo "Running: sharpie bind --sdk=$IOS_SDK --namespace=$NAMESPACE"
+
+          sharpie bind \
+            --sdk="$IOS_SDK" \
+            --output="$OUTPUT_DIR" \
+            --namespace="$NAMESPACE" \
+            --scope="$FRAMEWORK_HEADERS" \
+            "$SWIFT_HEADER"
+
+          echo "✅ Bindings generated successfully"
+
+      - name: Display Generated Artifacts
+        run: |
+          echo "📄 Generated Artifacts:"
+          echo "════════════════════════════════════════════════════════"
+          cd src/Maui.MicrosoftClarity.iOS
+
+          OUTPUT_DIR="ClarityBindingOutput"
+
+          if [ -d "$OUTPUT_DIR" ]; then
+            echo ""
+            echo "📂 Output Directory: $OUTPUT_DIR/"
+            echo ""
+
+            if [ -f "$OUTPUT_DIR/ApiDefinitions.cs" ]; then
+              FILE_SIZE=$(ls -lh "$OUTPUT_DIR/ApiDefinitions.cs" | awk '{print $5}')
+              LINE_COUNT=$(wc -l < "$OUTPUT_DIR/ApiDefinitions.cs")
+              VERIFY_COUNT=$(grep -c "\[Verify" "$OUTPUT_DIR/ApiDefinitions.cs" 2>/dev/null || echo "0")
+              echo "✅ ApiDefinitions.cs"
+              echo "   Size: $FILE_SIZE"
+              echo "   Lines: $LINE_COUNT"
+              echo "   [Verify] attributes: $VERIFY_COUNT"
+              echo ""
+            else
+              echo "❌ ApiDefinitions.cs not found"
+            fi
+
+            if [ -f "$OUTPUT_DIR/StructsAndEnums.cs" ]; then
+              FILE_SIZE=$(ls -lh "$OUTPUT_DIR/StructsAndEnums.cs" | awk '{print $5}')
+              LINE_COUNT=$(wc -l < "$OUTPUT_DIR/StructsAndEnums.cs")
+              VERIFY_COUNT=$(grep -c "\[Verify" "$OUTPUT_DIR/StructsAndEnums.cs" 2>/dev/null || echo "0")
+              echo "✅ StructsAndEnums.cs"
+              echo "   Size: $FILE_SIZE"
+              echo "   Lines: $LINE_COUNT"
+              echo "   [Verify] attributes: $VERIFY_COUNT"
+              echo ""
+            else
+              echo "❌ StructsAndEnums.cs not found"
+            fi
+
+            echo "════════════════════════════════════════════════════════"
+            echo ""
+            echo "📋 ApiDefinitions.cs Preview (first 50 lines):"
+            echo "────────────────────────────────────────────────────────"
+            head -50 "$OUTPUT_DIR/ApiDefinitions.cs"
+            echo "────────────────────────────────────────────────────────"
+            echo ""
+
+            echo "📋 StructsAndEnums.cs Preview (first 50 lines):"
+            echo "────────────────────────────────────────────────────────"
+            head -50 "$OUTPUT_DIR/StructsAndEnums.cs"
+            echo "────────────────────────────────────────────────────────"
+            echo ""
+
+            echo "✅ Pipeline completed successfully!"
+          else
+            echo "❌ Output directory not found!"
+            exit 1
+          fi
+
+      - name: Upload ApiDefinitions.cs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ApiDefinitions
+          path: src/Maui.MicrosoftClarity.iOS/ClarityBindingOutput/ApiDefinitions.cs
+          retention-days: 30
+
+      - name: Upload StructsAndEnums.cs
+        uses: actions/upload-artifact@v4
+        with:
+          name: StructsAndEnums
+          path: src/Maui.MicrosoftClarity.iOS/ClarityBindingOutput/StructsAndEnums.cs
+          retention-days: 30
+
+      - name: Upload Complete Binding Output
+        uses: actions/upload-artifact@v4
+        with:
+          name: complete-binding-output
+          path: src/Maui.MicrosoftClarity.iOS/ClarityBindingOutput/
+          retention-days: 30
+
+      - name: Create Summary
+        run: |
+          cd src/Maui.MicrosoftClarity.iOS
+          OUTPUT_DIR="ClarityBindingOutput"
+
+          echo "## 🎉 iOS Bindings Generated Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Clarity Version: ${{ inputs.clarity_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "### 📱 iOS SDK: $IOS_SDK" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📄 Generated Files:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "$OUTPUT_DIR/ApiDefinitions.cs" ]; then
+            FILE_SIZE=$(ls -lh "$OUTPUT_DIR/ApiDefinitions.cs" | awk '{print $5}')
+            LINE_COUNT=$(wc -l < "$OUTPUT_DIR/ApiDefinitions.cs")
+            VERIFY_COUNT=$(grep -c "\[Verify" "$OUTPUT_DIR/ApiDefinitions.cs" 2>/dev/null || echo "0")
+            echo "- ✅ **ApiDefinitions.cs**: $FILE_SIZE, $LINE_COUNT lines, $VERIFY_COUNT [Verify] attributes" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f "$OUTPUT_DIR/StructsAndEnums.cs" ]; then
+            FILE_SIZE=$(ls -lh "$OUTPUT_DIR/StructsAndEnums.cs" | awk '{print $5}')
+            LINE_COUNT=$(wc -l < "$OUTPUT_DIR/StructsAndEnums.cs")
+            VERIFY_COUNT=$(grep -c "\[Verify" "$OUTPUT_DIR/StructsAndEnums.cs" 2>/dev/null || echo "0")
+            echo "- ✅ **StructsAndEnums.cs**: $FILE_SIZE, $LINE_COUNT lines, $VERIFY_COUNT [Verify] attributes" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📥 Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The generated binding files are available as workflow artifacts:" >> $GITHUB_STEP_SUMMARY
+          echo "- ApiDefinitions.cs" >> $GITHUB_STEP_SUMMARY
+          echo "- StructsAndEnums.cs" >> $GITHUB_STEP_SUMMARY
+          echo "- Complete binding output (all files)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. Download the artifacts from this workflow run" >> $GITHUB_STEP_SUMMARY
+          echo "2. Review the generated files" >> $GITHUB_STEP_SUMMARY
+          echo "3. Remove all [Verify] attributes from both files" >> $GITHUB_STEP_SUMMARY
+          echo "4. Copy files to the project directory" >> $GITHUB_STEP_SUMMARY
+          echo "5. Build the project on macOS (required for .NET iOS bindings)" >> $GITHUB_STEP_SUMMARY
