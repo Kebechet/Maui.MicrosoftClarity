@@ -277,6 +277,7 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 #if __has_warning("-Watimport-in-framework-header")
 #pragma clang diagnostic ignored "-Watimport-in-framework-header"
 #endif
+@import Foundation;
 @import ObjectiveC;
 #endif
 
@@ -326,7 +327,7 @@ SWIFT_CLASS("_TtC7Clarity13ClarityConfig")
 ///     If <code>userId</code> isn’t provided, a random one is generated automatically.
 ///   </li>
 ///   <li>
-///     Must be a base-36 string smaller than <code>1Z141Z4</code>.
+///     Must be a base-36 string smaller than <code>1z141z4</code> and without any uppercase letters.
 ///   </li>
 ///   <li>
 ///     If an invalid <code>userId</code> is supplied:
@@ -580,6 +581,28 @@ SWIFT_CLASS("_TtC7Clarity10ClaritySDK")
 /// returns:
 /// <code>true</code> if the custom tag was set successfully; otherwise <code>false</code>.
 + (BOOL)setCustomTagWithKey:(NSString * _Nonnull)key value:(NSString * _Nonnull)value;
+/// Sets a custom tag for the current session. This tag can be used to filter sessions on the Clarity dashboard.
+/// <ul>
+///   <li>
+///     Notes:
+///     <ul>
+///       <li>
+///         To ensure that the custom tag is associated with the correct session, it’s recommended to call this function within the callbacks of <code>setOnSessionStartedCallback(_:)</code> or <code>startNewSession(callback:)</code>.
+///       </li>
+///       <li>
+///         This function should only be called on the main thread.
+///       </li>
+///     </ul>
+///   </li>
+/// </ul>
+/// \param key the key for the custom tag. The value must be a nonempty string, with a maximum length of 255 characters, and can’t consist only of whitespace.
+///
+/// \param values the set of values for the custom tag. Each value must be a nonempty string, with a maximum length of 255 characters, and can’t consist only of whitespace.
+///
+///
+/// returns:
+/// <code>true</code> if the custom tag was set successfully; otherwise <code>false</code>.
++ (BOOL)setCustomTagWithKey:(NSString * _Nonnull)key values:(NSSet<NSString *> * _Nonnull)values;
 /// Sends a custom event to the current Clarity session. These custom events can be used to track specific user interactions or actions that Clarity’s built-in event tracking doesn’t capture.
 /// <ul>
 ///   <li>
@@ -675,6 +698,7 @@ typedef SWIFT_ENUM(NSInteger, LogLevel, open) {
   LogLevelError = 4,
   LogLevelNone = 5,
 };
+
 
 
 
