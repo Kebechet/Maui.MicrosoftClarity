@@ -260,6 +260,13 @@ jobs:
           path: src/Maui.MicrosoftClarity.iOS/ClarityBindingOutput/StructsAndEnums.cs
           retention-days: 30
 
+      - name: Upload Clarity.framework (without .swiftmodule)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Clarity-framework-${{ env.CLARITY_VERSION }}
+          path: src/Maui.MicrosoftClarity.iOS/Clarity.xcframework/ios-arm64/Clarity.framework/
+          retention-days: 30
+
       - name: Create Summary
         run: |
           cd src/Maui.MicrosoftClarity.iOS
@@ -292,8 +299,9 @@ jobs:
           echo "### 📥 Artifacts" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "The generated binding files are available as workflow artifacts:" >> $GITHUB_STEP_SUMMARY
-          echo "- ApiDefinitions.cs" >> $GITHUB_STEP_SUMMARY
-          echo "- StructsAndEnums.cs" >> $GITHUB_STEP_SUMMARY
+          echo "- **ApiDefinitions.cs** - C# API definitions" >> $GITHUB_STEP_SUMMARY
+          echo "- **StructsAndEnums.cs** - C# structs and enums" >> $GITHUB_STEP_SUMMARY
+          echo "- **Clarity-framework-$CLARITY_VERSION** - Clarity.framework (without .swiftmodule directories)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📝 Next Steps:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
