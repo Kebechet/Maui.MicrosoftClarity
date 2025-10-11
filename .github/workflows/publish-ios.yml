@@ -56,7 +56,6 @@ jobs:
           -o ${{env.ARTIFACT_FOLDER}}
           --no-build
           --no-restore
-          --include-symbols
           --include-source
 
       - uses: actions/upload-artifact@v4
