@@ -1,13 +1,7 @@
-name: Generate iOS Bindings with Objective Sharpie
+name: Generate iOS Bindings
 
 on:
   workflow_dispatch:
-    inputs:
-      clarity_version:
-        description: 'Clarity framework version'
-        required: true
-        default: '1.0.0'
-        type: string
 
 jobs:
   generate-bindings:
@@ -18,6 +12,54 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Fetch Clarity Version and Download URL
+        id: clarity_info
+        run: |
+          echo "🔍 Fetching latest Clarity version from Package.swift..."
+
+          # Download Package.swift from clarity-apps repo
+          PACKAGE_SWIFT_URL="https://raw.githubusercontent.com/microsoft/clarity-apps/main/Package.swift"
+          curl -s -o Package.swift "$PACKAGE_SWIFT_URL"
+
+          if [ ! -f Package.swift ]; then
+            echo "❌ Error: Failed to download Package.swift"
+            exit 1
+          fi
+
+          echo "📄 Package.swift content:"
+          cat Package.swift
+          echo ""
+
+          # Extract version from the .binaryTarget url
+          # Look for pattern like: Clarity-X.Y.Z.xcframework.zip
+          DOWNLOAD_URL=$(grep -o 'https://[^"]*\.xcframework\.zip' Package.swift | head -1)
+
+          if [ -z "$DOWNLOAD_URL" ]; then
+            echo "❌ Error: Could not extract download URL from Package.swift"
+            exit 1
+          fi
+
+          # Extract version from URL (e.g., Clarity-1.0.0.xcframework.zip -> 1.0.0)
+          # Use more precise regex to match version pattern
+          CLARITY_VERSION=$(echo "$DOWNLOAD_URL" | grep -oE 'Clarity-[0-9]+\.[0-9]+\.[0-9]+' | sed 's/Clarity-//')
+
+          if [ -z "$CLARITY_VERSION" ]; then
+            echo "❌ Error: Could not extract version from download URL"
+            echo "Download URL: $DOWNLOAD_URL"
+            exit 1
+          fi
+
+          echo "✅ Clarity Version: $CLARITY_VERSION"
+          echo "✅ Download URL: $DOWNLOAD_URL"
+
+          # Export to environment for subsequent steps
+          echo "CLARITY_VERSION=$CLARITY_VERSION" >> $GITHUB_ENV
+          echo "FRAMEWORK_URL=$DOWNLOAD_URL" >> $GITHUB_ENV
+
+          # Also set as output for this step
+          echo "version=$CLARITY_VERSION" >> $GITHUB_OUTPUT
+          echo "url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+
       - name: Install Objective Sharpie
         run: |
           echo "📦 Installing Objective Sharpie..."
@@ -27,30 +69,72 @@ jobs:
       - name: Display SDK Information
         run: |
           echo "🔍 Available iOS SDKs:"
-          sharpie xcode -sdks | grep iphoneos || true
+          sharpie xcode -sdks
+          echo ""
 
-          IOS_SDK=$(sharpie xcode -sdks 2>/dev/null | grep iphoneos | tail -1 | awk '{print $1}')
+          # Extract the iOS SDK - the format is typically "sdk: iphoneos18.2"
+          # We need to get the full SDK name without the "sdk:" prefix
+          IOS_SDK=$(sharpie xcode -sdks 2>&1 | grep -i iphoneos | grep -o 'iphoneos[0-9.]*' | tail -1)
+
+          if [ -z "$IOS_SDK" ]; then
+            echo "❌ Error: Could not detect iOS SDK"
+            echo "Available SDKs:"
+            sharpie xcode -sdks
+            exit 1
+          fi
+
           echo "✅ Selected iOS SDK: $IOS_SDK"
           echo "IOS_SDK=$IOS_SDK" >> $GITHUB_ENV
 
       - name: Download Clarity Framework
         run: |
-          echo "⬇️  Downloading Clarity v${{ inputs.clarity_version }} framework..."
+          echo "⬇️  Downloading Clarity v$CLARITY_VERSION framework..."
           cd src/Maui.MicrosoftClarity.iOS
 
-          FRAMEWORK_URL="https://clarityappsresources.blob.core.windows.net/ios-public/Clarity-${{ inputs.clarity_version }}.xcframework.zip"
-          FRAMEWORK_ZIP="Clarity-${{ inputs.clarity_version }}.xcframework.zip"
+          FRAMEWORK_ZIP="Clarity-${CLARITY_VERSION}.xcframework.zip"
 
-          curl -L -o "$FRAMEWORK_ZIP" "$FRAMEWORK_URL"
+          # Remove existing file if it exists
+          rm -f "$FRAMEWORK_ZIP"
+
+          # Download with retry and proper error handling
+          echo "Downloading from: $FRAMEWORK_URL"
+          HTTP_CODE=$(curl -L -w "%{http_code}" -o "$FRAMEWORK_ZIP" "$FRAMEWORK_URL")
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ Error: HTTP $HTTP_CODE returned from server"
+            echo "URL may be incorrect or file doesn't exist for version ${{ inputs.clarity_version }}"
+            exit 1
+          fi
+
+          # Verify the download
+          if [ ! -f "$FRAMEWORK_ZIP" ]; then
+            echo "❌ Error: Downloaded file not found"
+            exit 1
+          fi
+
+          FILE_SIZE=$(stat -f%z "$FRAMEWORK_ZIP" 2>/dev/null || stat -c%s "$FRAMEWORK_ZIP")
+          if [ "$FILE_SIZE" -lt 1000 ]; then
+            echo "❌ Error: Downloaded file is too small ($FILE_SIZE bytes), likely an error page"
+            cat "$FRAMEWORK_ZIP"
+            exit 1
+          fi
+
+          # Verify it's a valid zip file
+          if ! unzip -t "$FRAMEWORK_ZIP" > /dev/null 2>&1; then
+            echo "❌ Error: Downloaded file is not a valid zip archive"
+            file "$FRAMEWORK_ZIP"
+            exit 1
+          fi
+
+          echo "✅ Download complete and verified"
           ls -lh "$FRAMEWORK_ZIP"
-          echo "✅ Download complete"
 
       - name: Extract Framework
         run: |
           echo "📦 Extracting framework..."
           cd src/Maui.MicrosoftClarity.iOS
 
-          FRAMEWORK_ZIP="Clarity-${{ inputs.clarity_version }}.xcframework.zip"
+          FRAMEWORK_ZIP="Clarity-${CLARITY_VERSION}.xcframework.zip"
           FRAMEWORK_DIR="Clarity.xcframework"
 
           unzip -q "$FRAMEWORK_ZIP"
@@ -176,13 +260,6 @@ jobs:
           path: src/Maui.MicrosoftClarity.iOS/ClarityBindingOutput/StructsAndEnums.cs
           retention-days: 30
 
-      - name: Upload Complete Binding Output
-        uses: actions/upload-artifact@v4
-        with:
-          name: complete-binding-output
-          path: src/Maui.MicrosoftClarity.iOS/ClarityBindingOutput/
-          retention-days: 30
-
       - name: Create Summary
         run: |
           cd src/Maui.MicrosoftClarity.iOS
@@ -190,7 +267,8 @@ jobs:
 
           echo "## 🎉 iOS Bindings Generated Successfully" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 Clarity Version: ${{ inputs.clarity_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Clarity Version: $CLARITY_VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Download URL: $FRAMEWORK_URL" >> $GITHUB_STEP_SUMMARY
           echo "### 📱 iOS SDK: $IOS_SDK" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📄 Generated Files:" >> $GITHUB_STEP_SUMMARY
@@ -216,7 +294,6 @@ jobs:
           echo "The generated binding files are available as workflow artifacts:" >> $GITHUB_STEP_SUMMARY
           echo "- ApiDefinitions.cs" >> $GITHUB_STEP_SUMMARY
           echo "- StructsAndEnums.cs" >> $GITHUB_STEP_SUMMARY
-          echo "- Complete binding output (all files)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📝 Next Steps:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
