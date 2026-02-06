@@ -18,7 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>3.5.1.0</Version>
+    <Version>3.8.1.0</Version>
     <PackageReleaseNotes>Updated to latest library version</PackageReleaseNotes>
   </PropertyGroup>
 
