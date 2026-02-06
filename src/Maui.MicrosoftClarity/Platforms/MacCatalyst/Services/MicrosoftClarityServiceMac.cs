@@ -39,6 +39,10 @@ public partial class MicrosoftClarityService
         return true;
     }
 
+    public partial bool SetOnSessionStartedCallback(Action<string> callback)
+    {
+        return true;
+    }
 
     public partial Task<string?> StartNewSession()
     {

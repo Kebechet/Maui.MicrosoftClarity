@@ -121,6 +121,19 @@ public partial class MicrosoftClarityService
         }
     }
 
+    public partial bool SetOnSessionStartedCallback(Action<string> callback)
+    {
+        try
+        {
+            var nativeCallback = new SessionStartedCallbackAdapter(callback);
+            return (bool)ClaritySdk.SetOnSessionStartedCallback(nativeCallback)!;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(SetOnSessionStartedCallback));
+            return false;
+        }
+    }
 
     public partial async Task<string?> StartNewSession()
     {

@@ -31,5 +31,7 @@ public partial class MicrosoftClarityService
 
     public partial bool SendCustomEvent(string value);
 
+    public partial bool SetOnSessionStartedCallback(Action<string> callback);
+
     public partial Task<string?> StartNewSession();
 }
