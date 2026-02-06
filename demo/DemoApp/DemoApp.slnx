@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="../../src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj" />
+  <Project Path="DemoApp/DemoApp.csproj">
+    <Deploy />
+  </Project>
+</Solution>

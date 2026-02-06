@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj" />
+  <Project Path="Maui.MicrosoftClarity.iOS/Maui.MicrosoftClarity.iOS.csproj" />
+  <Project Path="Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj" />
+</Solution>
