@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-android</TargetFramework>
+    <TargetFramework>net10.0-android</TargetFramework>
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -18,8 +18,8 @@
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>3.8.1.0</Version>
-    <PackageReleaseNotes>Updated to latest library version</PackageReleaseNotes>
+    <Version>3.8.1.1</Version>
+    <PackageReleaseNotes>Updated to net10.0</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

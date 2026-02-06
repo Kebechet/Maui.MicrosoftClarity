@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-ios</TargetFramework>
+    <TargetFramework>net10.0-ios</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
@@ -20,8 +20,8 @@
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>3.4.0.0</Version>
-    <PackageReleaseNotes>Bumped iOS library to newest version</PackageReleaseNotes>
+    <Version>3.4.0.1</Version>
+    <PackageReleaseNotes>Updated to net10.0</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
