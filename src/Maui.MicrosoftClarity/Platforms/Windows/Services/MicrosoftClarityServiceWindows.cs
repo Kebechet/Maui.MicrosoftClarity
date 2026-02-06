@@ -39,6 +39,12 @@ public partial class MicrosoftClarityService
         return true;
     }
 
+
+    public partial Task<string?> StartNewSession()
+    {
+        return Task.FromResult<string?>(null);
+    }
+
     //wrapper methods
     public bool IsPausedMethod()
     {

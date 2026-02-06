@@ -108,17 +108,6 @@ public partial class MicrosoftClarityService
         }
     }
 
-    //public partial void StartNewSession()
-    //{
-    //    try
-    //    {
-    //        ClaritySdk.StartNewSession();
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(StartNewSession));
-    //    }
-    //}
     public partial bool SendCustomEvent(string value)
     {
         try
@@ -132,6 +121,29 @@ public partial class MicrosoftClarityService
         }
     }
 
+
+    public partial async Task<string?> StartNewSession()
+    {
+        try
+        {
+            var tcs = new TaskCompletionSource<string?>();
+            var nativeCallback = new SessionStartedCallbackAdapter(tcs);
+            var started = (bool)ClaritySdk.StartNewSession(nativeCallback)!;
+
+            if (!started)
+            {
+                tcs.TrySetResult(null);
+            }
+
+            var sessionId = await tcs.Task;
+            return sessionId;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(StartNewSession));
+            return null;
+        }
+    }
     //wrapper methods
     public bool IsPausedMethod()
     {

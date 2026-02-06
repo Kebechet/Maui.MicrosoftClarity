@@ -30,4 +30,6 @@ public partial class MicrosoftClarityService
     public partial bool SetCustomSessionId(string customSessionId);
 
     public partial bool SendCustomEvent(string value);
+
+    public partial Task<string?> StartNewSession();
 }

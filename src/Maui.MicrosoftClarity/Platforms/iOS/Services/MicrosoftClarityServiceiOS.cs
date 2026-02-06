@@ -119,6 +119,29 @@ public partial class MicrosoftClarityService
         }
     }
 
+
+    public partial async Task<string?> StartNewSession()
+    {
+        try
+        {
+            var tcs = new TaskCompletionSource<string?>();
+            var started = ClaritySDK.StartNewSessionWithCallback(id => tcs.TrySetResult(id));
+
+            if (!started)
+            {
+                tcs.TrySetResult(null);
+            }
+
+            var sessionId = await tcs.Task;
+            return sessionId;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(StartNewSession));
+            return null;
+        }
+    }
+
     //wrapper methods
     public bool IsPausedMethod()
     {
