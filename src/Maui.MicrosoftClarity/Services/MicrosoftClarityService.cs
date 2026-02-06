@@ -28,4 +28,6 @@ public partial class MicrosoftClarityService
     public partial bool SetCurrentScreenName(string screenName);
 
     public partial bool SetCustomSessionId(string customSessionId);
+
+    public partial bool SendCustomEvent(string value);
 }

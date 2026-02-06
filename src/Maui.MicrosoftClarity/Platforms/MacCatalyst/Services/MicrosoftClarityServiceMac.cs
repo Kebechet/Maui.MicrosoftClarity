@@ -34,6 +34,11 @@ public partial class MicrosoftClarityService
         return true;
     }
 
+    public partial bool SendCustomEvent(string value)
+    {
+        return true;
+    }
+
     //wrapper methods
     public bool IsPausedMethod()
     {

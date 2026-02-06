@@ -119,6 +119,18 @@ public partial class MicrosoftClarityService
     //        _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(StartNewSession));
     //    }
     //}
+    public partial bool SendCustomEvent(string value)
+    {
+        try
+        {
+            return ClaritySdk.SendCustomEvent(value);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(SendCustomEvent));
+            return false;
+        }
+    }
 
     //wrapper methods
     public bool IsPausedMethod()
