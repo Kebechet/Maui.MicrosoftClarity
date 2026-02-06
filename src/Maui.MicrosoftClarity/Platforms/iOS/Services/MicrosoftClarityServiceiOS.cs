@@ -154,6 +154,12 @@ public partial class MicrosoftClarityService
         }
     }
 
+    // Currently only supported on Android
+    public partial bool Consent(bool? isAdsStorageAllowed, bool? isAnalyticsStorageAllowed)
+    {
+        return false;
+    }
+
     //wrapper methods
     public bool IsPausedMethod()
     {

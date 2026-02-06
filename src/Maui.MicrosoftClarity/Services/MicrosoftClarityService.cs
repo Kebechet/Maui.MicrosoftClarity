@@ -34,4 +34,9 @@ public partial class MicrosoftClarityService
     public partial bool SetOnSessionStartedCallback(Action<string> callback);
 
     public partial Task<string?> StartNewSession();
+
+    /// <summary>
+    /// Manages user consent for data collection. Currently only supported on Android.
+    /// </summary>
+    public partial bool Consent(bool? isAdsStorageAllowed, bool? isAnalyticsStorageAllowed);
 }

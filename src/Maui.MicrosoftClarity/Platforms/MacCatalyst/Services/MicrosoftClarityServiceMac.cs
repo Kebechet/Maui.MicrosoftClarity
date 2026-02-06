@@ -48,6 +48,12 @@ public partial class MicrosoftClarityService
     {
         return Task.FromResult<string?>(null);
     }
+
+    public partial bool Consent(bool? isAdsStorageAllowed, bool? isAnalyticsStorageAllowed)
+    {
+        return false;
+    }
+
     //wrapper methods
     public bool IsPausedMethod()
     {

@@ -1,5 +1,6 @@
 ﻿using Com.Microsoft.Clarity;
 using Com.Microsoft.Clarity.Models;
+using Maui.MicrosoftClarity.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Maui.MicrosoftClarity.Services;
@@ -157,6 +158,20 @@ public partial class MicrosoftClarityService
             return null;
         }
     }
+
+    public partial bool Consent(bool? isAdsStorageAllowed, bool? isAnalyticsStorageAllowed)
+    {
+        try
+        {
+            return (bool)ClaritySdk.Consent(isAdsStorageAllowed.ToJavaBoolean(), isAnalyticsStorageAllowed.ToJavaBoolean())!;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(Consent));
+            return false;
+        }
+    }
+
     //wrapper methods
     public bool IsPausedMethod()
     {
