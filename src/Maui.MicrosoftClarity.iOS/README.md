@@ -23,7 +23,7 @@ The versioning scheme of `Maui.MicrosoftClarity.iOS` is derived from the version
 
 ### Generating binding files
 - On my MAC I have downloaded and installed [Objective Sharpie](https://learn.microsoft.com/en-us/xamarin/cross-platform/macios/binding/objective-sharpie/)
-- I have downloaded latest package `v1.0.0` from [clarity-apps repo](https://github.com/microsoft/clarity-apps) ->  [Package.swift](https://github.com/microsoft/clarity-apps/blob/main/Package.swift) -> [xcframework.zip](https://clarityappsresources.blob.core.windows.net/ios-public/Clarity-1.0.0.xcframework.zip)
+- I have downloaded latest package `v3.4.0` from [clarity-apps repo](https://github.com/microsoft/clarity-apps) ->  [Package.swift](https://github.com/microsoft/clarity-apps/blob/main/Package.swift) -> [xcframework.zip](https://www.clarity.ms/apps/resources/ios/Clarity-3.4.0.xcframework.zip)
 - I have extracted the `.zip` on my MAC desktop
 - started terminal, then `cd ~/Desktop`
 - firstly check what versions of xcode SDKs you have installed by `sharpie xcode -sdks` and use the `iphoneosXX.Y` version you have
@@ -35,9 +35,9 @@ The versioning scheme of `Maui.MicrosoftClarity.iOS` is derived from the version
 - ✅ - Done
 
 ### ⚠️ Binding build
-Currently it is not possible to build the binding from Windows with connected MAC. So you have to build this binding directly from the MAC. The final size of the nuget should be `>6MB`
-- Issue: https://github.com/xamarin/xamarin-macios/issues/20905#issuecomment-2275166543
+The final size of the nuget should be `>6MB`
 - from `.xcframework` remove all `*.swiftmodule` directories
+- from `.xcframework` remove all `dSYMs` directories (debug symbols that cause `NU5123` long path warnings and unnecessarily increase the nuget size)
 
 # License
 This repository is licensed with the [MIT](LICENSE.txt) license.
