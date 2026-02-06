@@ -25,14 +25,4 @@ internal sealed class SessionStartedCallbackAdapter : Java.Lang.Object, ISession
 
         return null;
     }
-
-    public Java.Lang.Object? Invoke(Java.Lang.Object? p0)
-    {
-        if (p0 is Java.Lang.String javaString)
-        {
-            _callback(javaString.ToString());
-        }
-
-        return null;
-    }
 }

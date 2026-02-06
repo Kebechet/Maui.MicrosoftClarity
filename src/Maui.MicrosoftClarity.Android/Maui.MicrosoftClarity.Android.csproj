@@ -19,7 +19,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
     <Version>3.8.1.1</Version>
-    <PackageReleaseNotes>Updated to net10.0</PackageReleaseNotes>
+    <PackageReleaseNotes>Updated to net10.0, fixed Function1 type erasure clash in ACW</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

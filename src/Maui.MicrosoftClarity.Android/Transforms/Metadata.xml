@@ -1,6 +1,8 @@
 ﻿<metadata>
     <!--e.g errors: 'L' does not implement interface member 'IFunction0.Invoke()'-->
     <remove-node path="/api/package[@name!='com.microsoft.clarity' and @name!='com.microsoft.clarity.models']"/>
+    <!--net10: removes Function1 parent from SessionStartedCallback to avoid Java type erasure clash in ACW-->
+    <remove-node path="/api/package[@name='com.microsoft.clarity']/interface[@name='SessionStartedCallback']/implements[@name='kotlin.jvm.functions.Function1']"/>
     <!--warning BG8403: Type 'Com.Microsoft.Clarity.Clarity' has a type name which matches the enclosing namespace name. See https://aka.ms/BG8403 for more information.-->
     <attr path="/api/package[@name='com.microsoft.clarity']/class[@name='Clarity']" name="managedName">ClaritySdk</attr>
   <!--
