@@ -23,6 +23,7 @@ public partial class App : Application
         }
 
         _microsoftClarityService.Initialize(microsoftClarityProjectId);
+        _microsoftClarityService.Consent(isAdsStorageAllowed: true, isAnalyticsStorageAllowed: true);
 
         base.OnStart();
     }
