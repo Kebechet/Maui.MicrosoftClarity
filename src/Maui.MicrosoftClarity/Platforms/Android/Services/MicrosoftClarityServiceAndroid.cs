@@ -6,8 +6,11 @@ using Microsoft.Extensions.Logging;
 namespace Maui.MicrosoftClarity.Services;
 
 //https://learn.microsoft.com/en-us/clarity/mobile-sdk/android-sdk
-public partial class MicrosoftClarityService
+public partial class MicrosoftClarityService : IDisposable
 {
+    private SessionStartedCallbackAdapter? _sessionStartedCallbackAdapter;
+    private int _disposed;
+
     public partial void Initialize(string projectId)
     {
         var logLevel = Com.Microsoft.Clarity.Models.LogLevel.None;
@@ -124,15 +127,27 @@ public partial class MicrosoftClarityService
 
     public partial bool SetOnSessionStartedCallback(Action<string> callback)
     {
+        SessionStartedCallbackAdapter? nativeCallback = null;
         try
         {
-            var nativeCallback = new SessionStartedCallbackAdapter(callback);
-            return (bool)ClaritySdk.SetOnSessionStartedCallback(nativeCallback)!;
+            nativeCallback = new SessionStartedCallbackAdapter(callback);
+            var result = (bool)ClaritySdk.SetOnSessionStartedCallback(nativeCallback)!;
+            if (result)
+            {
+                _sessionStartedCallbackAdapter?.Dispose();
+                _sessionStartedCallbackAdapter = nativeCallback;
+                nativeCallback = null;
+            }
+            return result;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(SetOnSessionStartedCallback));
             return false;
+        }
+        finally
+        {
+            nativeCallback?.Dispose();
         }
     }
 
@@ -142,15 +157,20 @@ public partial class MicrosoftClarityService
         {
             var tcs = new TaskCompletionSource<string?>();
             var nativeCallback = new SessionStartedCallbackAdapter(tcs);
-            var started = (bool)ClaritySdk.StartNewSession(nativeCallback)!;
-
-            if (!started)
+            try
             {
-                tcs.TrySetResult(null);
+                var started = (bool)ClaritySdk.StartNewSession(nativeCallback)!;
+                if (!started)
+                {
+                    tcs.TrySetResult(null);
+                }
+                var sessionId = await tcs.Task;
+                return sessionId;
             }
-
-            var sessionId = await tcs.Task;
-            return sessionId;
+            finally
+            {
+                nativeCallback.Dispose();
+            }
         }
         catch (Exception ex)
         {
@@ -208,5 +228,14 @@ public partial class MicrosoftClarityService
             _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(CurrentSessionUrlMethod));
             return null;
         }
+    }
+
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            return;
+
+        var callback = Interlocked.Exchange(ref _sessionStartedCallbackAdapter, null);
+        callback?.Dispose();
     }
 }
