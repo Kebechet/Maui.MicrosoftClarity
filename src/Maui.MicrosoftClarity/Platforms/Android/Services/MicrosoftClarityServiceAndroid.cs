@@ -131,14 +131,14 @@ public partial class MicrosoftClarityService : IDisposable
         try
         {
             nativeCallback = new SessionStartedCallbackAdapter(callback);
-            var result = (bool)ClaritySdk.SetOnSessionStartedCallback(nativeCallback)!;
-            if (result)
+            var isSet = (bool)ClaritySdk.SetOnSessionStartedCallback(nativeCallback)!;
+            if (isSet)
             {
                 _sessionStartedCallbackAdapter?.Dispose();
                 _sessionStartedCallbackAdapter = nativeCallback;
                 nativeCallback = null;
             }
-            return result;
+            return isSet;
         }
         catch (Exception ex)
         {
@@ -151,7 +151,7 @@ public partial class MicrosoftClarityService : IDisposable
         }
     }
 
-    public partial async Task<string?> StartNewSession()
+    public async partial Task<string?> StartNewSession()
     {
         try
         {
@@ -159,8 +159,8 @@ public partial class MicrosoftClarityService : IDisposable
             var nativeCallback = new SessionStartedCallbackAdapter(tcs);
             try
             {
-                var started = (bool)ClaritySdk.StartNewSession(nativeCallback)!;
-                if (!started)
+                var isStarted = (bool)ClaritySdk.StartNewSession(nativeCallback)!;
+                if (!isStarted)
                 {
                     tcs.TrySetResult(null);
                 }
