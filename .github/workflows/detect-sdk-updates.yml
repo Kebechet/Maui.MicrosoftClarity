@@ -1,0 +1,184 @@
+name: Detect SDK Updates
+
+# Runs daily and opens an auto-bump PR per platform whenever Microsoft
+# publishes a new Clarity Android (Maven) or iOS (clarity-apps Package.swift)
+# SDK version. Manual runs via workflow_dispatch are also supported.
+on:
+  schedule:
+    - cron: '0 6 * * *'   # 06:00 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # ---------------------------------------------------------------------------
+  check-android:
+    name: Check Maven Central for Clarity Android SDK
+    runs-on: ubuntu-latest
+    outputs:
+      latest:    ${{ steps.latest.outputs.version }}
+      current:   ${{ steps.current.outputs.version }}
+      needs_bump: ${{ steps.compare.outputs.needs_bump }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: latest
+        name: Fetch latest version from Maven Central
+        run: |
+          VERSION=$(curl -fsSL \
+            https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/maven-metadata.xml \
+            | grep -oP '(?<=<latest>)[^<]+')
+          if [[ -z "$VERSION" ]]; then
+            # Some Maven metadata files only have <release> rather than <latest>.
+            VERSION=$(curl -fsSL \
+              https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/maven-metadata.xml \
+              | grep -oP '(?<=<release>)[^<]+')
+          fi
+          echo "Maven Central latest: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - id: current
+        name: Read current AAR version from Jars/
+        run: |
+          AAR=$(ls src/Maui.MicrosoftClarity.Android/Jars/clarity-*.aar | head -1)
+          VERSION=$(basename "$AAR" .aar | sed 's/^clarity-//')
+          echo "Current pinned native: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - id: compare
+        run: |
+          if [[ "${{ steps.latest.outputs.version }}" != "${{ steps.current.outputs.version }}" ]]; then
+            echo "needs_bump=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_bump=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  open-android-pr:
+    name: Open Android bump PR
+    needs: check-android
+    if: needs.check-android.outputs.needs_bump == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run bump-android.sh
+        run: |
+          chmod +x scripts/bump-android.sh
+          scripts/bump-android.sh "${{ needs.check-android.outputs.latest }}"
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: auto-bump/android-${{ needs.check-android.outputs.latest }}
+          # Conventional Commit — drives release-please for the wrapper later.
+          commit-message: |
+            chore(deps): bump Clarity Android SDK to ${{ needs.check-android.outputs.latest }}
+
+            From ${{ needs.check-android.outputs.current }} to ${{ needs.check-android.outputs.latest }}.
+          title: 'chore(deps): bump Clarity Android SDK to ${{ needs.check-android.outputs.latest }}'
+          body: |
+            Automated daily check found a new Clarity Android SDK release.
+
+            - **Previous:** `${{ needs.check-android.outputs.current }}`
+            - **Latest:**   `${{ needs.check-android.outputs.latest }}`
+            - **Source:**   https://mvnrepository.com/artifact/com.microsoft.clarity/clarity/${{ needs.check-android.outputs.latest }}
+            - **Changelog:** https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#android-sdk-changelog
+
+            `bump-and-wire.yml` will pick this up: if the wrapper still
+            compiles cleanly, the PR auto-merges; otherwise `@copilot` is
+            assigned to wire up any new/changed APIs.
+          labels: |
+            auto-bump
+            android
+            dependencies
+
+  # ---------------------------------------------------------------------------
+  check-ios:
+    name: Check Microsoft clarity-apps for Clarity iOS SDK
+    runs-on: ubuntu-latest
+    outputs:
+      latest:    ${{ steps.latest.outputs.version }}
+      current:   ${{ steps.current.outputs.version }}
+      needs_bump: ${{ steps.compare.outputs.needs_bump }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: latest
+        name: Extract latest version from Package.swift
+        # Same logic as the existing generate-ios-bindings.yml.
+        run: |
+          VERSION=$(curl -fsSL \
+            https://raw.githubusercontent.com/microsoft/clarity-apps/main/Package.swift \
+            | grep -oE 'Clarity-[0-9]+\.[0-9]+\.[0-9]+' \
+            | head -1 | sed 's/Clarity-//')
+          echo "Package.swift latest: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - id: current
+        name: Read current native version from iOS csproj
+        run: |
+          BINDING=$(grep -oP '(?<=<Version>)[^<]+(?=</Version>)' \
+            src/Maui.MicrosoftClarity.iOS/Maui.MicrosoftClarity.iOS.csproj | head -1)
+          # Strip the trailing binding-revision segment.
+          VERSION=$(echo "$BINDING" | awk -F. 'BEGIN{OFS="."} {NF--; print}')
+          echo "Current pinned native: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - id: compare
+        run: |
+          if [[ "${{ steps.latest.outputs.version }}" != "${{ steps.current.outputs.version }}" ]]; then
+            echo "needs_bump=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_bump=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  open-ios-pr:
+    name: Open iOS bump PR
+    needs: check-ios
+    if: needs.check-ios.outputs.needs_bump == 'true'
+    # bump-ios.sh requires Objective Sharpie + macOS, same as the existing workflow.
+    runs-on: macos-15
+    steps:
+      - name: Set Xcode Version
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+
+      - uses: actions/checkout@v4
+
+      - name: Install Objective Sharpie
+        run: brew install --cask objectivesharpie || true
+
+      - name: Run bump-ios.sh
+        run: |
+          chmod +x scripts/bump-ios.sh
+          scripts/bump-ios.sh "${{ needs.check-ios.outputs.latest }}"
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: auto-bump/ios-${{ needs.check-ios.outputs.latest }}
+          commit-message: |
+            chore(deps): bump Clarity iOS SDK to ${{ needs.check-ios.outputs.latest }}
+
+            From ${{ needs.check-ios.outputs.current }} to ${{ needs.check-ios.outputs.latest }}.
+            Regenerated ApiDefinitions.cs and StructsAndEnums.cs via Objective Sharpie.
+          title: 'chore(deps): bump Clarity iOS SDK to ${{ needs.check-ios.outputs.latest }}'
+          body: |
+            Automated daily check found a new Clarity iOS SDK release.
+
+            - **Previous:** `${{ needs.check-ios.outputs.current }}`
+            - **Latest:**   `${{ needs.check-ios.outputs.latest }}`
+            - **Source:**   https://github.com/microsoft/clarity-apps/blob/main/Package.swift
+            - **Changelog:** https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#ios-sdk-changelog
+
+            `ApiDefinitions.cs` and `StructsAndEnums.cs` were regenerated and
+            their `[Verify]` attributes stripped per the iOS README.
+
+            `bump-and-wire.yml` will pick this up: if the wrapper still
+            compiles cleanly, the PR auto-merges; otherwise `@copilot` is
+            assigned to wire up any new/changed APIs.
+          labels: |
+            auto-bump
+            ios
+            dependencies

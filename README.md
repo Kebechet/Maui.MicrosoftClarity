@@ -55,6 +55,58 @@ So that you dont have to specify platform for this package and it's calls, also 
 - Library will throw exceptions only in case developer did some mistake
 - in other cases, when there is some corrupted state it will return default value of that type.
 
+## Automated SDK updates
+
+This repo runs a daily pipeline that watches Microsoft's Clarity Android and iOS SDKs and tries to bump + re-wire this package automatically. The flow:
+
+```mermaid
+flowchart TD
+    A[Microsoft ships new Clarity SDK] --> B[06:00 UTC daily<br/>detect-sdk-updates.yml]
+    B --> C[Bump PR opened<br/>label: auto-bump]
+    C --> D[bump-and-wire.yml:<br/>build binding + diff API + build wrapper]
+
+    D --> E{Outcome?}
+
+    E -->|API unchanged<br/>wrapper compiles| F[Auto-merge as<br/>stable release]
+    E -->|API additions<br/>or wrapper breaks| G[Apply -automatic suffix<br/>NuGet prerelease]
+    E -->|Binding itself broken| H[Apply -automatic suffix<br/>label: binding-broken]
+
+    G --> I[Ping @copilot<br/>with API diff + instructions]
+    H --> J[Ping @copilot<br/>with binding-fix guide]
+
+    I --> K[Agent commits wiring]
+    J --> L{Agent can fix?}
+    L -->|yes| K
+    L -->|no| M[Agent adds label:<br/>needs-human]
+
+    K --> N[Human review]
+    M --> N
+    F --> O[main updated]
+    N -->|happy| P[Optional: strip -automatic<br/>then merge]
+    N -->|unhappy| Q[Feedback to @copilot<br/>or take over]
+    P --> O
+    Q --> K
+
+    O --> R[release-please<br/>maintains release PR<br/>for wrapper version]
+    R --> S[Merge release PR<br/>tags vX.Y.Z]
+    S --> T[Manually run<br/>publish-*.yml workflows]
+    T --> U[NuGet.org]
+
+    classDef happy fill:#d4edda,stroke:#155724,color:#000
+    classDef warn fill:#fff3cd,stroke:#856404,color:#000
+    classDef human fill:#f8d7da,stroke:#721c24,color:#000
+    class F,O,U happy
+    class G,H,I,J,K warn
+    class M,N,Q human
+```
+
+The only manual steps for you:
+1. Review agent wiring when `-automatic` is applied (and optionally strip the suffix before merge)
+2. Fix binding-generator failures the agent escalates as `needs-human` (rare)
+3. Trigger the three `publish-*.yml` workflows after each release tag
+
+See `.github/COPILOT_INSTRUCTIONS.md` for the rules the agent follows.
+
 ## Contributions
 Feel free to create an issue or pull request. In case you would like to do massive changes in the package please firstly discuss them in the issue because otherwise there is high chance that such big PR would be rejected.
 

@@ -1,0 +1,351 @@
+name: Bump and Wire
+
+# Triggered when detect-sdk-updates.yml opens an `auto-bump` PR.
+#
+# Pipeline:
+#   1. Build the relevant binding csproj — confirms the new AAR/xcframework
+#      compiles cleanly through the binding generator.
+#   2. Diff the public API surface against the previously-published nupkg
+#      to detect *added* APIs (apicompat only catches breaking changes,
+#      so we use GenAPI + plain diff for additions).
+#   3. Build the wrapper csproj against a local feed containing the new
+#      binding nupkg.
+#   4. Decide:
+#        - additions == 0 AND wrapper compiles  → enable squash auto-merge
+#                                                  as a stable release.
+#        - additions > 0 OR wrapper compile fails → push a commit that
+#                                                  appends `-automatic` to
+#                                                  binding + wrapper-ref
+#                                                  versions, then ping
+#                                                  @copilot with the agent
+#                                                  prompt + API diff.
+#        - binding compile fails → flag `needs-human` and stop.
+#
+# The `-automatic` suffix is a NuGet prerelease marker. PRs marked this way
+# stay open until a human reviews the wiring; the human can manually strip
+# the suffix in a follow-up commit before merging if confident enough to
+# promote to stable.
+#
+# Note: publish-android.yml / publish-ios.yml / publish-wrapper.yml are still
+# workflow_dispatch-only. After this PR merges you still trigger the publish
+# workflow yourself; that's the manual safety brake we kept on purpose.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SDK_VERSION: 10.0.102
+  BUILD_CONFIGURATION: Release
+
+jobs:
+  guard:
+    if: contains(github.event.pull_request.labels.*.name, 'auto-bump')
+    runs-on: ubuntu-latest
+    outputs:
+      platform: ${{ steps.detect.outputs.platform }}
+    steps:
+      - id: detect
+        run: |
+          if ${{ contains(github.event.pull_request.labels.*.name, 'android') }}; then
+            echo "platform=android" >> "$GITHUB_OUTPUT"
+          elif ${{ contains(github.event.pull_request.labels.*.name, 'ios') }}; then
+            echo "platform=ios" >> "$GITHUB_OUTPUT"
+          else
+            echo "platform=unknown" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: guard
+    if: needs.guard.outputs.platform != 'unknown'
+    runs-on: ${{ needs.guard.outputs.platform == 'ios' && 'macos-15' || 'windows-latest' }}
+    outputs:
+      binding_built:    ${{ steps.build_binding.outcome == 'success' }}
+      wrapper_built:    ${{ steps.build_wrapper.outcome == 'success' }}
+      api_added_count:  ${{ steps.api_diff.outputs.api_added_count }}
+      api_removed_count: ${{ steps.api_diff.outputs.api_removed_count }}
+      previous_version: ${{ steps.previous.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          # Need full history to read the previous binding version from origin/main.
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: needs.guard.outputs.platform == 'ios'
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+
+      - uses: actions/setup-java@v4
+        if: needs.guard.outputs.platform == 'android'
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+
+      - name: Pin .NET SDK
+        run: echo '{"sdk":{"version":"${{ env.DOTNET_SDK_VERSION }}"}}' > global.json
+        shell: bash
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install MAUI workloads
+        shell: bash
+        run: |
+          if [[ "${{ needs.guard.outputs.platform }}" == "ios" ]]; then
+            dotnet workload install ios maui-ios --ignore-failed-sources --version ${{ env.DOTNET_SDK_VERSION }}
+          else
+            dotnet workload install android maui-android maui-ios maui-maccatalyst --ignore-failed-sources --version ${{ env.DOTNET_SDK_VERSION }}
+          fi
+
+      # ---- Read the previous binding version from origin/main -----------
+      - id: previous
+        name: Read previous binding version from main
+        shell: bash
+        run: |
+          if [[ "${{ needs.guard.outputs.platform }}" == "ios" ]]; then
+            CSPROJ_REL="src/Maui.MicrosoftClarity.iOS/Maui.MicrosoftClarity.iOS.csproj"
+          else
+            CSPROJ_REL="src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj"
+          fi
+          VERSION=$(git show "origin/main:${CSPROJ_REL}" \
+            | grep -oP '(?<=<Version>)[^<]+(?=</Version>)' | head -1)
+          # Strip any pre-existing prerelease suffix when looking up nuget.org.
+          VERSION="${VERSION%%-*}"
+          echo "Previous published version: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # ---- Build the binding --------------------------------------------
+      - id: build_binding
+        name: Build binding csproj
+        continue-on-error: true
+        shell: bash
+        run: |
+          if [[ "${{ needs.guard.outputs.platform }}" == "ios" ]]; then
+            PROJ=src/Maui.MicrosoftClarity.iOS/Maui.MicrosoftClarity.iOS.csproj
+          else
+            PROJ=src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj
+          fi
+          dotnet restore "$PROJ" 2>&1 | tee -a binding-build.log
+          dotnet build   "$PROJ" -c ${{ env.BUILD_CONFIGURATION }} --no-restore 2>&1 | tee -a binding-build.log
+
+      - if: steps.build_binding.outcome != 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: binding-build-log
+          path: binding-build.log
+
+      # ---- Diff API surface against previously-published nupkg -----------
+      - id: api_diff
+        if: steps.build_binding.outcome == 'success'
+        name: Diff API surface
+        shell: bash
+        run: |
+          chmod +x scripts/diff-binding-api.sh
+          scripts/diff-binding-api.sh "${{ needs.guard.outputs.platform }}" "${{ steps.previous.outputs.version }}"
+
+      - if: steps.api_diff.outputs.diff_path != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-diff
+          path: ${{ steps.api_diff.outputs.diff_path }}
+
+      # ---- Pack binding to local feed for wrapper restore ----------------
+      - if: steps.build_binding.outcome == 'success'
+        name: Pack binding to local feed
+        shell: bash
+        run: |
+          if [[ "${{ needs.guard.outputs.platform }}" == "ios" ]]; then
+            PROJ=src/Maui.MicrosoftClarity.iOS/Maui.MicrosoftClarity.iOS.csproj
+          else
+            PROJ=src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj
+          fi
+          dotnet pack "$PROJ" -c ${{ env.BUILD_CONFIGURATION }} -o ./local-feed --no-build
+          dotnet nuget add source "$(pwd)/local-feed" --name local-bump || true
+
+      # ---- Build the wrapper --------------------------------------------
+      - id: build_wrapper
+        if: steps.build_binding.outcome == 'success'
+        name: Build wrapper against local feed
+        continue-on-error: true
+        shell: bash
+        run: |
+          dotnet restore src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj \
+            --source ./local-feed --source https://api.nuget.org/v3/index.json
+          dotnet build   src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj \
+            -c ${{ env.BUILD_CONFIGURATION }} --no-restore
+
+      - if: steps.build_wrapper.outcome != 'success'
+        name: Capture wrapper build log
+        shell: bash
+        run: |
+          dotnet build src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj \
+            -c ${{ env.BUILD_CONFIGURATION }} 2>&1 | tee wrapper-build.log || true
+
+      - if: steps.build_wrapper.outcome != 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wrapper-build-log
+          path: wrapper-build.log
+
+  decide:
+    needs: [guard, build]
+    if: needs.guard.outputs.platform != 'unknown'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git for bot pushes
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # ---- Happy path: clean bump → auto-merge as stable -----------------
+      - id: stable_path
+        if: |
+          needs.build.outputs.binding_built == 'true' &&
+          needs.build.outputs.wrapper_built == 'true' &&
+          needs.build.outputs.api_added_count == '0' &&
+          needs.build.outputs.api_removed_count == '0'
+        name: Approve and enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr review ${{ github.event.pull_request.number }} --approve \
+            --body "API surface unchanged, bindings + wrapper compile cleanly. Auto-approving."
+          gh pr merge  ${{ github.event.pull_request.number }} --auto --squash
+
+      # ---- Additions detected → apply -automatic + ping @copilot ---------
+      - id: additions_path
+        if: |
+          needs.build.outputs.binding_built == 'true' &&
+          needs.build.outputs.wrapper_built == 'true' &&
+          needs.build.outputs.api_added_count != '0'
+        name: Apply -automatic suffix and request agent wiring
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/apply-automatic-suffix.sh
+          scripts/apply-automatic-suffix.sh "${{ needs.guard.outputs.platform }}"
+
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m "chore(deps): mark as -automatic prerelease pending agent wiring"
+            git push
+          fi
+
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --add-label needs-wiring --add-label automatic-prerelease
+
+          # Download the API diff artifact uploaded by the build job to embed in the comment.
+          gh run download ${{ github.run_id }} -n api-diff -D /tmp/api-diff || true
+          DIFF_BLOB=""
+          if [[ -f /tmp/api-diff/api-diff.txt ]]; then
+            DIFF_BLOB=$(head -200 /tmp/api-diff/api-diff.txt)
+          fi
+          INSTRUCTIONS=$(cat .github/COPILOT_INSTRUCTIONS.md)
+
+          gh pr comment ${{ github.event.pull_request.number }} --body "$(cat <<EOF
+          @copilot the binding gained **${{ needs.build.outputs.api_added_count }} new API element(s)**. Please wire them through the cross-platform wrapper.
+
+          The version has been marked \`-automatic\` (NuGet prerelease) until a human reviews your wiring.
+
+          ## API additions detected
+
+          \`\`\`diff
+          ${DIFF_BLOB}
+          \`\`\`
+
+          ${INSTRUCTIONS}
+          EOF
+          )"
+
+      # ---- Wrapper broken → apply -automatic + ping @copilot -------------
+      - if: |
+          needs.build.outputs.binding_built == 'true' &&
+          needs.build.outputs.wrapper_built != 'true'
+        name: Apply -automatic suffix and request agent fix
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/apply-automatic-suffix.sh
+          scripts/apply-automatic-suffix.sh "${{ needs.guard.outputs.platform }}"
+
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m "chore(deps): mark as -automatic prerelease pending agent wiring"
+            git push
+          fi
+
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --add-label needs-wiring --add-label automatic-prerelease
+
+          INSTRUCTIONS=$(cat .github/COPILOT_INSTRUCTIONS.md)
+          gh pr comment ${{ github.event.pull_request.number }} --body "@copilot the binding compiles but the wrapper does not — the SDK bump introduced a breaking change. Update the cross-platform abstraction to compile against the new bindings.
+
+          The wrapper build log is uploaded as a workflow artifact (\`wrapper-build-log\`).
+
+          The version has been marked \`-automatic\` (NuGet prerelease) until a human reviews your fix.
+
+          ---
+
+          $INSTRUCTIONS"
+
+      # ---- Binding regression → apply -automatic + ping @copilot ---------
+      # Binding-level fixes (Transforms XML entries, ApiDefinitions.cs edits,
+      # Sharpie misread corrections) are pattern-matchable. Let the agent try
+      # first; it will escalate to needs-human if it can't make progress.
+      - if: needs.build.outputs.binding_built != 'true'
+        name: Apply -automatic suffix and request agent fix for binding
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/apply-automatic-suffix.sh
+          scripts/apply-automatic-suffix.sh "${{ needs.guard.outputs.platform }}"
+
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m "chore(deps): mark as -automatic prerelease pending agent fix"
+            git push
+          fi
+
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --add-label needs-wiring --add-label automatic-prerelease --add-label binding-broken
+
+          # Capture the binding build log into an artifact for the agent.
+          if [[ "${{ needs.guard.outputs.platform }}" == "ios" ]]; then
+            PROJ=src/Maui.MicrosoftClarity.iOS/Maui.MicrosoftClarity.iOS.csproj
+          else
+            PROJ=src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj
+          fi
+          INSTRUCTIONS=$(cat .github/COPILOT_INSTRUCTIONS.md)
+
+          gh pr comment ${{ github.event.pull_request.number }} --body "@copilot the **binding csproj itself failed to build** against the new native SDK — the C# binding generator (Java→C# for Android, Sharpie output for iOS) is producing invalid code.
+
+          This usually means one of:
+          - Type-erasure clash in Java generics (Android) — fix via \`Transforms/EnumMethods.xml\` or \`Metadata.xml\` remove-node entries.
+          - Sharpie misread of an ObjC selector or nullability (iOS) — fix by hand-editing \`ApiDefinitions.cs\`.
+          - New native type that the generator doesn't know how to map — add a Transform mapping.
+
+          See the \"Binding generator failures\" section of the instructions below for what to try. If you can't fix it (e.g. needs a Microsoft.Clarity SDK upstream fix), leave a clear \`// TODO(human-review):\` comment and add the \`needs-human\` label.
+
+          The version has been marked \`-automatic\` (NuGet prerelease) until a human reviews your fix.
+
+          The binding build log will be in this workflow run's logs under the \`Build binding csproj\` step — \`gh run view ${{ github.run_id }} --log\` to read it.
+
+          ---
+
+          $INSTRUCTIONS"

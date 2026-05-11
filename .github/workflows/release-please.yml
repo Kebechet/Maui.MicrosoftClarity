@@ -1,0 +1,26 @@
+name: release-please
+
+# Watches commits to main and maintains a "release PR" for the wrapper package.
+# When that PR is merged, release-please tags a release and updates
+# CHANGELOG.md + the <Version> in src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj.
+#
+# The two binding projects (.Android, .iOS) intentionally stay OUT of release-please —
+# their versions are derived from the underlying native SDK version
+# (<native>.<binding-rev>), which is bumped by detect-sdk-updates.yml.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
