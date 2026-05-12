@@ -8,7 +8,7 @@ A .NET MAUI wrapper around Microsoft Clarity Android + iOS SDKs. Three packages:
 | `src/Maui.MicrosoftClarity.iOS/` | iOS binding (Sharpie-generated from `Clarity.xcframework`) | `<native>.<binding-rev>` |
 | `src/Maui.MicrosoftClarity/` | Cross-platform wrapper | Semver, managed by release-please |
 
-The PR comment that mentioned you already says which step failed. The binding `<Version>` and the wrapper's `<PackageReference>` have been suffixed `-automatic` (NuGet prerelease marker). **Do not strip the suffix** — that's the human's call at merge time.
+The PR comment that mentioned you already says which step failed.
 
 ## Your job
 
@@ -34,7 +34,4 @@ The PR comment that mentioned you already says which step failed. The binding `<
 
 ## If the binding csproj itself is broken (not the wrapper)
 
-The fix is at the binding-generator layer. See the appropriate platform guide:
-
-- Android: [`.github/agent-android-binding.md`](agent-android-binding.md)
-- iOS: [`.github/agent-ios-binding.md`](agent-ios-binding.md)
+The fix is at the binding-generator layer. The workflow appends the appropriate platform guide ([agent-android-binding.md](agent-android-binding.md) or [agent-ios-binding.md](agent-ios-binding.md)) to the PR comment when the binding-broken branch fires.

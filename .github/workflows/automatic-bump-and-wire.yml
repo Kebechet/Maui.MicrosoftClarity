@@ -5,30 +5,20 @@ name: automatic-bump-and-wire
 # Pipeline:
 #   1. Build the relevant binding csproj — confirms the new AAR/xcframework
 #      compiles cleanly through the binding generator.
-#   2. Diff the public API surface against the previously-published nupkg
-#      to detect *added* APIs (apicompat only catches breaking changes,
-#      so we use GenAPI + plain diff for additions).
+#   2. Diff the upstream native API surface (Clarity-Swift.h for iOS, javap
+#      output of classes.jar for Android) old vs new to detect added APIs.
 #   3. Build the wrapper csproj against a local feed containing the new
 #      binding nupkg.
 #   4. Decide:
-#        - additions == 0 AND wrapper compiles  → enable squash auto-merge
-#                                                  as a stable release.
-#        - additions > 0 OR wrapper compile fails → push a commit that
-#                                                  appends `-automatic` to
-#                                                  binding + wrapper-ref
-#                                                  versions, then ping
-#                                                  @copilot with the agent
-#                                                  prompt + API diff.
-#        - binding compile fails → flag `needs-human` and stop.
+#        - additions == 0 AND wrapper compiles  → auto-approve + auto-merge.
+#        - additions > 0 OR wrapper compile fails → label `needs-wiring`,
+#          ping @copilot with the API diff + instructions.
+#        - binding compile fails → label `needs-wiring binding-broken`,
+#          ping @copilot with the binding-specific guide.
 #
-# The `-automatic` suffix is a NuGet prerelease marker. PRs marked this way
-# stay open until a human reviews the wiring; the human can manually strip
-# the suffix in a follow-up commit before merging if confident enough to
-# promote to stable.
-#
-# Note: publish-android.yml / publish-ios.yml / publish-wrapper.yml are still
-# workflow_dispatch-only. After this PR merges you still trigger the publish
-# workflow yourself; that's the manual safety brake we kept on purpose.
+# The publish-{android,ios,wrapper}.yml workflows are workflow_dispatch-only.
+# After this PR merges you still trigger the publish workflow yourself —
+# that's the manual safety brake against shipping unreviewed bumps to NuGet.
 
 on:
   pull_request:
@@ -237,11 +227,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Configure git for bot pushes
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
       # ---- Happy path: clean bump → auto-merge as stable -----------------
       - id: stable_path
         if: |
@@ -257,27 +242,17 @@ jobs:
             --body "API surface unchanged, bindings + wrapper compile cleanly. Auto-approving."
           gh pr merge  ${{ github.event.pull_request.number }} --auto --squash
 
-      # ---- Additions detected → apply -automatic + ping @copilot ---------
+      # ---- Additions detected → ping @copilot ----------------------------
       - id: additions_path
         if: |
           needs.build.outputs.binding_built == 'true' &&
           needs.build.outputs.wrapper_built == 'true' &&
           needs.build.outputs.api_added_count != '0'
-        name: Apply -automatic suffix and request agent wiring
+        name: Request agent wiring
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          chmod +x scripts/apply-automatic-suffix.sh
-          scripts/apply-automatic-suffix.sh "${{ needs.guard.outputs.platform }}"
-
-          if ! git diff --quiet; then
-            git add -A
-            git commit -m "chore(deps): mark as -automatic prerelease pending agent wiring"
-            git push
-          fi
-
-          gh pr edit ${{ github.event.pull_request.number }} \
-            --add-label needs-wiring --add-label automatic-prerelease
+          gh pr edit ${{ github.event.pull_request.number }} --add-label needs-wiring
 
           # Download the API diff artifact uploaded by the build job to embed in the comment.
           gh run download ${{ github.run_id }} -n api-diff -D /tmp/api-diff || true
@@ -290,8 +265,6 @@ jobs:
           gh pr comment ${{ github.event.pull_request.number }} --body "$(cat <<EOF
           @copilot the binding gained **${{ needs.build.outputs.api_added_count }} new API element(s)**. Please wire them through the cross-platform wrapper.
 
-          The version has been marked \`-automatic\` (NuGet prerelease) until a human reviews your wiring.
-
           ## API additions detected
 
           \`\`\`diff
@@ -302,57 +275,36 @@ jobs:
           EOF
           )"
 
-      # ---- Wrapper broken → apply -automatic + ping @copilot -------------
+      # ---- Wrapper broken → ping @copilot --------------------------------
       - if: |
           needs.build.outputs.binding_built == 'true' &&
           needs.build.outputs.wrapper_built != 'true'
-        name: Apply -automatic suffix and request agent fix
+        name: Request agent fix for wrapper
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          chmod +x scripts/apply-automatic-suffix.sh
-          scripts/apply-automatic-suffix.sh "${{ needs.guard.outputs.platform }}"
-
-          if ! git diff --quiet; then
-            git add -A
-            git commit -m "chore(deps): mark as -automatic prerelease pending agent wiring"
-            git push
-          fi
-
-          gh pr edit ${{ github.event.pull_request.number }} \
-            --add-label needs-wiring --add-label automatic-prerelease
+          gh pr edit ${{ github.event.pull_request.number }} --add-label needs-wiring
 
           INSTRUCTIONS=$(cat .github/COPILOT_INSTRUCTIONS.md)
           gh pr comment ${{ github.event.pull_request.number }} --body "@copilot the binding compiles but the wrapper does not — the SDK bump introduced a breaking change. Update the cross-platform abstraction to compile against the new bindings.
 
           The wrapper build log is uploaded as a workflow artifact (\`wrapper-build-log\`).
 
-          The version has been marked \`-automatic\` (NuGet prerelease) until a human reviews your fix.
-
           ---
 
           $INSTRUCTIONS"
 
-      # ---- Binding regression → apply -automatic + ping @copilot ---------
+      # ---- Binding regression → ping @copilot ----------------------------
       # Binding-level fixes (Transforms XML entries, ApiDefinitions.cs edits,
       # Sharpie misread corrections) are pattern-matchable. Let the agent try
       # first; it will escalate to needs-human if it can't make progress.
       - if: needs.build.outputs.binding_built != 'true'
-        name: Apply -automatic suffix and request agent fix for binding
+        name: Request agent fix for binding
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          chmod +x scripts/apply-automatic-suffix.sh
-          scripts/apply-automatic-suffix.sh "${{ needs.guard.outputs.platform }}"
-
-          if ! git diff --quiet; then
-            git add -A
-            git commit -m "chore(deps): mark as -automatic prerelease pending agent fix"
-            git push
-          fi
-
           gh pr edit ${{ github.event.pull_request.number }} \
-            --add-label needs-wiring --add-label automatic-prerelease --add-label binding-broken
+            --add-label needs-wiring --add-label binding-broken
 
           # The binding-specific guide (Sharpie / Transforms patterns) is
           # only relevant on this branch, so include it here in addition to
@@ -370,9 +322,7 @@ jobs:
           - Sharpie misread of an ObjC selector or nullability (iOS) — fix by hand-editing \`ApiDefinitions.cs\`.
           - New native type that the generator doesn't know how to map — add a Transform mapping.
 
-          See the \"Binding generator failures\" section of the instructions below for what to try. If you can't fix it (e.g. needs a Microsoft.Clarity SDK upstream fix), leave a clear \`// TODO(human-review):\` comment and add the \`needs-human\` label.
-
-          The version has been marked \`-automatic\` (NuGet prerelease) until a human reviews your fix.
+          See the binding-specific guide appended below for what to try. If you can't fix it (e.g. needs a Microsoft.Clarity SDK upstream fix), leave a clear \`// TODO(human-review):\` comment and add the \`needs-human\` label.
 
           The binding build log will be in this workflow run's logs under the \`Build binding csproj\` step — \`gh run view ${{ github.run_id }} --log\` to read it.
 
