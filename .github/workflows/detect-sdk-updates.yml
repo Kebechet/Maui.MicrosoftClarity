@@ -1,4 +1,4 @@
-name: Detect SDK Updates
+name: detect-sdk-updates
 
 # Runs daily and opens an auto-bump PR per platform whenever Microsoft
 # publishes a new Clarity Android (Maven) or iOS (clarity-apps Package.swift)

@@ -1,4 +1,4 @@
-name: Bump and Wire
+name: bump-and-wire
 
 # Triggered when detect-sdk-updates.yml opens an `auto-bump` PR.
 #
