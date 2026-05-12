@@ -1,7 +1,7 @@
 using System;
-using Clarity;
 using Foundation;
 using ObjCRuntime;
+using UIKit;
 
 namespace MicrosoftClarityiOS
 {
