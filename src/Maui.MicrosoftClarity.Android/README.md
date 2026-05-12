@@ -1,8 +1,10 @@
 ﻿[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/kebechet)
 
 # Maui.MicrosoftClarity.Android
-![NuGet Version](https://img.shields.io/nuget/v/Kebechet.Maui.MicrosoftClarity.Android)
-![NuGet Downloads](https://img.shields.io/nuget/dt/Kebechet.Maui.MicrosoftClarity.Android)
+[![NuGet Version](https://img.shields.io/nuget/v/Kebechet.Maui.MicrosoftClarity.Android)](https://www.nuget.org/packages/Kebechet.Maui.MicrosoftClarity.Android/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/Kebechet.Maui.MicrosoftClarity.Android)](https://www.nuget.org/packages/Kebechet.Maui.MicrosoftClarity.Android/)
+![Last updated (main)](https://img.shields.io/github/last-commit/Kebechet/Maui.MicrosoftClarity/main?path=src%2FMaui.MicrosoftClarity.Android&label=last%20updated)
+[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/samuel_sidor.svg?style=social&label=Follow%20samuel_sidor)](https://x.com/samuel_sidor)
 
 Thic repo contains bindings for Microsoft Clarity Android library
 - https://clarity.microsoft.com/

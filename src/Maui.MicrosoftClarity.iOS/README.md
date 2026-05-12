@@ -1,8 +1,10 @@
 ﻿[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/kebechet)
 
 # Maui.MicrosoftClarity.iOS
-![NuGet Version](https://img.shields.io/nuget/v/Kebechet.Maui.MicrosoftClarity.iOS)
-![NuGet Downloads](https://img.shields.io/nuget/dt/Kebechet.Maui.MicrosoftClarity.iOS)
+[![NuGet Version](https://img.shields.io/nuget/v/Kebechet.Maui.MicrosoftClarity.iOS)](https://www.nuget.org/packages/Kebechet.Maui.MicrosoftClarity.iOS/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/Kebechet.Maui.MicrosoftClarity.iOS)](https://www.nuget.org/packages/Kebechet.Maui.MicrosoftClarity.iOS/)
+![Last updated (main)](https://img.shields.io/github/last-commit/Kebechet/Maui.MicrosoftClarity/main?path=src%2FMaui.MicrosoftClarity.iOS&label=last%20updated)
+[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/samuel_sidor.svg?style=social&label=Follow%20samuel_sidor)](https://x.com/samuel_sidor)
 
 This repo contains bindings for Microsoft Clarity iOS library
 - https://clarity.microsoft.com/

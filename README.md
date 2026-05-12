@@ -5,7 +5,6 @@
 [![NuGet Downloads](https://img.shields.io/nuget/dt/Kebechet.Maui.MicrosoftClarity)](https://www.nuget.org/packages/Kebechet.Maui.MicrosoftClarity/)
 ![Last updated (main)](https://img.shields.io/github/last-commit/Kebechet/Maui.MicrosoftClarity/main?label=last%20updated)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/samuel_sidor.svg?style=social&label=Follow%20samuel_sidor)](https://x.com/samuel_sidor)
-[![Follow @Kebechet](https://img.shields.io/static/v1?label=Follow%20%40Kebechet&message= &logo=github&style=social)](https://github.com/Kebechet)
 
 Wrapper for [Microsoft Clarity for mobile](https://clarity.microsoft.com/)
 
