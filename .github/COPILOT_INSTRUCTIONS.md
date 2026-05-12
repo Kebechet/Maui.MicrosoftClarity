@@ -158,6 +158,12 @@ rewrite the xcframework or patch the .h headers.
   strings — not manual null + `Any()`/`Length` checks.
 - Don't remove comments that explain non-obvious behavior or the reason
   behind a decision (workarounds, environment-specific behavior, edge cases).
+- If you touch a `scripts/*.sh` or inline workflow `run:` block, keep it
+  portable across GNU and BSD userlands — the same scripts run on
+  `ubuntu-latest`, `macos-15`, and `windows-latest` (Git Bash). In
+  particular: no `grep -P` (PCRE / lookaround) and no `find -quit`. Use
+  `sed -n -E 's|.*<Tag>([^<]+)</Tag>.*|\1|p'` for XML extraction, and
+  `find … | head -1` instead of `-quit`.
 
 ## What success looks like
 
