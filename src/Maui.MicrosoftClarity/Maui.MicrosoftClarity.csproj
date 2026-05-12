@@ -61,7 +61,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
-    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.iOS" Version="3.4.0.1" />
+    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.iOS" Version="3.5.2.0" />
   </ItemGroup>
 
 </Project>
