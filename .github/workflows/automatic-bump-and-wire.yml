@@ -34,6 +34,16 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
 
+# Coalesce duplicate runs that arrive in a burst for the same PR.
+# peter-evans/create-pull-request adds labels one at a time after opening the
+# PR, each fires a `labeled` event, and the decide job's suffix-commit push
+# fires a `synchronize` — left unbounded this produces 5-7 parallel pipelines
+# that each reach the `decide` step and each post a duplicate @copilot comment.
+# `cancel-in-progress: true` keeps only the newest run per PR.
+concurrency:
+  group: automatic-bump-and-wire-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   pull-requests: write
