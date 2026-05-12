@@ -8,10 +8,10 @@ public partial class MicrosoftClarityService
 {
     public partial void Initialize(string projectId)
     {
-        var logLevel = MicrosoftClarityiOS.LogLevel.None;
+        var logLevel = ClarityLogLevel.None;
 
 #if DEBUG
-       logLevel = MicrosoftClarityiOS.LogLevel.Verbose;
+       logLevel = ClarityLogLevel.Verbose;
 #endif
 
         try
@@ -19,7 +19,7 @@ public partial class MicrosoftClarityService
             var config = new ClarityConfig(projectId)
             {
                 LogLevel = logLevel,
-                ApplicationFramework = ApplicationFramework.Native
+                ApplicationFramework = ClarityApplicationFramework.Native
             };
 
             ClaritySDK.InitializeWithConfig(config);
@@ -154,10 +154,20 @@ public partial class MicrosoftClarityService
         }
     }
 
-    // Currently only supported on Android
     public partial bool Consent(bool? isAdsStorageAllowed, bool? isAnalyticsStorageAllowed)
     {
-        return false;
+        if (!isAnalyticsStorageAllowed.HasValue)
+            return false;
+
+        try
+        {
+            return ClaritySDK.ConsentWithAnalyticsStorage(isAnalyticsStorageAllowed.Value);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{methodName} error in Clarity SDK", nameof(Consent));
+            return false;
+        }
     }
 
     //wrapper methods
