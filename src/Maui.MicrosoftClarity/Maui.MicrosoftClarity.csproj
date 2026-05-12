@@ -30,7 +30,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>3.0.1</Version> <!-- x-release-please-version -->
+    <Version>3.0.2</Version> <!-- x-release-please-version -->
     <PackageReleaseNotes>Fixed Android memory leak: properly dispose SessionStartedCallbackAdapter Java interop objects</PackageReleaseNotes>
   </PropertyGroup>
 
