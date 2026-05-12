@@ -183,23 +183,37 @@ jobs:
           dotnet nuget add source "$(pwd)/local-feed" --name local-bump || true
 
       # ---- Build the wrapper --------------------------------------------
+      # Only the bumped platform's TFM is relevant — the other TFMs consume
+      # unchanged bindings and would just demand workloads we haven't installed
+      # on this runner. Filtering with `-f` avoids false-positive "wrapper
+      # broken" verdicts caused by missing android workload on macOS, etc.
       - id: build_wrapper
         if: steps.build_binding.outcome == 'success'
         name: Build wrapper against local feed
         continue-on-error: true
         shell: bash
         run: |
+          if [[ "${{ needs.guard.outputs.platform }}" == "ios" ]]; then
+            TFM=net10.0-ios
+          else
+            TFM=net10.0-android
+          fi
           dotnet restore src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj \
             --source ./local-feed --source https://api.nuget.org/v3/index.json
           dotnet build   src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj \
-            -c ${{ env.BUILD_CONFIGURATION }} --no-restore
+            -f "$TFM" -c ${{ env.BUILD_CONFIGURATION }} --no-restore
 
       - if: steps.build_wrapper.outcome != 'success'
         name: Capture wrapper build log
         shell: bash
         run: |
+          if [[ "${{ needs.guard.outputs.platform }}" == "ios" ]]; then
+            TFM=net10.0-ios
+          else
+            TFM=net10.0-android
+          fi
           dotnet build src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj \
-            -c ${{ env.BUILD_CONFIGURATION }} 2>&1 | tee wrapper-build.log || true
+            -f "$TFM" -c ${{ env.BUILD_CONFIGURATION }} 2>&1 | tee wrapper-build.log || true
 
       - if: steps.build_wrapper.outcome != 'success'
         uses: actions/upload-artifact@v4
