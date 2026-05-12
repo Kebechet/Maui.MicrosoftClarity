@@ -3,7 +3,7 @@ using ObjCRuntime;
 namespace MicrosoftClarityiOS
 {
 	[Native]
-	public enum ApplicationFramework : long
+	public enum ClarityApplicationFramework : long
 	{
 		Native = 0,
 		Cordova = 1,
@@ -12,7 +12,7 @@ namespace MicrosoftClarityiOS
 	}
 
 	[Native]
-	public enum LogLevel : long
+	public enum ClarityLogLevel : long
 	{
 		Verbose = 0,
 		Debug = 1,
