@@ -96,24 +96,9 @@ echo "    new DLL: $NEW_DLL"
 # --- 3. Install GenAPI ----------------------------------------------------
 if ! command -v genapi >/dev/null 2>&1; then
   echo "==> Installing Microsoft.DotNet.GenAPI.Tool"
-  dotnet tool install -g Microsoft.DotNet.GenAPI.Tool 2>&1 || \
-    dotnet tool update  -g Microsoft.DotNet.GenAPI.Tool 2>&1 || true
+  dotnet tool install -g Microsoft.DotNet.GenAPI.Tool >/dev/null 2>&1 || \
+    dotnet tool update  -g Microsoft.DotNet.GenAPI.Tool >/dev/null 2>&1
   export PATH="$PATH:$HOME/.dotnet/tools"
-fi
-
-if ! command -v genapi >/dev/null 2>&1; then
-  echo "WARN: Microsoft.DotNet.GenAPI.Tool could not be installed — skipping API diff" >&2
-  echo "api_added_count=0"
-  echo "api_removed_count=0"
-  echo "diff_path="
-  if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-    {
-      echo "api_added_count=0"
-      echo "api_removed_count=0"
-      echo "diff_path="
-    } >> "$GITHUB_OUTPUT"
-  fi
-  exit 0
 fi
 
 # --- 4. Generate API surface dumps ----------------------------------------
