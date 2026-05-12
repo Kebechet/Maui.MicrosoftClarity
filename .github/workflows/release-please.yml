@@ -6,7 +6,7 @@ name: release-please
 #
 # The two binding projects (.Android, .iOS) intentionally stay OUT of release-please —
 # their versions are derived from the underlying native SDK version
-# (<native>.<binding-rev>), which is bumped by detect-sdk-updates.yml.
+# (<native>.<binding-rev>), which is bumped by automatic-detect-sdk-updates.yml.
 
 on:
   push:

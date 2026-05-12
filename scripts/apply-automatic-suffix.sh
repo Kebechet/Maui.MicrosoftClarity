@@ -13,7 +13,7 @@
 #   `--prerelease`. This is the right semantic for "the automation shipped
 #   this without a human reviewing the API surface."
 #
-# When this is called from bump-and-wire.yml:
+# When this is called from automatic-bump-and-wire.yml:
 #   - api-diff detected new APIs (additions > 0)  → apply -automatic
 #   - wrapper failed to compile against new binding → apply -automatic
 # In both cases @copilot is also pinged to do the wiring; the suffix stays

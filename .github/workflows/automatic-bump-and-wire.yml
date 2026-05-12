@@ -1,6 +1,6 @@
-name: bump-and-wire
+name: automatic-bump-and-wire
 
-# Triggered when detect-sdk-updates.yml opens an `auto-bump` PR.
+# Triggered when automatic-detect-sdk-updates.yml opens an `auto-bump` PR.
 #
 # Pipeline:
 #   1. Build the relevant binding csproj — confirms the new AAR/xcframework

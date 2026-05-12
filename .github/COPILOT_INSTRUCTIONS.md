@@ -11,7 +11,7 @@ around the Microsoft Clarity Android + iOS SDKs. The repo has three packages:
 
 ## When you are invoked
 
-You're called from `bump-and-wire.yml` after an automated SDK bump landed in
+You're called from `automatic-bump-and-wire.yml` after an automated SDK bump landed in
 this PR. One of three things happened:
 
 1. **The binding csproj failed to build** — the C# binding generator

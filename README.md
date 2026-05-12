@@ -60,9 +60,9 @@ This repo runs a daily pipeline that watches Microsoft's Clarity Android and iOS
 
 ```mermaid
 flowchart TD
-    A[Microsoft ships new Clarity SDK] --> B[06:00 UTC daily<br/>detect-sdk-updates.yml]
+    A[Microsoft ships new Clarity SDK] --> B[06:00 UTC daily<br/>automatic-detect-sdk-updates.yml]
     B --> C[Bump PR opened<br/>label: auto-bump]
-    C --> D[bump-and-wire.yml:<br/>build binding + diff API + build wrapper]
+    C --> D[automatic-bump-and-wire.yml:<br/>build binding + diff API + build wrapper]
 
     D --> E{Outcome?}
 

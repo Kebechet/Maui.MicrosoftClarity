@@ -1,4 +1,4 @@
-name: detect-sdk-updates
+name: automatic-detect-sdk-updates
 
 # Runs daily and opens an auto-bump PR per platform whenever Microsoft
 # publishes a new Clarity Android (Maven) or iOS (clarity-apps Package.swift)
@@ -65,7 +65,7 @@ jobs:
       # PR is created *as the App*, not as `github-actions[bot]` using the default
       # GITHUB_TOKEN. The latter is a dead-end: GitHub silently drops the
       # `pull_request: opened` event when the default token is the actor, so
-      # `bump-and-wire.yml` would never fire. The App-issued token has no such
+      # `automatic-bump-and-wire.yml` would never fire. The App-issued token has no such
       # restriction.
       - id: app-token
         uses: actions/create-github-app-token@v1
@@ -101,7 +101,7 @@ jobs:
             - **Source:**   https://mvnrepository.com/artifact/com.microsoft.clarity/clarity/${{ needs.check-android.outputs.latest }}
             - **Changelog:** https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#android-sdk-changelog
 
-            `bump-and-wire.yml` will pick this up: if the wrapper still
+            `automatic-bump-and-wire.yml` will pick this up: if the wrapper still
             compiles cleanly, the PR auto-merges; otherwise `@copilot` is
             assigned to wire up any new/changed APIs.
           labels: |
@@ -201,7 +201,7 @@ jobs:
             `ApiDefinitions.cs` and `StructsAndEnums.cs` were regenerated and
             their `[Verify]` attributes stripped per the iOS README.
 
-            `bump-and-wire.yml` will pick this up: if the wrapper still
+            `automatic-bump-and-wire.yml` will pick this up: if the wrapper still
             compiles cleanly, the PR auto-merges; otherwise `@copilot` is
             assigned to wire up any new/changed APIs.
           labels: |
