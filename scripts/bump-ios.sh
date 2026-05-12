@@ -81,7 +81,12 @@ for f in ApiDefinitions.cs StructsAndEnums.cs; do
     echo "ERROR: sharpie did not produce $src" >&2
     exit 1
   fi
-  sed -i.bak -E '/^\[Verify\(.+\)\]$/d; s/\[Verify\([^)]+\)\] *//g' "$src"
+  # Sharpie emits Verify attrs in several forms — handle them all:
+  #   [Verify(MethodToProperty)]           ← single-line, no spaces
+  #   [Verify (MethodToProperty)]          ← single-line, space before `(`
+  #   \t\t[Verify (MethodToProperty)]      ← indented (when on its own line)
+  #   inline alongside other attributes
+  sed -i.bak -E '/^[[:space:]]*\[Verify[[:space:]]*\(.+\)\][[:space:]]*$/d; s/\[Verify[[:space:]]*\([^)]+\)\] *//g' "$src"
   rm -f "${src}.bak"
   mv "$src" "$f"
 done
