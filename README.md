@@ -67,24 +67,18 @@ flowchart TD
     D --> E{Outcome?}
 
     E -->|API unchanged<br/>wrapper compiles| F[Auto-merge as<br/>stable release]
-    E -->|API additions<br/>or wrapper breaks| G[Apply -automatic suffix<br/>NuGet prerelease]
-    E -->|Binding itself broken| H[Apply -automatic suffix<br/>label: binding-broken]
+    E -->|API additions<br/>or wrapper breaks| G[Label: needs-wiring<br/>Ping @copilot<br/>with API diff]
+    E -->|Binding itself broken| H[Label: binding-broken<br/>Ping @copilot<br/>with binding-fix guide]
 
-    G --> I[Ping @copilot<br/>with API diff + instructions]
-    H --> J[Ping @copilot<br/>with binding-fix guide]
-
-    I --> K[Agent commits wiring]
-    J --> L{Agent can fix?}
+    G --> K[Agent commits wiring]
+    H --> L{Agent can fix?}
     L -->|yes| K
     L -->|no| M[Agent adds label:<br/>needs-human]
 
-    K --> N[Human review]
+    K --> N[Human review + merge]
     M --> N
     F --> O[main updated]
-    N -->|happy| P[Optional: strip -automatic<br/>then merge]
-    N -->|unhappy| Q[Feedback to @copilot<br/>or take over]
-    P --> O
-    Q --> K
+    N --> O
 
     O --> R[release-please<br/>maintains release PR<br/>for wrapper version]
     R --> S[Merge release PR<br/>tags vX.Y.Z]
@@ -95,12 +89,12 @@ flowchart TD
     classDef warn fill:#fff3cd,stroke:#856404,color:#000
     classDef human fill:#f8d7da,stroke:#721c24,color:#000
     class F,O,U happy
-    class G,H,I,J,K warn
-    class M,N,Q human
+    class G,H,K warn
+    class M,N human
 ```
 
 The only manual steps for you:
-1. Review agent wiring when `-automatic` is applied (and optionally strip the suffix before merge)
+1. Review and merge agent wiring PRs when `needs-wiring` is applied
 2. Fix binding-generator failures the agent escalates as `needs-human` (rare)
 3. Trigger the three `publish-*.yml` workflows after each release tag
 

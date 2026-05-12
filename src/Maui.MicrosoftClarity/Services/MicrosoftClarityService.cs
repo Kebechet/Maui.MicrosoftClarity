@@ -36,7 +36,9 @@ public partial class MicrosoftClarityService
     public partial Task<string?> StartNewSession();
 
     /// <summary>
-    /// Manages user consent for data collection. Currently only supported on Android.
+    /// Manages user consent for data collection.
+    /// On Android both <paramref name="isAdsStorageAllowed"/> and <paramref name="isAnalyticsStorageAllowed"/> are forwarded.
+    /// On iOS only <paramref name="isAnalyticsStorageAllowed"/> is used (ads-storage consent is not supported by the iOS SDK).
     /// </summary>
     public partial bool Consent(bool? isAdsStorageAllowed, bool? isAnalyticsStorageAllowed);
 }
