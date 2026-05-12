@@ -4,9 +4,9 @@ namespace DemoApp;
 
 public partial class App : Application
 {
-    private readonly MicrosoftClarityService _microsoftClarityService;
+    private readonly IMicrosoftClarityService _microsoftClarityService;
 
-    public App(MicrosoftClarityService microsoftClarityService)
+    public App(IMicrosoftClarityService microsoftClarityService)
     {
         InitializeComponent();
         _microsoftClarityService = microsoftClarityService;

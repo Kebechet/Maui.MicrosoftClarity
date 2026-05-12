@@ -1,44 +1,58 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Maui.MicrosoftClarity.Services;
 
-public partial class MicrosoftClarityService
+/// <inheritdoc cref="IMicrosoftClarityService"/>
+public partial class MicrosoftClarityService : IMicrosoftClarityService
 {
     private readonly ILogger<MicrosoftClarityService> _logger;
 
+    /// <summary>
+    /// Creates a new <see cref="MicrosoftClarityService"/>. Resolved by DI when registered via
+    /// <c>IServiceCollectionExtensions.AddMicrosoftClarity</c>.
+    /// </summary>
     public MicrosoftClarityService(ILogger<MicrosoftClarityService> logger)
     {
         _logger = logger;
     }
 
+    /// <inheritdoc/>
     public partial void Initialize(string projectId);
 
+    /// <inheritdoc/>
     public bool IsPaused => IsPausedMethod();
+    /// <inheritdoc/>
     public string? CurrentSessionId => CurrentSessionIdMethod();
+    /// <inheritdoc/>
     public string? CurrentSessionUrl => CurrentSessionUrlMethod();
 
+    /// <inheritdoc/>
     public partial void Pause();
 
+    /// <inheritdoc/>
     public partial void Resume();
 
+    /// <inheritdoc/>
     public partial bool SetCustomUserId(string customUserId);
 
+    /// <inheritdoc/>
     public partial bool SetCustomTag(string key, string value);
 
+    /// <inheritdoc/>
     public partial bool SetCurrentScreenName(string screenName);
 
+    /// <inheritdoc/>
     public partial bool SetCustomSessionId(string customSessionId);
 
+    /// <inheritdoc/>
     public partial bool SendCustomEvent(string value);
 
+    /// <inheritdoc/>
     public partial bool SetOnSessionStartedCallback(Action<string> callback);
 
+    /// <inheritdoc/>
     public partial Task<string?> StartNewSession();
 
-    /// <summary>
-    /// Manages user consent for data collection.
-    /// On Android both <paramref name="isAdsStorageAllowed"/> and <paramref name="isAnalyticsStorageAllowed"/> are forwarded.
-    /// On iOS only <paramref name="isAnalyticsStorageAllowed"/> is used (ads-storage consent is not supported by the iOS SDK).
-    /// </summary>
+    /// <inheritdoc/>
     public partial bool Consent(bool? isAdsStorageAllowed, bool? isAnalyticsStorageAllowed);
 }

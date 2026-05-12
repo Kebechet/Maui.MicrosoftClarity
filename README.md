@@ -14,12 +14,12 @@ Firstly register package installer in your `MauiProgram.cs`
  builder.Services.AddMicrosoftClarity();
 ```
 
-then in `App.xaml.cs` inject `MicrosoftClarityService`:
+then in `App.xaml.cs` inject `IMicrosoftClarityService`:
 ```csharp
 public partial class App : Application {
-    private readonly MicrosoftClarityService _microsoftClarityService;
+    private readonly IMicrosoftClarityService _microsoftClarityService;
 
-    public App(MicrosoftClarityService microsoftClarityService) {
+    public App(IMicrosoftClarityService microsoftClarityService) {
         InitializeComponent();
         _microsoftClarityService = microsoftClarityService;
     }
