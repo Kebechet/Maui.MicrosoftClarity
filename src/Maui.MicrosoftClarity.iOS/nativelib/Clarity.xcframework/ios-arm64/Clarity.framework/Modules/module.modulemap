@@ -7,5 +7,4 @@ framework module Clarity {
 
 module Clarity.Swift {
   header "Clarity-Swift.h"
-  requires objc
 }
