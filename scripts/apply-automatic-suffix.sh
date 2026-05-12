@@ -40,7 +40,7 @@ esac
 
 WRAPPER="src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj"
 
-CURRENT=$(grep -oP '(?<=<Version>)[^<]+(?=</Version>)' "$CSPROJ" | head -1)
+CURRENT=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' "$CSPROJ" | head -1)
 echo "==> Current binding version: $CURRENT"
 
 if [[ "$CURRENT" == *-automatic ]]; then

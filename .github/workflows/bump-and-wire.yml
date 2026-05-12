@@ -118,7 +118,7 @@ jobs:
             CSPROJ_REL="src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj"
           fi
           VERSION=$(git show "origin/main:${CSPROJ_REL}" \
-            | grep -oP '(?<=<Version>)[^<]+(?=</Version>)' | head -1)
+            | sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' | head -1)
           # Strip any pre-existing prerelease suffix when looking up nuget.org.
           VERSION="${VERSION%%-*}"
           echo "Previous published version: $VERSION"

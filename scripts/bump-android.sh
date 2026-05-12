@@ -60,7 +60,7 @@ fi
 
 # --- 4. Update <Version> in the binding csproj -----------------------------
 # Versioning rule: <native>.<binding-rev>; reset rev to .0 on native bump.
-CURRENT_BINDING_VERSION=$(grep -oP '(?<=<Version>)[^<]+(?=</Version>)' "$ANDROID_CSPROJ" | head -1)
+CURRENT_BINDING_VERSION=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' "$ANDROID_CSPROJ" | head -1)
 echo "    current binding version: $CURRENT_BINDING_VERSION"
 
 if [[ "$CURRENT_NATIVE" == "$NEW_VERSION" ]]; then

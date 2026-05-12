@@ -71,7 +71,8 @@ unzip -q "$WORK/old.nupkg" -d "$WORK/old"
 
 # Find the DLL inside lib/<tfm>/. The TFM in the nupkg may have a minor-version
 # suffix (e.g. net10.0-android33.0); match by prefix.
-OLD_DLL=$(find "$WORK/old/lib" -type d -name "${TFM}*" -print -quit | xargs -I{} find {} -name "$ASSEMBLY_NAME" | head -1)
+TFM_DIR=$(find "$WORK/old/lib" -type d -name "${TFM}*" | head -1)
+OLD_DLL=$(find "$TFM_DIR" -name "$ASSEMBLY_NAME" 2>/dev/null | head -1)
 if [[ -z "$OLD_DLL" ]]; then
   echo "WARN: could not find $ASSEMBLY_NAME in previous nupkg under lib/${TFM}*; skipping diff" >&2
   echo "api_added_count=0"

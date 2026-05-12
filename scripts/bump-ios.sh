@@ -29,7 +29,7 @@ FRAMEWORK_DIR="Clarity.xcframework"
 echo "==> Bumping iOS Clarity SDK to ${NEW_VERSION}"
 
 # --- 1. Detect current native version from existing csproj <Version> -------
-CURRENT_BINDING_VERSION=$(grep -oP '(?<=<Version>)[^<]+(?=</Version>)' "$IOS_CSPROJ" | head -1)
+CURRENT_BINDING_VERSION=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' "$IOS_CSPROJ" | head -1)
 CURRENT_NATIVE=$(echo "$CURRENT_BINDING_VERSION" | awk -F. 'BEGIN{OFS="."} {NF--; print}')
 echo "    current native version: $CURRENT_NATIVE"
 echo "    target  native version: $NEW_VERSION"

@@ -29,12 +29,12 @@ jobs:
         run: |
           VERSION=$(curl -fsSL \
             https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/maven-metadata.xml \
-            | grep -oP '(?<=<latest>)[^<]+')
+            | sed -n -E 's|.*<latest>([^<]+)</latest>.*|\1|p')
           if [[ -z "$VERSION" ]]; then
             # Some Maven metadata files only have <release> rather than <latest>.
             VERSION=$(curl -fsSL \
               https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/maven-metadata.xml \
-              | grep -oP '(?<=<release>)[^<]+')
+              | sed -n -E 's|.*<release>([^<]+)</release>.*|\1|p')
           fi
           echo "Maven Central latest: $VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
@@ -119,7 +119,7 @@ jobs:
       - id: current
         name: Read current native version from iOS csproj
         run: |
-          BINDING=$(grep -oP '(?<=<Version>)[^<]+(?=</Version>)' \
+          BINDING=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' \
             src/Maui.MicrosoftClarity.iOS/Maui.MicrosoftClarity.iOS.csproj | head -1)
           # Strip the trailing binding-revision segment.
           VERSION=$(echo "$BINDING" | awk -F. 'BEGIN{OFS="."} {NF--; print}')
