@@ -66,7 +66,12 @@ jobs:
             ${{env.ARTIFACT_FOLDER}}/*.snupkg
 
       - name: Publish Nuget
+        # --skip-duplicate covers two cases: the .symbols.nupkg that
+        # `dotnet pack` produces alongside the main nupkg (same id+version,
+        # otherwise causes a 409), and an accidental re-run against an
+        # already-published version.
         run: >
           dotnet nuget push ${{env.ARTIFACT_FOLDER}}/*.nupkg
           --api-key ${{ secrets.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
