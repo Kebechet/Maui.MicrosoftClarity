@@ -354,13 +354,14 @@ jobs:
           gh pr edit ${{ github.event.pull_request.number }} \
             --add-label needs-wiring --add-label automatic-prerelease --add-label binding-broken
 
-          # Capture the binding build log into an artifact for the agent.
+          # The binding-specific guide (Sharpie / Transforms patterns) is
+          # only relevant on this branch, so include it here in addition to
+          # the general instructions.
           if [[ "${{ needs.guard.outputs.platform }}" == "ios" ]]; then
-            PROJ=src/Maui.MicrosoftClarity.iOS/Maui.MicrosoftClarity.iOS.csproj
+            INSTRUCTIONS=$(cat .github/COPILOT_INSTRUCTIONS.md .github/agent-ios-binding.md)
           else
-            PROJ=src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj
+            INSTRUCTIONS=$(cat .github/COPILOT_INSTRUCTIONS.md .github/agent-android-binding.md)
           fi
-          INSTRUCTIONS=$(cat .github/COPILOT_INSTRUCTIONS.md)
 
           gh pr comment ${{ github.event.pull_request.number }} --body "@copilot the **binding csproj itself failed to build** against the new native SDK — the C# binding generator (Java→C# for Android, Sharpie output for iOS) is producing invalid code.
 
