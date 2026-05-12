@@ -61,7 +61,21 @@ jobs:
     if: needs.check-android.outputs.needs_bump == 'true'
     runs-on: ubuntu-latest
     steps:
+      # Mint a short-lived installation token from the bump-bot GitHub App so the
+      # PR is created *as the App*, not as `github-actions[bot]` using the default
+      # GITHUB_TOKEN. The latter is a dead-end: GitHub silently drops the
+      # `pull_request: opened` event when the default token is the actor, so
+      # `bump-and-wire.yml` would never fire. The App-issued token has no such
+      # restriction.
+      - id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BUMP_BOT_APP_ID }}
+          private-key: ${{ secrets.BUMP_BOT_APP_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Run bump-android.sh
         run: |
@@ -71,6 +85,7 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@v6
         with:
+          token: ${{ steps.app-token.outputs.token }}
           branch: auto-bump/android-${{ needs.check-android.outputs.latest }}
           # Conventional Commit — drives release-please for the wrapper later.
           commit-message: |
@@ -141,10 +156,20 @@ jobs:
     # bump-ios.sh requires Objective Sharpie + macOS, same as the existing workflow.
     runs-on: macos-15
     steps:
+      # See open-android-pr for why we need an App-issued token rather than the
+      # default GITHUB_TOKEN.
+      - id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BUMP_BOT_APP_ID }}
+          private-key: ${{ secrets.BUMP_BOT_APP_PRIVATE_KEY }}
+
       - name: Set Xcode Version
         run: sudo xcode-select -s /Applications/Xcode_16.4.app
 
       - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Install Objective Sharpie
         run: brew install --cask objectivesharpie || true
@@ -157,6 +182,7 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@v6
         with:
+          token: ${{ steps.app-token.outputs.token }}
           branch: auto-bump/ios-${{ needs.check-ios.outputs.latest }}
           commit-message: |
             chore(deps): bump Clarity iOS SDK to ${{ needs.check-ios.outputs.latest }}
