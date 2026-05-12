@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.0.0](https://github.com/Kebechet/Maui.MicrosoftClarity/compare/v3.0.2...v4.0.0) (2026-05-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* introduce IMicrosoftClarityService interface for DI and IntelliSense
+
+### Features
+
+* introduce IMicrosoftClarityService interface for DI and IntelliSense ([c8d47c7](https://github.com/Kebechet/Maui.MicrosoftClarity/commit/c8d47c7e1406aad669f1309ab25ace2c67d24fa4))
+
+
+### Miscellaneous
+
+* bumped dependencies ([f4bde6c](https://github.com/Kebechet/Maui.MicrosoftClarity/commit/f4bde6c2d92dc907c9994235da0a62d67c064b29))
+
 ## [3.0.2](https://github.com/Kebechet/Maui.MicrosoftClarity/compare/v3.0.1...v3.0.2) (2026-05-12)
 
 
