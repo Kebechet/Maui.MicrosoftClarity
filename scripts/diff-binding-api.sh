@@ -40,6 +40,11 @@ WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 DIFF_PATH="api-diff.txt"
 
+# Retries transient faults only. Without --retry-all-errors, curl retries timeouts,
+# 408, 429 and 5xx but not a 404, so a genuinely absent artifact still fails on the
+# first attempt instead of burning three round-trips.
+CURL_RETRY=(--retry 3 --retry-delay 2)
+
 emit_outputs() {
   local added="$1" removed="$2" path="$3"
   echo "==> Outputs"
@@ -73,7 +78,7 @@ case "$PLATFORM" in
 
     OLD_ZIP_URL="https://www.clarity.ms/apps/resources/ios/Clarity-${PREVIOUS_NATIVE}.xcframework.zip"
     echo "==> Downloading previous xcframework: $OLD_ZIP_URL"
-    if ! curl -fsSL "$OLD_ZIP_URL" -o "$WORK/old.zip"; then
+    if ! curl -fsSL "${CURL_RETRY[@]}" "$OLD_ZIP_URL" -o "$WORK/old.zip"; then
       echo "WARN: previous xcframework v${PREVIOUS_NATIVE} not available at clarity.ms — skipping diff" >&2
       emit_outputs 0 0 ""
       exit 0
@@ -110,7 +115,7 @@ case "$PLATFORM" in
 
     NEW_AAR_URL="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${NEW_NATIVE}/clarity-${NEW_NATIVE}.aar"
     echo "==> Downloading new .aar: $NEW_AAR_URL"
-    if ! curl -fsSL "$NEW_AAR_URL" -o "$WORK/new.aar"; then
+    if ! curl -fsSL "${CURL_RETRY[@]}" "$NEW_AAR_URL" -o "$WORK/new.aar"; then
       echo "ERROR: could not download pinned .aar v${NEW_NATIVE} from Maven Central" >&2
       exit 1
     fi
@@ -118,7 +123,7 @@ case "$PLATFORM" in
 
     OLD_AAR_URL="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${PREVIOUS_NATIVE}/clarity-${PREVIOUS_NATIVE}.aar"
     echo "==> Downloading previous .aar: $OLD_AAR_URL"
-    if ! curl -fsSL "$OLD_AAR_URL" -o "$WORK/old.aar"; then
+    if ! curl -fsSL "${CURL_RETRY[@]}" "$OLD_AAR_URL" -o "$WORK/old.aar"; then
       echo "ERROR: could not download baseline .aar v${PREVIOUS_NATIVE} from Maven Central" >&2
       exit 1
     fi

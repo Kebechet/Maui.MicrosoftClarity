@@ -43,7 +43,9 @@ echo "    target  native version: $NEW_VERSION"
 # The AAR is only fetched at build time, so a typo here would otherwise surface
 # as an opaque XA4234 much later in the pipeline.
 echo "==> Verifying $POM_URL"
-if ! curl -fsSL -o /dev/null "$POM_URL"; then
+# --retry (without --retry-all-errors) covers timeouts/429/5xx but not the 404 we are
+# actually testing for, so a missing version still fails on the first attempt.
+if ! curl -fsSL --retry 3 --retry-delay 2 -o /dev/null "$POM_URL"; then
   echo "ERROR: com.microsoft.clarity:clarity:${NEW_VERSION} not found on Maven Central" >&2
   exit 1
 fi
