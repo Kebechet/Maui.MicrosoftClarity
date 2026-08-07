@@ -1,6 +1,6 @@
 # Android binding fixes
 
-The .NET Android SDK generates C# from the checked-in `Jars/clarity-X.Y.Z.aar` at build time. When it fails, look at `binding-build-log` for `BG####` errors. The fix is almost always in one of:
+The .NET Android SDK downloads `com.microsoft.clarity:clarity` from Maven Central (pinned by `<AndroidMavenLibrary>` in the binding csproj) and generates C# from that AAR at build time — nothing is committed to the repo. When it fails, look at `binding-build-log` for `BG####` errors. The fix is almost always in one of:
 
 - **`Transforms/EnumMethods.xml`** — remap Java `int` parameters to C# enums. Use when a Java method like `Clarity.setVisibility(int)` should accept a strongly-typed enum.
 - **`Transforms/EnumFields.xml`** — convert Java static `int` constants into a C# enum type. Use when Java exposes `Clarity.MODE_FOO = 0; MODE_BAR = 1`.

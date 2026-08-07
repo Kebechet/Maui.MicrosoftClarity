@@ -18,8 +18,8 @@
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>3.8.2.0</Version>
-    <PackageReleaseNotes>Updated to net10.0, fixed Function1 type erasure clash in ACW</PackageReleaseNotes>
+    <Version>3.8.2.1</Version>
+    <PackageReleaseNotes>3.8.2.1: the Clarity AAR is now consumed via AndroidMavenLibrary (fetched from Maven Central when the binding itself is built) with POM-driven Java dependency verification, and the committed Jars were removed - shipped binaries are byte-identical to 3.8.2.0, nothing changes for consumers. 3.8.2.0: updated to net10.0, fixed Function1 type erasure clash in ACW</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,8 +38,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xamarin.Android.Binding.InstallReferrer" Version="2.2.0" />
-    <PackageReference Include="Xamarin.Protobuf.JavaLite" Version="3.25.3" />
+    <!--The AAR is downloaded from Maven Central and its POM drives Java dependency
+    verification, so every Clarity bump cross-checks the PackageReference list below.-->
+    <AndroidMavenLibrary Include="com.microsoft.clarity:clarity" Version="3.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--JavaArtifact tells the POM verifier which Maven coordinate these two packages
+    fulfill: neither carries the `artifact_versioned=` nuspec tag the verifier reads
+    (Xamarin.Android.Binding.InstallReferrer is third-party, Xamarin.Protobuf.JavaLite
+    only started emitting the tag in 4.28.0 - a protobuf major bump we don't want).-->
+    <PackageReference Include="Xamarin.Android.Binding.InstallReferrer" Version="2.2.0"
+                      JavaArtifact="com.android.installreferrer:installreferrer:2.2" />
+    <PackageReference Include="Xamarin.Protobuf.JavaLite" Version="3.25.3"
+                      JavaArtifact="com.google.protobuf:protobuf-javalite:3.25.3" />
     <PackageReference Include="Xamarin.Kotlin.StdLib" Version="2.0.0" />
 
     <!--fixed build error "androidx.collection.ArrayMapKt is defined multiple times"-->
