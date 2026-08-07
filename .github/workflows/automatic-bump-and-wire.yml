@@ -169,8 +169,10 @@ jobs:
           else
             PROJ=src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj
           fi
-          dotnet pack "$PROJ" -c ${{ env.BUILD_CONFIGURATION }} -o ./local-feed --no-build
-          dotnet nuget add source "$(pwd)/local-feed" --name local-bump || true
+          # $GITHUB_WORKSPACE, not $(pwd): on the windows-latest runner this step uses
+          # Git Bash, whose $(pwd) is an MSYS path (/d/a/...) that the Windows dotnet
+          # CLI rejects outright. The wrapper step consumes this feed by absolute path.
+          dotnet pack "$PROJ" -c ${{ env.BUILD_CONFIGURATION }} -o "$GITHUB_WORKSPACE/local-feed" --no-build
 
       # ---- Build the wrapper --------------------------------------------
       # Only the bumped platform's TFM is relevant — the other TFMs consume
@@ -190,25 +192,23 @@ jobs:
           else
             TFM=net10.0-android
           fi
+          # The `| tee` below does not swallow a dotnet failure: `shell: bash` makes
+          # GitHub invoke `bash --noprofile --norc -e -o pipefail`, so the pipeline
+          # exits with dotnet's status rather than tee's. Dropping `shell: bash` here
+          # would silently turn every failed wrapper build into a green step.
+          #
+          # The local feed MUST be an absolute path. NuGet resolves every --source
+          # relative to the project directory once any one of them is relative, which
+          # turns the nuget.org URL into '<projdir>\https:\api.nuget.org\v3\index.json'
+          # and fails the restore with NU1301 - the wrapper then looks "broken" on
+          # every single bump PR and the run can never reach the auto-merge path.
           dotnet restore src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj \
             -p:TargetFrameworks="$TFM" \
-            --source ./local-feed --source https://api.nuget.org/v3/index.json
+            --source "$GITHUB_WORKSPACE/local-feed" \
+            --source https://api.nuget.org/v3/index.json 2>&1 | tee wrapper-build.log
           dotnet build   src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj \
             -p:TargetFrameworks="$TFM" \
-            -c ${{ env.BUILD_CONFIGURATION }} --no-restore
-
-      - if: steps.build_wrapper.outcome != 'success'
-        name: Capture wrapper build log
-        shell: bash
-        run: |
-          if [[ "${{ needs.guard.outputs.platform }}" == "ios" ]]; then
-            TFM=net10.0-ios
-          else
-            TFM=net10.0-android
-          fi
-          dotnet build src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj \
-            -p:TargetFrameworks="$TFM" \
-            -c ${{ env.BUILD_CONFIGURATION }} 2>&1 | tee wrapper-build.log || true
+            -c ${{ env.BUILD_CONFIGURATION }} --no-restore 2>&1 | tee -a wrapper-build.log
 
       - if: steps.build_wrapper.outcome != 'success'
         uses: actions/upload-artifact@v4
