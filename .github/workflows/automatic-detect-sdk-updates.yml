@@ -45,6 +45,12 @@ jobs:
           VERSION=$(sed -n -E \
             's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
             src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj | head -1)
+          # An empty parse would compare unequal to every upstream version and open a
+          # bogus auto-bump PR on every daily run, so treat it as fatal.
+          if [[ -z "$VERSION" ]]; then
+            echo "ERROR: could not parse the pinned Clarity version from the binding csproj" >&2
+            exit 1
+          fi
           echo "Current pinned native: $VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 

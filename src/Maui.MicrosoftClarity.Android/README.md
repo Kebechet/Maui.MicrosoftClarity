@@ -32,7 +32,7 @@ The versioning scheme of `Maui.MicrosoftClarity.Android` is derived from the ver
 	The AAR is downloaded when **this binding** is built and baked into the nupkg, so consumers
 	need no Java, no Gradle and no build-time downloads.
 - Then you have to add all necessary dependencies. Your binding library should contain all these dependencies (ideally in same `version` but until those libraries are compatible, versions are not important).
-  - I  have found and added `PackageReference` for all `Xamarin/Maui` alternatives of these libraries
+  - I have found and added `PackageReference` for all `Xamarin/Maui` alternatives of these libraries
 - The artifact's POM is downloaded alongside the AAR and drives **Java dependency verification**,
 	so a missing dependency now fails the build with `XA4241`/`XA4242` naming exactly what is
 	missing — the `PackageReference` list is cross-checked on every SDK bump instead of being

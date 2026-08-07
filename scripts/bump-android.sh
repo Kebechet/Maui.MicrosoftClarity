@@ -54,6 +54,18 @@ sed -i.bak -E \
   "$ANDROID_CSPROJ"
 rm -f "${ANDROID_CSPROJ}.bak"
 
+# Read the pin back. If this write ever silently misses while the read in step 1
+# still matches, the steps below would bump the NuGet version and the wrapper
+# reference while leaving the native pin behind — i.e. ship "3.9.0.0" containing
+# Clarity 3.8.2.
+WRITTEN_NATIVE=$(sed -n -E \
+  's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
+  "$ANDROID_CSPROJ" | head -1)
+if [[ "$WRITTEN_NATIVE" != "$NEW_VERSION" ]]; then
+  echo "ERROR: failed to update the <AndroidMavenLibrary> pin (still '${WRITTEN_NATIVE}')" >&2
+  exit 1
+fi
+
 # --- 4. Update <Version> in the binding csproj ------------------------------
 # Versioning rule: <native>.<binding-rev>; reset rev to .0 on native bump.
 CURRENT_BINDING_VERSION=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' "$ANDROID_CSPROJ" | head -1)
