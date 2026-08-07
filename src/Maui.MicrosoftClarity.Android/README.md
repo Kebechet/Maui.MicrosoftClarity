@@ -23,17 +23,25 @@ The versioning scheme of `Maui.MicrosoftClarity.Android` is derived from the ver
 
 ## How the binding was created
 - To start create a project `Android Java library binding`
-- Then files of the the library have to be downloaded. 
-- Download native library from: [mvnrepository.com](https://mvnrepository.com/artifact/com.microsoft.clarity/clarity) to 
-	download the [Clarity v3.0.0](https://mvnrepository.com/artifact/com.microsoft.clarity/clarity/3.0.0) android library.
-- Click: `files->View all`. You have to download there files:
-  - `.aar` that contains the compiled library and 
-  - `-sources.jar` that is used in binding process for documenting the library.
-- After download create in your project `Jars` folder and put there both files. For
-  - for `.aar` set `Build Action` to: `AndroidLibrary`
-  - for `-sources.jar` set `Build Action` to: `JavaSourceJar` based on this [docs](https://learn.microsoft.com/en-us/xamarin/android/deploy-test/building-apps/build-items#javasourcejar)
+- Reference the native library straight from Maven Central with
+	[`AndroidMavenLibrary`](https://learn.microsoft.com/en-us/dotnet/android/binding-libs/binding-java-libs/binding-java-maven-library)
+	instead of committing an `.aar` into a `Jars` folder:
+	```xml
+	<AndroidMavenLibrary Include="com.microsoft.clarity:clarity" Version="3.8.2" />
+	```
+	The AAR is downloaded when **this binding** is built and baked into the nupkg, so consumers
+	need no Java, no Gradle and no build-time downloads.
 - Then you have to add all necessary dependencies. Your binding library should contain all these dependencies (ideally in same `version` but until those libraries are compatible, versions are not important).
   - I  have found and added `PackageReference` for all `Xamarin/Maui` alternatives of these libraries
+- The artifact's POM is downloaded alongside the AAR and drives **Java dependency verification**,
+	so a missing dependency now fails the build with `XA4241`/`XA4242` naming exactly what is
+	missing — the `PackageReference` list is cross-checked on every SDK bump instead of being
+	hand-curated.
+  - A package that doesn't advertise which Maven artifact it fulfills (no `artifact_versioned=`
+	nuspec tag) has to say so via `JavaArtifact="group:id:version"` metadata on its
+	`PackageReference`.
+  - A POM dependency that genuinely isn't needed is excluded with
+	`<AndroidIgnoredJavaDependency Include="group:id:version" />`.
 
 # License
 This repository is licensed with the [MIT](LICENSE.txt) license.

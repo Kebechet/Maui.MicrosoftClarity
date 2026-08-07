@@ -40,10 +40,11 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - id: current
-        name: Read current AAR version from Jars/
+        name: Read current AAR version from the binding csproj
         run: |
-          AAR=$(ls src/Maui.MicrosoftClarity.Android/Jars/clarity-*.aar | head -1)
-          VERSION=$(basename "$AAR" .aar | sed 's/^clarity-//')
+          VERSION=$(sed -n -E \
+            's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
+            src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj | head -1)
           echo "Current pinned native: $VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 

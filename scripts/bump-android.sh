@@ -6,8 +6,10 @@
 #   e.g. scripts/bump-android.sh 3.9.0
 #
 # What it does:
-#   1. Downloads clarity-<new>.aar and clarity-<new>-sources.jar from Maven Central.
-#   2. Replaces the existing AAR (and sources.jar if present) in src/.../Jars/.
+#   1. Verifies the requested version exists on Maven Central.
+#   2. Bumps the <AndroidMavenLibrary> version in the binding csproj — the .NET
+#      Android SDK downloads that AAR (and its POM) at build time; nothing is
+#      committed to the repo.
 #   3. Bumps the <Version> in the binding csproj — resets binding-revision to .0
 #      when the native version actually changes.
 #   4. Bumps the <PackageReference> in the wrapper csproj to match.
@@ -18,47 +20,41 @@ set -euo pipefail
 
 NEW_VERSION="${1:?usage: bump-android.sh <new-version>}"
 ANDROID_DIR="src/Maui.MicrosoftClarity.Android"
-JARS_DIR="$ANDROID_DIR/Jars"
 ANDROID_CSPROJ="$ANDROID_DIR/Maui.MicrosoftClarity.Android.csproj"
 WRAPPER_CSPROJ="src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj"
 
 MAVEN_BASE="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${NEW_VERSION}"
-AAR_URL="${MAVEN_BASE}/clarity-${NEW_VERSION}.aar"
-SOURCES_URL="${MAVEN_BASE}/clarity-${NEW_VERSION}-sources.jar"
+POM_URL="${MAVEN_BASE}/clarity-${NEW_VERSION}.pom"
 
 echo "==> Bumping Android Clarity SDK to ${NEW_VERSION}"
 
-# --- 1. Determine current native version from existing AAR filename --------
-CURRENT_AAR=$(ls "$JARS_DIR"/clarity-*.aar 2>/dev/null | head -1 || true)
-if [[ -z "$CURRENT_AAR" ]]; then
-  echo "ERROR: no existing clarity-*.aar found in $JARS_DIR" >&2
+# --- 1. Determine current native version from the csproj -------------------
+CURRENT_NATIVE=$(sed -n -E \
+  's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
+  "$ANDROID_CSPROJ" | head -1)
+if [[ -z "$CURRENT_NATIVE" ]]; then
+  echo "ERROR: no <AndroidMavenLibrary Include=\"com.microsoft.clarity:clarity\" .../> found in $ANDROID_CSPROJ" >&2
   exit 1
 fi
-CURRENT_NATIVE=$(basename "$CURRENT_AAR" .aar | sed 's/^clarity-//')
 echo "    current native version: $CURRENT_NATIVE"
 echo "    target  native version: $NEW_VERSION"
 
-# --- 2. Download new artifacts ---------------------------------------------
-echo "==> Downloading $AAR_URL"
-curl -fsSL "$AAR_URL" -o "$JARS_DIR/clarity-${NEW_VERSION}.aar"
-
-echo "==> Downloading $SOURCES_URL"
-if curl -fsSL "$SOURCES_URL" -o "$JARS_DIR/clarity-${NEW_VERSION}-sources.jar"; then
-  echo "    sources.jar downloaded"
-else
-  # Some Clarity releases on Maven don't ship -sources.jar; not fatal.
-  echo "    WARN: no -sources.jar published for ${NEW_VERSION}, skipping"
-  rm -f "$JARS_DIR/clarity-${NEW_VERSION}-sources.jar"
+# --- 2. Confirm the target exists on Maven Central --------------------------
+# The AAR is only fetched at build time, so a typo here would otherwise surface
+# as an opaque XA4234 much later in the pipeline.
+echo "==> Verifying $POM_URL"
+if ! curl -fsSL -o /dev/null "$POM_URL"; then
+  echo "ERROR: com.microsoft.clarity:clarity:${NEW_VERSION} not found on Maven Central" >&2
+  exit 1
 fi
 
-# --- 3. Remove old artifacts (only if version actually changed) ------------
-if [[ "$CURRENT_NATIVE" != "$NEW_VERSION" ]]; then
-  echo "==> Removing old clarity-${CURRENT_NATIVE}.* from Jars/"
-  rm -f "$JARS_DIR/clarity-${CURRENT_NATIVE}.aar"
-  rm -f "$JARS_DIR/clarity-${CURRENT_NATIVE}-sources.jar"
-fi
+# --- 3. Point AndroidMavenLibrary at the new version ------------------------
+sed -i.bak -E \
+  "s|(<AndroidMavenLibrary +Include=\"com\.microsoft\.clarity:clarity\" +Version=\")[^\"]+(\")|\1${NEW_VERSION}\2|" \
+  "$ANDROID_CSPROJ"
+rm -f "${ANDROID_CSPROJ}.bak"
 
-# --- 4. Update <Version> in the binding csproj -----------------------------
+# --- 4. Update <Version> in the binding csproj ------------------------------
 # Versioning rule: <native>.<binding-rev>; reset rev to .0 on native bump.
 CURRENT_BINDING_VERSION=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' "$ANDROID_CSPROJ" | head -1)
 echo "    current binding version: $CURRENT_BINDING_VERSION"
@@ -85,7 +81,6 @@ rm -f "${WRAPPER_CSPROJ}.bak"
 echo "==> Done"
 echo "    binding version: $NEW_BINDING_VERSION"
 echo "    files changed:"
-echo "      - $JARS_DIR/clarity-${NEW_VERSION}.aar"
 echo "      - $ANDROID_CSPROJ"
 echo "      - $WRAPPER_CSPROJ"
 

@@ -4,7 +4,7 @@ A .NET MAUI wrapper around Microsoft Clarity Android + iOS SDKs. Three packages:
 
 | Project | Purpose | Versioning |
 |---|---|---|
-| `src/Maui.MicrosoftClarity.Android/` | Android binding (consumes `Jars/clarity-X.Y.Z.aar` from Maven Central) | `<native>.<binding-rev>` |
+| `src/Maui.MicrosoftClarity.Android/` | Android binding (`<AndroidMavenLibrary>` pulls `com.microsoft.clarity:clarity` from Maven Central at build time) | `<native>.<binding-rev>` |
 | `src/Maui.MicrosoftClarity.iOS/` | iOS binding (Sharpie-generated from `Clarity.xcframework`) | `<native>.<binding-rev>` |
 | `src/Maui.MicrosoftClarity/` | Cross-platform wrapper | Semver, managed by release-please |
 

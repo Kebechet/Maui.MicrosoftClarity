@@ -92,12 +92,25 @@ case "$PLATFORM" in
     ;;
 
   android)
-    NEW_AAR=$(ls src/Maui.MicrosoftClarity.Android/Jars/clarity-*.aar 2>/dev/null | head -1 || true)
-    if [[ -z "$NEW_AAR" || ! -f "$NEW_AAR" ]]; then
-      echo "WARN: no .aar under src/Maui.MicrosoftClarity.Android/Jars/ — skipping diff" >&2
+    # The AAR isn't committed — it's pulled from Maven Central at build time via
+    # <AndroidMavenLibrary>, so read the pinned version and fetch the same artifact.
+    NEW_NATIVE=$(sed -n -E \
+      's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
+      src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj | head -1)
+    if [[ -z "$NEW_NATIVE" ]]; then
+      echo "WARN: no <AndroidMavenLibrary> version in the Android csproj — skipping diff" >&2
       emit_outputs 0 0 ""
       exit 0
     fi
+
+    NEW_AAR_URL="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${NEW_NATIVE}/clarity-${NEW_NATIVE}.aar"
+    echo "==> Downloading new .aar: $NEW_AAR_URL"
+    if ! curl -fsSL "$NEW_AAR_URL" -o "$WORK/new.aar"; then
+      echo "WARN: .aar v${NEW_NATIVE} not on Maven Central — skipping diff" >&2
+      emit_outputs 0 0 ""
+      exit 0
+    fi
+    NEW_AAR="$WORK/new.aar"
 
     OLD_AAR_URL="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${PREVIOUS_NATIVE}/clarity-${PREVIOUS_NATIVE}.aar"
     echo "==> Downloading previous .aar: $OLD_AAR_URL"
