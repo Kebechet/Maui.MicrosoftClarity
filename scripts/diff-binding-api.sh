@@ -40,6 +40,11 @@ WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 DIFF_PATH="api-diff.txt"
 
+# Retries transient faults only. Without --retry-all-errors, curl retries timeouts,
+# 408, 429 and 5xx but not a 404, so a genuinely absent artifact still fails on the
+# first attempt instead of burning three round-trips.
+CURL_RETRY=(--retry 3 --retry-delay 2)
+
 emit_outputs() {
   local added="$1" removed="$2" path="$3"
   echo "==> Outputs"
@@ -73,7 +78,7 @@ case "$PLATFORM" in
 
     OLD_ZIP_URL="https://www.clarity.ms/apps/resources/ios/Clarity-${PREVIOUS_NATIVE}.xcframework.zip"
     echo "==> Downloading previous xcframework: $OLD_ZIP_URL"
-    if ! curl -fsSL "$OLD_ZIP_URL" -o "$WORK/old.zip"; then
+    if ! curl -fsSL "${CURL_RETRY[@]}" "$OLD_ZIP_URL" -o "$WORK/old.zip"; then
       echo "WARN: previous xcframework v${PREVIOUS_NATIVE} not available at clarity.ms — skipping diff" >&2
       emit_outputs 0 0 ""
       exit 0
@@ -97,27 +102,30 @@ case "$PLATFORM" in
     NEW_NATIVE=$(sed -n -E \
       's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
       src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj | head -1)
+    # Android bails hard rather than emitting 0/0 the way the iOS branch does:
+    # `emit_outputs 0 0` means "API surface verified unchanged", which is the exact
+    # condition automatic-bump-and-wire.yml auto-approves and auto-merges on. That is
+    # an acceptable fallback for iOS, where clarity.ms genuinely drops old
+    # xcframeworks, but Maven Central artifacts are immutable — a miss here is a
+    # network fault or a broken pin, never a legitimately absent artifact.
     if [[ -z "$NEW_NATIVE" ]]; then
-      echo "WARN: no <AndroidMavenLibrary> version in the Android csproj — skipping diff" >&2
-      emit_outputs 0 0 ""
-      exit 0
+      echo "ERROR: no <AndroidMavenLibrary> version found in the Android csproj" >&2
+      exit 1
     fi
 
     NEW_AAR_URL="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${NEW_NATIVE}/clarity-${NEW_NATIVE}.aar"
     echo "==> Downloading new .aar: $NEW_AAR_URL"
-    if ! curl -fsSL "$NEW_AAR_URL" -o "$WORK/new.aar"; then
-      echo "WARN: .aar v${NEW_NATIVE} not on Maven Central — skipping diff" >&2
-      emit_outputs 0 0 ""
-      exit 0
+    if ! curl -fsSL "${CURL_RETRY[@]}" "$NEW_AAR_URL" -o "$WORK/new.aar"; then
+      echo "ERROR: could not download pinned .aar v${NEW_NATIVE} from Maven Central" >&2
+      exit 1
     fi
     NEW_AAR="$WORK/new.aar"
 
     OLD_AAR_URL="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${PREVIOUS_NATIVE}/clarity-${PREVIOUS_NATIVE}.aar"
     echo "==> Downloading previous .aar: $OLD_AAR_URL"
-    if ! curl -fsSL "$OLD_AAR_URL" -o "$WORK/old.aar"; then
-      echo "WARN: previous .aar v${PREVIOUS_NATIVE} not on Maven Central — skipping diff" >&2
-      emit_outputs 0 0 ""
-      exit 0
+    if ! curl -fsSL "${CURL_RETRY[@]}" "$OLD_AAR_URL" -o "$WORK/old.aar"; then
+      echo "ERROR: could not download baseline .aar v${PREVIOUS_NATIVE} from Maven Central" >&2
+      exit 1
     fi
 
     if ! command -v javap >/dev/null 2>&1; then
