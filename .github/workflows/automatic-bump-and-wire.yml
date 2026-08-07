@@ -192,6 +192,11 @@ jobs:
           else
             TFM=net10.0-android
           fi
+          # The `| tee` below does not swallow a dotnet failure: `shell: bash` makes
+          # GitHub invoke `bash --noprofile --norc -e -o pipefail`, so the pipeline
+          # exits with dotnet's status rather than tee's. Dropping `shell: bash` here
+          # would silently turn every failed wrapper build into a green step.
+          #
           # The local feed MUST be an absolute path. NuGet resolves every --source
           # relative to the project directory once any one of them is relative, which
           # turns the nuget.org URL into '<projdir>\https:\api.nuget.org\v3\index.json'
