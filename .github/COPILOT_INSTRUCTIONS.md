@@ -34,4 +34,6 @@ The PR comment that mentioned you already says which step failed.
 
 ## If the binding csproj itself is broken (not the wrapper)
 
-The fix is at the binding-generator layer. The workflow appends the appropriate platform guide ([agent-android-binding.md](agent-android-binding.md) or [agent-ios-binding.md](agent-ios-binding.md)) to the PR comment when the binding-broken branch fires.
+The fix is at the binding-generator layer. `build-binding.yml` appends the appropriate platform guide ([agent-android-binding.md](agent-android-binding.md) or [agent-ios-binding.md](agent-ios-binding.md)) to the PR comment when the binding-broken branch fires.
+
+A bump PR from `build-binding.yml` touches **only** the binding csproj — never the wrapper's `PackageReference`. Keep it that way: the wrapper is moved onto the new binding by a separate stage, once the package is actually live on nuget.org. Bumping both together leaves `main` referencing a package that does not exist.

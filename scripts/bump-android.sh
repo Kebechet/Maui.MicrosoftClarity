@@ -12,7 +12,11 @@
 #      committed to the repo.
 #   3. Bumps the <Version> in the binding csproj — resets binding-revision to .0
 #      when the native version actually changes.
-#   4. Bumps the <PackageReference> in the wrapper csproj to match.
+#
+# It deliberately does NOT touch the wrapper's <PackageReference>. The wrapper is
+# only moved onto a binding version that is already live on nuget.org, which is a
+# separate stage; bumping both together is what used to leave main referencing a
+# package that did not exist yet.
 #
 # Designed to run on a Linux/macOS GitHub Actions runner.
 
@@ -21,7 +25,6 @@ set -euo pipefail
 NEW_VERSION="${1:?usage: bump-android.sh <new-version>}"
 ANDROID_DIR="src/Maui.MicrosoftClarity.Android"
 ANDROID_CSPROJ="$ANDROID_DIR/Maui.MicrosoftClarity.Android.csproj"
-WRAPPER_CSPROJ="src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj"
 
 MAVEN_BASE="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${NEW_VERSION}"
 POM_URL="${MAVEN_BASE}/clarity-${NEW_VERSION}.pom"
@@ -86,17 +89,10 @@ echo "    new     binding version: $NEW_BINDING_VERSION"
 sed -i.bak -E "s|<Version>[^<]+</Version>|<Version>${NEW_BINDING_VERSION}</Version>|" "$ANDROID_CSPROJ"
 rm -f "${ANDROID_CSPROJ}.bak"
 
-# --- 5. Update wrapper csproj to reference new binding version -------------
-sed -i.bak -E \
-  "s|(<PackageReference Include=\"Kebechet\.Maui\.MicrosoftClarity\.Android\" Version=\")[^\"]+(\")|\1${NEW_BINDING_VERSION}\2|" \
-  "$WRAPPER_CSPROJ"
-rm -f "${WRAPPER_CSPROJ}.bak"
-
 echo "==> Done"
 echo "    binding version: $NEW_BINDING_VERSION"
 echo "    files changed:"
 echo "      - $ANDROID_CSPROJ"
-echo "      - $WRAPPER_CSPROJ"
 
 # Emit version for use by GitHub Actions.
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then

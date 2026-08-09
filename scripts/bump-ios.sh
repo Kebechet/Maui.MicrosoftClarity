@@ -13,14 +13,18 @@
 #   2. Strips .swiftmodule and .dSYM directories (avoids NU5123 + Windows long-path warnings).
 #   3. Runs Objective Sharpie to regenerate ApiDefinitions.cs + StructsAndEnums.cs.
 #   4. Strips [Verify(...)] attributes — they're advisory and break the build if left in.
-#   5. Bumps <Version> in the binding csproj and the wrapper's <PackageReference>.
+#   5. Bumps <Version> in the binding csproj.
+#
+# It deliberately does NOT touch the wrapper's <PackageReference>. The wrapper is
+# only moved onto a binding version that is already live on nuget.org, which is a
+# separate stage; bumping both together is what used to leave main referencing a
+# package that did not exist yet.
 
 set -euo pipefail
 
 NEW_VERSION="${1:?usage: bump-ios.sh <new-version>}"
 IOS_DIR="src/Maui.MicrosoftClarity.iOS"
 IOS_CSPROJ="$IOS_DIR/Maui.MicrosoftClarity.iOS.csproj"
-WRAPPER_CSPROJ="src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj"
 
 FRAMEWORK_ZIP_URL="https://www.clarity.ms/apps/resources/ios/Clarity-${NEW_VERSION}.xcframework.zip"
 FRAMEWORK_ZIP="Clarity-${NEW_VERSION}.xcframework.zip"
@@ -106,12 +110,6 @@ echo "    new binding version: $NEW_BINDING_VERSION"
 
 sed -i.bak -E "s|<Version>[^<]+</Version>|<Version>${NEW_BINDING_VERSION}</Version>|" "$IOS_CSPROJ"
 rm -f "${IOS_CSPROJ}.bak"
-
-# --- 7. Update wrapper csproj reference -----------------------------------
-sed -i.bak -E \
-  "s|(<PackageReference Include=\"Kebechet\.Maui\.MicrosoftClarity\.iOS\" Version=\")[^\"]+(\")|\1${NEW_BINDING_VERSION}\2|" \
-  "$WRAPPER_CSPROJ"
-rm -f "${WRAPPER_CSPROJ}.bak"
 
 echo "==> Done"
 echo "    binding version: $NEW_BINDING_VERSION"

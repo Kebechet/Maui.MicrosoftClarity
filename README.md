@@ -56,47 +56,60 @@ So that you dont have to specify platform for this package and it's calls, also 
 
 ## Automated SDK updates
 
-This repo runs a daily pipeline that watches Microsoft's Clarity Android and iOS SDKs and tries to bump + re-wire this package automatically. The flow:
+This repo watches Microsoft's Clarity Android and iOS SDKs and bumps this package
+automatically. It runs in two independent stages so that the wrapper is only ever
+moved onto a binding that is **already live on nuget.org** — that way `main` never
+references a package that does not exist yet.
+
+### Stage 1 — `build-binding.yml`
+
+Daily at 06:00 UTC, or on demand (`workflow_dispatch` takes a platform and an
+optional explicit version, for when a release drops and you don't want to wait).
 
 ```mermaid
 flowchart TD
-    A[Microsoft ships new Clarity SDK] --> B[06:00 UTC daily<br/>automatic-detect-sdk-updates.yml]
-    B --> C[Bump PR opened<br/>label: auto-bump]
-    C --> D[automatic-bump-and-wire.yml:<br/>build binding + diff API + build wrapper]
+    A[Microsoft ships new Clarity SDK] --> B[06:00 UTC daily<br/>or manual dispatch]
+    B --> C{Pinned version<br/>== target?}
+    C -->|yes| Z[Nothing to do]
+    C -->|no| D[Bump BINDING csproj only<br/>wrapper untouched]
+    D --> E[Open PR + build the binding]
+    E --> F{Compiles?}
+    F -->|no| G[Label: binding-broken<br/>Ping @copilot<br/>PR stays open]
+    F -->|yes| H[Squash-merge to main]
+    H --> I[Publish binding to NuGet.org]
 
-    D --> E{Outcome?}
-
-    E -->|API unchanged<br/>wrapper compiles| F[Auto-merge as<br/>stable release]
-    E -->|API additions<br/>or wrapper breaks| G[Label: needs-wiring<br/>Ping @copilot<br/>with API diff]
-    E -->|Binding itself broken| H[Label: binding-broken<br/>Ping @copilot<br/>with binding-fix guide]
-
-    G --> K[Agent commits wiring]
-    H --> L{Agent can fix?}
-    L -->|yes| K
-    L -->|no| M[Agent adds label:<br/>needs-human]
-
-    K --> N[Human review + merge]
-    M --> N
-    F --> O[main updated]
-    N --> O
-
-    O --> R[release-please<br/>maintains release PR<br/>for wrapper version]
-    R --> S[Merge release PR<br/>tags vX.Y.Z]
-    S --> T[Manually run<br/>publish-*.yml workflows]
-    T --> U[NuGet.org]
+    G --> J{Agent can fix?}
+    J -->|yes| E
+    J -->|no| K[Label: needs-human]
 
     classDef happy fill:#d4edda,stroke:#155724,color:#000
     classDef warn fill:#fff3cd,stroke:#856404,color:#000
     classDef human fill:#f8d7da,stroke:#721c24,color:#000
-    class F,O,U happy
-    class G,H,K warn
-    class M,N human
+    class H,I,Z happy
+    class G,J warn
+    class K human
 ```
+
+Auto-merge is safe here precisely because the wrapper is untouched: nothing else
+in the repo depends on the binding csproj, so `main` keeps referencing the
+previously-published binding and stays restorable throughout. Publishing is
+automatic, and the gate is the build — nothing reaches NuGet unless the binding
+compiled and the PR merged.
+
+### Stage 2 — wrapper
+
+Runs separately, and starts by asking whether the new binding is **actually
+restorable from nuget.org** yet (indexing lags publication, sometimes by hours).
+If it isn't, it does nothing and tries again later, so the schedule is a tuning
+knob rather than a race. Once the binding is live it bumps the wrapper's
+`PackageReference`, builds against nuget.org, and either auto-merges a clean bump
+or pings @copilot with the native API diff. release-please then cuts the wrapper
+release.
 
 The only manual steps for you:
 1. Review and merge agent wiring PRs when `needs-wiring` is applied
 2. Fix binding-generator failures the agent escalates as `needs-human` (rare)
-3. Trigger the three `publish-*.yml` workflows after each release tag
+3. Merge the release-please PR to cut a wrapper version
 
 See `.github/COPILOT_INSTRUCTIONS.md` for the rules the agent follows.
 

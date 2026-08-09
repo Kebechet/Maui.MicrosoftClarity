@@ -1,0 +1,442 @@
+name: build-binding
+
+# Stage 1 of the release pipeline: get a new native Clarity SDK bound, merged and
+# published, for one or both platforms.
+#
+#   1. Resolve the target native version — the dispatch input, else whatever is
+#      newest upstream (Maven Central for Android, clarity-apps' Package.swift
+#      for iOS).
+#   2. Compare against the version pinned in the binding csproj. Same -> nothing
+#      to do.
+#   3. Branch off main and bump the BINDING csproj only.
+#   4. Open a PR and build the binding.
+#        fails  -> label binding-broken, ping @copilot, leave the PR open.
+#        builds -> squash-merge it.
+#   5. Publish the binding to nuget.org.
+#
+# The wrapper's <PackageReference> is deliberately untouched here. Nothing else
+# in the repo depends on the binding csproj, so main keeps referencing the
+# previously-published binding and stays restorable the whole time - which is
+# what makes step 4's auto-merge safe. Moving the wrapper onto the new binding is
+# a separate stage that runs only once the package is actually live on nuget.org.
+#
+# Publishing is automatic and NuGet versions cannot be unpublished. The gate is
+# step 4: nothing is pushed unless the binding compiled and the PR merged.
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # 06:00 UTC daily
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Which binding(s) to build'
+        type: choice
+        options: [both, android, ios]
+        default: both
+      version:
+        description: 'Native SDK version to pin (blank = latest upstream)'
+        type: string
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+# A second run while one is mid-flight could open a competing PR for the same
+# version or race the merge, so let an in-flight run finish.
+concurrency:
+  group: build-binding
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SDK_VERSION: 10.0.102
+  BUILD_CONFIGURATION: Release
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Cheap ubuntu job so we don't spin up a windows/macOS runner just to discover
+  # there is nothing to do — which is the common case on the daily schedule.
+  detect:
+    name: Detect new SDK versions
+    runs-on: ubuntu-latest
+    outputs:
+      android_target:  ${{ steps.android.outputs.target }}
+      android_current: ${{ steps.android.outputs.current }}
+      android_needed:  ${{ steps.android.outputs.needed }}
+      ios_target:      ${{ steps.ios.outputs.target }}
+      ios_current:     ${{ steps.ios.outputs.current }}
+      ios_needed:      ${{ steps.ios.outputs.needed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: android
+        name: Android — Maven Central vs pinned
+        if: github.event_name != 'workflow_dispatch' || contains(fromJSON('["both","android"]'), inputs.platform)
+        # Via env, not inline ${{ }}: a dispatch input interpolated straight into
+        # the script body would be a shell-injection vector.
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          CURRENT=$(sed -n -E \
+            's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
+            src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj | head -1)
+          # An empty parse would compare unequal to every upstream version and
+          # bump on every run, so treat it as fatal rather than as "changed".
+          if [[ -z "$CURRENT" ]]; then
+            echo "ERROR: could not parse the pinned Clarity version from the Android binding csproj" >&2
+            exit 1
+          fi
+
+          TARGET="$INPUT_VERSION"
+          if [[ -z "$TARGET" ]]; then
+            META=https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/maven-metadata.xml
+            TARGET=$(curl -fsSL --retry 3 --retry-delay 2 "$META" \
+              | sed -n -E 's|.*<latest>([^<]+)</latest>.*|\1|p')
+            # Some Maven metadata files carry only <release> rather than <latest>.
+            if [[ -z "$TARGET" ]]; then
+              TARGET=$(curl -fsSL --retry 3 --retry-delay 2 "$META" \
+                | sed -n -E 's|.*<release>([^<]+)</release>.*|\1|p')
+            fi
+          fi
+          if [[ -z "$TARGET" ]]; then
+            echo "ERROR: could not determine a target Android version" >&2
+            exit 1
+          fi
+
+          echo "  pinned: $CURRENT / target: $TARGET"
+          {
+            echo "current=$CURRENT"
+            echo "target=$TARGET"
+            echo "needed=$([[ "$CURRENT" != "$TARGET" ]] && echo true || echo false)"
+          } >> "$GITHUB_OUTPUT"
+
+      - id: ios
+        name: iOS — clarity-apps vs pinned
+        if: github.event_name != 'workflow_dispatch' || contains(fromJSON('["both","ios"]'), inputs.platform)
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          # Binding version is <native>.<binding-rev>; strip the revision.
+          BINDING=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' \
+            src/Maui.MicrosoftClarity.iOS/Maui.MicrosoftClarity.iOS.csproj | head -1)
+          CURRENT=$(echo "$BINDING" | awk -F. 'BEGIN{OFS="."} NF>1 {NF--; print}')
+          if [[ -z "$CURRENT" ]]; then
+            echo "ERROR: could not parse the pinned Clarity version from the iOS binding csproj" >&2
+            exit 1
+          fi
+
+          TARGET="$INPUT_VERSION"
+          if [[ -z "$TARGET" ]]; then
+            TARGET=$(curl -fsSL --retry 3 --retry-delay 2 \
+              https://raw.githubusercontent.com/microsoft/clarity-apps/main/Package.swift \
+              | grep -oE 'Clarity-[0-9]+\.[0-9]+\.[0-9]+' | head -1 | sed 's/Clarity-//')
+          fi
+          if [[ -z "$TARGET" ]]; then
+            echo "ERROR: could not determine a target iOS version" >&2
+            exit 1
+          fi
+
+          echo "  pinned: $CURRENT / target: $TARGET"
+          {
+            echo "current=$CURRENT"
+            echo "target=$TARGET"
+            echo "needed=$([[ "$CURRENT" != "$TARGET" ]] && echo true || echo false)"
+          } >> "$GITHUB_OUTPUT"
+
+  # ---------------------------------------------------------------------------
+  android:
+    name: Android ${{ needs.detect.outputs.android_target }}
+    needs: detect
+    if: needs.detect.outputs.android_needed == 'true'
+    runs-on: windows-latest
+    env:
+      PLATFORM: android
+      PROJECT: src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj
+      TARGET:  ${{ needs.detect.outputs.android_target }}
+      PREVIOUS: ${{ needs.detect.outputs.android_current }}
+    steps:
+      # A GitHub App token rather than GITHUB_TOKEN: pushes and merges made with
+      # the default token do not raise events, which would silently stop
+      # release-please and anything else watching main.
+      - id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BUMP_BOT_APP_ID }}
+          private-key: ${{ secrets.BUMP_BOT_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+
+      - name: Pin .NET SDK
+        shell: bash
+        run: echo '{"sdk":{"version":"${{ env.DOTNET_SDK_VERSION }}"}}' > global.json
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install workloads
+        shell: bash
+        run: dotnet workload install android maui-android --ignore-failed-sources --version ${{ env.DOTNET_SDK_VERSION }}
+
+      - id: bump
+        name: Bump the binding
+        shell: bash
+        run: |
+          chmod +x scripts/bump-android.sh
+          scripts/bump-android.sh "$TARGET"
+
+      - id: pr
+        name: Push branch and open PR
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          BRANCH="bump/${PLATFORM}-${TARGET}"
+          git config user.name  "clarity-bump-bot[bot]"
+          git config user.email "clarity-bump-bot[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          # global.json is a runner-local SDK pin, not part of the bump.
+          git add -A ':(exclude)global.json'
+          git commit -m "chore(deps): bump Clarity Android SDK to ${TARGET}
+
+          From ${PREVIOUS} to ${TARGET}. Binding only - the wrapper moves onto
+          ${{ steps.bump.outputs.binding_version }} once it is live on nuget.org."
+          # Force: a previous failed run may have left this branch behind.
+          git push --force origin "$BRANCH"
+
+          NUM=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [[ -z "$NUM" ]]; then
+            NUM=$(gh pr create --base main --head "$BRANCH" \
+              --title "chore(deps): bump Clarity Android SDK to ${TARGET}" \
+              --body "Binding bump only; the wrapper is moved separately once \`${{ steps.bump.outputs.binding_version }}\` is live on nuget.org.
+
+          - **Previous:** \`${PREVIOUS}\`
+          - **Target:** \`${TARGET}\`
+          - **Binding version:** \`${{ steps.bump.outputs.binding_version }}\`
+          - **Source:** https://central.sonatype.com/artifact/com.microsoft.clarity/clarity/${TARGET}
+          - **Changelog:** https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#android-sdk-changelog" \
+              --label auto-bump --label android --label dependencies \
+              | grep -oE '[0-9]+$')
+          fi
+          # Without this the later steps would run `gh pr merge ""` and fail with
+          # something far less obvious than the actual problem.
+          if [[ -z "$NUM" ]]; then
+            echo "ERROR: could not determine a PR number for $BRANCH" >&2
+            exit 1
+          fi
+          echo "number=$NUM" >> "$GITHUB_OUTPUT"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - id: build
+        name: Build the binding
+        continue-on-error: true
+        shell: bash
+        run: |
+          dotnet restore "$PROJECT" 2>&1 | tee binding-build.log
+          dotnet build   "$PROJECT" -c ${{ env.BUILD_CONFIGURATION }} --no-restore 2>&1 | tee -a binding-build.log
+
+      - if: steps.build.outcome != 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: binding-build-log-android
+          path: binding-build.log
+
+      - name: Binding broken — hand to @copilot
+        if: steps.build.outcome != 'success'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh pr edit ${{ steps.pr.outputs.number }} --add-label binding-broken --add-label needs-wiring
+          INSTRUCTIONS=$(cat .github/COPILOT_INSTRUCTIONS.md .github/agent-android-binding.md)
+          gh pr comment ${{ steps.pr.outputs.number }} --body "@copilot the Android binding does not compile against Clarity ${TARGET}, so nothing has been merged or published. The build log is attached to this run as \`binding-build-log-android\`.
+
+          $INSTRUCTIONS"
+          echo "::error::Android binding failed to build against ${TARGET}; PR left open for @copilot"
+          exit 1
+
+      - id: merge
+        name: Merge
+        shell: bash
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh pr merge ${{ steps.pr.outputs.number }} --squash --delete-branch
+          git fetch origin main
+          echo "sha=$(git rev-parse origin/main)" >> "$GITHUB_OUTPUT"
+
+      # Publishing the artifact built from the branch: a squash merge preserves
+      # content exactly, so this is byte-identical to building main. Ordering is
+      # what matters — nothing reaches nuget.org unless the merge succeeded.
+      - name: Pack and publish
+        shell: bash
+        run: |
+          dotnet pack "$PROJECT" -c ${{ env.BUILD_CONFIGURATION }} -o ./artifacts --no-build --no-restore
+          dotnet nuget push "./artifacts/*.nupkg" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+
+      - name: Summary
+        shell: bash
+        run: |
+          {
+            echo "### Android binding ${{ steps.bump.outputs.binding_version }} published"
+            echo ""
+            echo "- Clarity \`${PREVIOUS}\` → \`${TARGET}\`"
+            echo "- Merged as \`${{ steps.merge.outputs.sha }}\`"
+            echo "- The wrapper still references the previous binding until stage 2 runs."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ---------------------------------------------------------------------------
+  ios:
+    name: iOS ${{ needs.detect.outputs.ios_target }}
+    needs: detect
+    if: needs.detect.outputs.ios_needed == 'true'
+    runs-on: macos-15
+    env:
+      PLATFORM: ios
+      PROJECT: src/Maui.MicrosoftClarity.iOS/Maui.MicrosoftClarity.iOS.csproj
+      TARGET:  ${{ needs.detect.outputs.ios_target }}
+      PREVIOUS: ${{ needs.detect.outputs.ios_current }}
+    steps:
+      - id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BUMP_BOT_APP_ID }}
+          private-key: ${{ secrets.BUMP_BOT_APP_PRIVATE_KEY }}
+
+      - name: Set Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - name: Pin .NET SDK
+        run: echo '{"sdk":{"version":"${{ env.DOTNET_SDK_VERSION }}"}}' > global.json
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install workloads
+        run: dotnet workload install ios maui-ios --ignore-failed-sources --version ${{ env.DOTNET_SDK_VERSION }}
+
+      - name: Install Objective Sharpie
+        run: brew install --cask objectivesharpie || true
+
+      - id: bump
+        name: Bump the binding
+        run: |
+          chmod +x scripts/bump-ios.sh
+          scripts/bump-ios.sh "$TARGET"
+
+      - id: pr
+        name: Push branch and open PR
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          BRANCH="bump/${PLATFORM}-${TARGET}"
+          git config user.name  "clarity-bump-bot[bot]"
+          git config user.email "clarity-bump-bot[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          # global.json is a runner-local SDK pin, not part of the bump.
+          git add -A ':(exclude)global.json'
+          git commit -m "chore(deps): bump Clarity iOS SDK to ${TARGET}
+
+          From ${PREVIOUS} to ${TARGET}. Regenerated ApiDefinitions.cs and
+          StructsAndEnums.cs via Objective Sharpie. Binding only - the wrapper
+          moves onto ${{ steps.bump.outputs.binding_version }} once it is live on nuget.org."
+          git push --force origin "$BRANCH"
+
+          NUM=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [[ -z "$NUM" ]]; then
+            NUM=$(gh pr create --base main --head "$BRANCH" \
+              --title "chore(deps): bump Clarity iOS SDK to ${TARGET}" \
+              --body "Binding bump only; the wrapper is moved separately once \`${{ steps.bump.outputs.binding_version }}\` is live on nuget.org.
+
+          - **Previous:** \`${PREVIOUS}\`
+          - **Target:** \`${TARGET}\`
+          - **Binding version:** \`${{ steps.bump.outputs.binding_version }}\`
+          - **Source:** https://github.com/microsoft/clarity-apps/blob/main/Package.swift
+          - **Changelog:** https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#ios-sdk-changelog
+
+          \`ApiDefinitions.cs\` and \`StructsAndEnums.cs\` were regenerated and their \`[Verify]\` attributes stripped per the iOS README." \
+              --label auto-bump --label ios --label dependencies \
+              | grep -oE '[0-9]+$')
+          fi
+          # Without this the later steps would run `gh pr merge ""` and fail with
+          # something far less obvious than the actual problem.
+          if [[ -z "$NUM" ]]; then
+            echo "ERROR: could not determine a PR number for $BRANCH" >&2
+            exit 1
+          fi
+          echo "number=$NUM" >> "$GITHUB_OUTPUT"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - id: build
+        name: Build the binding
+        continue-on-error: true
+        run: |
+          dotnet restore "$PROJECT" 2>&1 | tee binding-build.log
+          dotnet build   "$PROJECT" -c ${{ env.BUILD_CONFIGURATION }} --no-restore 2>&1 | tee -a binding-build.log
+
+      - if: steps.build.outcome != 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: binding-build-log-ios
+          path: binding-build.log
+
+      - name: Binding broken — hand to @copilot
+        if: steps.build.outcome != 'success'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh pr edit ${{ steps.pr.outputs.number }} --add-label binding-broken --add-label needs-wiring
+          INSTRUCTIONS=$(cat .github/COPILOT_INSTRUCTIONS.md .github/agent-ios-binding.md)
+          gh pr comment ${{ steps.pr.outputs.number }} --body "@copilot the iOS binding does not compile against Clarity ${TARGET}, so nothing has been merged or published. The build log is attached to this run as \`binding-build-log-ios\`.
+
+          $INSTRUCTIONS"
+          echo "::error::iOS binding failed to build against ${TARGET}; PR left open for @copilot"
+          exit 1
+
+      - id: merge
+        name: Merge
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh pr merge ${{ steps.pr.outputs.number }} --squash --delete-branch
+          git fetch origin main
+          echo "sha=$(git rev-parse origin/main)" >> "$GITHUB_OUTPUT"
+
+      - name: Pack and publish
+        run: |
+          dotnet pack "$PROJECT" -c ${{ env.BUILD_CONFIGURATION }} -o ./artifacts --no-build --no-restore --include-source
+          dotnet nuget push "./artifacts/*.nupkg" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+
+      - name: Summary
+        run: |
+          {
+            echo "### iOS binding ${{ steps.bump.outputs.binding_version }} published"
+            echo ""
+            echo "- Clarity \`${PREVIOUS}\` → \`${TARGET}\`"
+            echo "- Merged as \`${{ steps.merge.outputs.sha }}\`"
+            echo "- The wrapper still references the previous binding until stage 2 runs."
+          } >> "$GITHUB_STEP_SUMMARY"
