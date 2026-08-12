@@ -18,7 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>3.8.2.1</Version>
+    <Version>3.9.0.0</Version>
     <PackageReleaseNotes>3.8.2.1: the Clarity AAR is now consumed via AndroidMavenLibrary (fetched from Maven Central when the binding itself is built) with POM-driven Java dependency verification, and the committed Jars were removed - shipped binaries are byte-identical to 3.8.2.0, nothing changes for consumers. 3.8.2.0: updated to net10.0, fixed Function1 type erasure clash in ACW</PackageReleaseNotes>
   </PropertyGroup>
 
@@ -40,7 +40,7 @@
   <ItemGroup>
     <!--The AAR is downloaded from Maven Central and its POM drives Java dependency
     verification, so every Clarity bump cross-checks the PackageReference list below.-->
-    <AndroidMavenLibrary Include="com.microsoft.clarity:clarity" Version="3.8.2" />
+    <AndroidMavenLibrary Include="com.microsoft.clarity:clarity" Version="3.9.0" />
   </ItemGroup>
 
   <ItemGroup>
