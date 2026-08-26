@@ -19,7 +19,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
     <Version>3.8.3.0</Version>
-    <PackageReleaseNotes>3.8.2.1: the Clarity AAR is now consumed via AndroidMavenLibrary (fetched from Maven Central when the binding itself is built) with POM-driven Java dependency verification, and the committed Jars were removed - shipped binaries are byte-identical to 3.8.2.0, nothing changes for consumers. 3.8.2.0: updated to net10.0, fixed Function1 type erasure clash in ACW</PackageReleaseNotes>
+    <PackageReleaseNotes>3.8.3.0: bumped the native Clarity Android SDK from 3.8.2 to 3.8.3 (upstream: enhanced session upload reliability - https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#android-sdk-changelog). The bound public API (Clarity, ClarityConfig, SessionStartedCallback, models.*) and the POM dependencies are unchanged, so nothing changes for consumers beyond the newer native SDK. 3.8.2.1: the Clarity AAR is now consumed via AndroidMavenLibrary (fetched from Maven Central when the binding itself is built) with POM-driven Java dependency verification, and the committed Jars were removed - shipped binaries are byte-identical to 3.8.2.0, nothing changes for consumers. 3.8.2.0: updated to net10.0, fixed Function1 type erasure clash in ACW</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
