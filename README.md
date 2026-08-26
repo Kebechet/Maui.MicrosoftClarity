@@ -56,62 +56,53 @@ So that you dont have to specify platform for this package and it's calls, also 
 
 ## Automated SDK updates
 
-This repo watches Microsoft's Clarity Android and iOS SDKs and bumps this package
-automatically. It runs in two independent stages so that the wrapper is only ever
-moved onto a binding that is **already live on nuget.org** — that way `main` never
-references a package that does not exist yet.
+Two independent workflows watch Microsoft's native Clarity SDKs and each turn a new
+release into **one standalone pull request that is ready to merge when it opens**:
 
-### Stage 1 — `build-binding.yml`
+| Workflow | Watches | Runner |
+|---|---|---|
+| `TryBumpAndroid` (`.github/workflows/try-bump-android.yml`) | `com.microsoft.clarity:clarity` on Maven Central | ubuntu |
+| `TryBumpIOS` (`.github/workflows/try-bump-ios.yml`) | `Clarity-<version>` in `microsoft/clarity-apps` `Package.swift` | macOS + Objective Sharpie |
 
-Daily at 06:00 UTC, or on demand (`workflow_dispatch` takes a platform and an
-optional explicit version, for when a release drops and you don't want to wait).
+Both run daily and on demand (`workflow_dispatch` takes an optional explicit version).
+A run bumps the **binding** csproj only. The wrapper csproj is asserted byte-identical
+before anything is committed, so `main` never references a binding that is not on
+nuget.org yet.
 
 ```mermaid
 flowchart TD
-    A[Microsoft ships new Clarity SDK] --> B[06:00 UTC daily<br/>or manual dispatch]
-    B --> C{Pinned version<br/>== target?}
-    C -->|yes| Z[Nothing to do]
-    C -->|no| D[Bump BINDING csproj only<br/>wrapper untouched]
-    D --> E[Open PR + build the binding]
-    E --> F{Compiles?}
-    F -->|no| G[Label: binding-broken<br/>Ping @copilot<br/>PR stays open]
-    F -->|yes| H[Squash-merge to main]
-    H --> I[Publish binding to NuGet.org]
-
-    G --> J{Agent can fix?}
-    J -->|yes| E
-    J -->|no| K[Label: needs-human]
+    A[Microsoft ships a new native SDK] --> B{detect: newest upstream<br/>== pinned version?}
+    B -->|yes| Z[Nothing to do]
+    B -->|no| C[bump-*.sh: pin, Version,<br/>PackageReleaseNotes + changelog excerpt]
+    C --> D{Binding builds?}
+    D -->|no| E[Claude Code repairs<br/>Transforms / ApiDefinitions,<br/>then a deterministic rebuild]
+    E --> F{Builds now?}
+    D -->|yes| G{Wrapper compiles against<br/>the packed binding?}
+    F -->|yes| G
+    F -->|no| H[DRAFT PR<br/>label binding-broken<br/>run fails]
+    G -->|yes| I[PR ready to merge<br/>bump/platform-version]
+    G -->|no| J[DRAFT PR<br/>label wrapper-broken<br/>run fails]
 
     classDef happy fill:#d4edda,stroke:#155724,color:#000
     classDef warn fill:#fff3cd,stroke:#856404,color:#000
-    classDef human fill:#f8d7da,stroke:#721c24,color:#000
-    class H,I,Z happy
-    class G,J warn
-    class K human
+    classDef bad fill:#f8d7da,stroke:#721c24,color:#000
+    class I,Z happy
+    class E warn
+    class H,J bad
 ```
 
-Auto-merge is safe here precisely because the wrapper is untouched: nothing else
-in the repo depends on the binding csproj, so `main` keeps referencing the
-previously-published binding and stays restorable throughout. Publishing is
-automatic, and the gate is the build — nothing reaches NuGet unless the binding
-compiled and the PR merged.
+What a green PR guarantees: `<Version>` follows `<native>.<binding-rev>`,
+`PackageReleaseNotes` starts with an entry for that version (with Microsoft's changelog
+text when it is published), the binding builds, and the wrapper compiles against the
+packed nupkg from a local feed. When Claude Code had to repair the binding sources the
+PR carries the `claude-fixed` label and a summary of the edits - review those like any
+hand-written change.
 
-### Stage 2 — wrapper
+Secrets: `BUMP_BOT_APP_ID` / `BUMP_BOT_APP_PRIVATE_KEY` (the bot that pushes and opens
+PRs) and `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`; without it a broken
+binding simply lands as a draft PR with the build log attached).
 
-Runs separately, and starts by asking whether the new binding is **actually
-restorable from nuget.org** yet (indexing lags publication, sometimes by hours).
-If it isn't, it does nothing and tries again later, so the schedule is a tuning
-knob rather than a race. Once the binding is live it bumps the wrapper's
-`PackageReference`, builds against nuget.org, and either auto-merges a clean bump
-or pings @copilot with the native API diff. release-please then cuts the wrapper
-release.
-
-The only manual steps for you:
-1. Review and merge agent wiring PRs when `needs-wiring` is applied
-2. Fix binding-generator failures the agent escalates as `needs-human` (rare)
-3. Merge the release-please PR to cut a wrapper version
-
-See `.github/COPILOT_INSTRUCTIONS.md` for the rules the agent follows.
+Merging and publishing the binding, and moving the wrapper onto it, are separate steps.
 
 ## Contributions
 Feel free to create an issue or pull request. In case you would like to do massive changes in the package please firstly discuss them in the issue because otherwise there is high chance that such big PR would be rejected.

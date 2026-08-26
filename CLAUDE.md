@@ -44,6 +44,18 @@ Android partial implements `IDisposable` (to release a `SessionStartedCallbackAd
 DI's runtime disposable detection handles cleanup on container shutdown for the
 singleton registration; consumers do not need to manage disposal manually.
 
+## Scripts and workflows
+
+`scripts/*.sh` run on ubuntu, macOS and Windows Git Bash runners, so keep them portable:
+no `grep -P`, no `find -quit`, XML values via `sed -n -E 's|.*<Tag>([^<]+)</Tag>.*|\1|p'`.
+In-place edits use `perl -pi` - Git Bash's `sed -i` strips CRLF line endings, which is
+how a csproj silently lost its line endings once.
+
+The automated SDK bumps live in `.github/workflows/try-bump-android.yml` and
+`try-bump-ios.yml`; the prompts Claude Code follows when a bumped binding does not build
+are `.github/prompts/fix-<platform>-binding.md`. A bump PR touches only the binding
+project - never the wrapper's binding `PackageReference`.
+
 ## Versioning
 
 This package uses release-please. The `<Version>` line in

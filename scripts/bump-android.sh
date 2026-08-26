@@ -7,31 +7,31 @@
 #
 # What it does:
 #   1. Verifies the requested version exists on Maven Central.
-#   2. Bumps the <AndroidMavenLibrary> version in the binding csproj — the .NET
-#      Android SDK downloads that AAR (and its POM) at build time; nothing is
-#      committed to the repo.
-#   3. Bumps the <Version> in the binding csproj — resets binding-revision to .0
-#      when the native version actually changes.
+#   2. Points <AndroidMavenLibrary> at it - the .NET Android SDK downloads that AAR (and
+#      its POM) when the binding is built; nothing is committed to the repo.
+#   3. Bumps <Version> (<native>.<binding-rev>: the revision resets to .0 when the native
+#      version changes and increments otherwise).
+#   4. Prepends a <PackageReleaseNotes> entry for the new binding version, with
+#      Microsoft's changelog text for the native version when it is published.
 #
-# It deliberately does NOT touch the wrapper's <PackageReference>. The wrapper is
-# only moved onto a binding version that is already live on nuget.org, which is a
-# separate stage; bumping both together is what used to leave main referencing a
-# package that did not exist yet.
+# It deliberately does NOT touch the wrapper's <PackageReference>: the wrapper is only
+# moved onto a binding that is already live on nuget.org, which is a separate step.
 #
-# Designed to run on a Linux/macOS GitHub Actions runner.
+# In-place edits go through perl: Git Bash's sed -i strips CRLF line endings, so a local
+# run on Windows would otherwise rewrite every line of the csproj. Runs on ubuntu, macOS
+# and Windows Git Bash.
 
 set -euo pipefail
 
 NEW_VERSION="${1:?usage: bump-android.sh <new-version>}"
-ANDROID_DIR="src/Maui.MicrosoftClarity.Android"
-ANDROID_CSPROJ="$ANDROID_DIR/Maui.MicrosoftClarity.Android.csproj"
-
-MAVEN_BASE="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${NEW_VERSION}"
-POM_URL="${MAVEN_BASE}/clarity-${NEW_VERSION}.pom"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ANDROID_CSPROJ="src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj"
+POM_URL="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${NEW_VERSION}/clarity-${NEW_VERSION}.pom"
+CHANGELOG_URL="https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#android-sdk-changelog"
 
 echo "==> Bumping Android Clarity SDK to ${NEW_VERSION}"
 
-# --- 1. Determine current native version from the csproj -------------------
+# --- 1. Current versions from the csproj -----------------------------------------
 CURRENT_NATIVE=$(sed -n -E \
   's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
   "$ANDROID_CSPROJ" | head -1)
@@ -39,45 +39,27 @@ if [[ -z "$CURRENT_NATIVE" ]]; then
   echo "ERROR: no <AndroidMavenLibrary Include=\"com.microsoft.clarity:clarity\" .../> found in $ANDROID_CSPROJ" >&2
   exit 1
 fi
-echo "    current native version: $CURRENT_NATIVE"
-echo "    target  native version: $NEW_VERSION"
+CURRENT_BINDING_VERSION=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' "$ANDROID_CSPROJ" | head -1)
+if [[ -z "$CURRENT_BINDING_VERSION" ]]; then
+  echo "ERROR: no <Version> found in $ANDROID_CSPROJ" >&2
+  exit 1
+fi
+echo "    current native version:  $CURRENT_NATIVE"
+echo "    current binding version: $CURRENT_BINDING_VERSION"
+echo "    target  native version:  $NEW_VERSION"
 
-# --- 2. Confirm the target exists on Maven Central --------------------------
-# The AAR is only fetched at build time, so a typo here would otherwise surface
-# as an opaque XA4234 much later in the pipeline.
+# --- 2. The target must exist on Maven Central -----------------------------------
+# The AAR is only fetched at build time, so a typo here would otherwise surface as an
+# opaque XA4234 much later. --retry (without --retry-all-errors) covers timeouts and
+# 5xx but not the 404 we are actually testing for.
 echo "==> Verifying $POM_URL"
-# --retry (without --retry-all-errors) covers timeouts/429/5xx but not the 404 we are
-# actually testing for, so a missing version still fails on the first attempt.
 if ! curl -fsSL --retry 3 --retry-delay 2 -o /dev/null "$POM_URL"; then
   echo "ERROR: com.microsoft.clarity:clarity:${NEW_VERSION} not found on Maven Central" >&2
   exit 1
 fi
 
-# --- 3. Point AndroidMavenLibrary at the new version ------------------------
-sed -i.bak -E \
-  "s|(<AndroidMavenLibrary +Include=\"com\.microsoft\.clarity:clarity\" +Version=\")[^\"]+(\")|\1${NEW_VERSION}\2|" \
-  "$ANDROID_CSPROJ"
-rm -f "${ANDROID_CSPROJ}.bak"
-
-# Read the pin back. If this write ever silently misses while the read in step 1
-# still matches, the steps below would bump the NuGet version and the wrapper
-# reference while leaving the native pin behind — i.e. ship "3.9.0.0" containing
-# Clarity 3.8.2.
-WRITTEN_NATIVE=$(sed -n -E \
-  's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
-  "$ANDROID_CSPROJ" | head -1)
-if [[ "$WRITTEN_NATIVE" != "$NEW_VERSION" ]]; then
-  echo "ERROR: failed to update the <AndroidMavenLibrary> pin (still '${WRITTEN_NATIVE}')" >&2
-  exit 1
-fi
-
-# --- 4. Update <Version> in the binding csproj ------------------------------
-# Versioning rule: <native>.<binding-rev>; reset rev to .0 on native bump.
-CURRENT_BINDING_VERSION=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' "$ANDROID_CSPROJ" | head -1)
-echo "    current binding version: $CURRENT_BINDING_VERSION"
-
+# --- 3. New binding version --------------------------------------------------------
 if [[ "$CURRENT_NATIVE" == "$NEW_VERSION" ]]; then
-  # Same native, increment last segment.
   REV=$(echo "$CURRENT_BINDING_VERSION" | awk -F. '{print $NF + 1}')
   PREFIX=$(echo "$CURRENT_BINDING_VERSION" | awk -F. 'BEGIN{OFS="."} {NF--; print}')
   NEW_BINDING_VERSION="${PREFIX}.${REV}"
@@ -86,19 +68,61 @@ else
 fi
 echo "    new     binding version: $NEW_BINDING_VERSION"
 
-sed -i.bak -E "s|<Version>[^<]+</Version>|<Version>${NEW_BINDING_VERSION}</Version>|" "$ANDROID_CSPROJ"
-rm -f "${ANDROID_CSPROJ}.bak"
+# --- 4. Release note -----------------------------------------------------------------
+EXCERPT=$("$SCRIPT_DIR/changelog-excerpt.sh" android "$NEW_VERSION" || true)
+if [[ "$CURRENT_NATIVE" == "$NEW_VERSION" ]]; then
+  NOTE="${NEW_BINDING_VERSION}: rebuilt the binding for native Clarity Android SDK ${NEW_VERSION} (binding revision only, no native change)."
+else
+  NOTE="${NEW_BINDING_VERSION}: bumped native Clarity Android SDK from ${CURRENT_NATIVE} to ${NEW_VERSION}."
+fi
+if [[ -n "$EXCERPT" ]]; then
+  NOTE+=" Upstream: ${EXCERPT}"
+fi
+NOTE+=" Changelog: ${CHANGELOG_URL}"
+echo "    release note: $NOTE"
+
+# --- 5. Edit the csproj ----------------------------------------------------------------
+NEW_VERSION="$NEW_VERSION" perl -pi -e \
+  's|(<AndroidMavenLibrary\s+Include="com\.microsoft\.clarity:clarity"\s+Version=")[^"]+(")|$1$ENV{NEW_VERSION}$2|' \
+  "$ANDROID_CSPROJ"
+NEW_BINDING_VERSION="$NEW_BINDING_VERSION" perl -pi -e \
+  's|<Version>[^<]+</Version>|<Version>$ENV{NEW_BINDING_VERSION}</Version>|' \
+  "$ANDROID_CSPROJ"
+# Prepend, keeping the earlier entries: nuget.org shows the notes as history.
+NOTE="$NOTE" perl -pi -e \
+  's|(<PackageReleaseNotes>)(.*?)(</PackageReleaseNotes>)|$1 . $ENV{NOTE} . (length $2 ? " $2" : "") . $3|e' \
+  "$ANDROID_CSPROJ"
+
+# --- 6. Read everything back: a silently missed edit would ship "3.9.0.0" containing
+#        Clarity 3.8.2, which is worse than failing here. ------------------------------
+WRITTEN_NATIVE=$(sed -n -E \
+  's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
+  "$ANDROID_CSPROJ" | head -1)
+if [[ "$WRITTEN_NATIVE" != "$NEW_VERSION" ]]; then
+  echo "ERROR: failed to update the <AndroidMavenLibrary> pin (still '${WRITTEN_NATIVE}')" >&2
+  exit 1
+fi
+WRITTEN_BINDING=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' "$ANDROID_CSPROJ" | head -1)
+if [[ "$WRITTEN_BINDING" != "$NEW_BINDING_VERSION" ]]; then
+  echo "ERROR: failed to update <Version> (still '${WRITTEN_BINDING}')" >&2
+  exit 1
+fi
+if ! grep -qF "<PackageReleaseNotes>${NEW_BINDING_VERSION}: " "$ANDROID_CSPROJ"; then
+  echo "ERROR: failed to prepend the <PackageReleaseNotes> entry" >&2
+  exit 1
+fi
 
 echo "==> Done"
 echo "    binding version: $NEW_BINDING_VERSION"
 echo "    files changed:"
 echo "      - $ANDROID_CSPROJ"
 
-# Emit version for use by GitHub Actions.
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
   {
     echo "native_version=${NEW_VERSION}"
     echo "binding_version=${NEW_BINDING_VERSION}"
     echo "previous_native_version=${CURRENT_NATIVE}"
+    echo "changelog_excerpt=${EXCERPT}"
+    echo "release_note=${NOTE}"
   } >> "$GITHUB_OUTPUT"
 fi

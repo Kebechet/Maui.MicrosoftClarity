@@ -1,0 +1,285 @@
+name: TryBumpAndroid
+
+# Produces ONE standalone pull request that moves the Android binding onto a newer native
+# Clarity SDK and is ready to merge when it opens: correct <Version> and pin, release
+# notes with Microsoft's changelog entry, the binding builds, and the cross-platform
+# wrapper compiles against the packed result. Nothing is merged or published here.
+#
+#   detect  target = dispatch input, else newest on Maven Central; compared with the pin
+#           in the binding csproj. Equal -> nothing to do.
+#   bump    scripts/bump-android.sh, build the binding. If that fails and a Claude OAuth
+#           token is configured, Claude Code repairs Transforms/*.xml (edits outside that
+#           allow-list are discarded) and a deterministic rebuild decides. Then pack,
+#           compile the wrapper against the pack from a local feed, and
+#           scripts/open-bump-pr.sh opens or refreshes bump/android-<version>:
+#             everything passed -> ready-for-review PR
+#             otherwise        -> DRAFT PR labelled binding-broken / wrapper-broken and
+#                                 this job fails, so the run shows red.
+#
+# The wrapper csproj is asserted byte-identical before anything is committed.
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # 06:00 UTC daily
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Native Clarity Android SDK version to pin (blank = newest on Maven Central)'
+        type: string
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+# A second run mid-flight would race the same bump branch and PR.
+concurrency:
+  group: try-bump-android
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SDK_VERSION: 10.0.102
+  BUILD_CONFIGURATION: Release
+  BINDING_PROJECT: src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj
+  BINDING_DIR: src/Maui.MicrosoftClarity.Android
+
+jobs:
+  detect:
+    name: Detect
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      target:  ${{ steps.resolve.outputs.target }}
+      current: ${{ steps.resolve.outputs.current }}
+      needed:  ${{ steps.resolve.outputs.needed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: resolve
+        name: Maven Central vs pinned
+        # Via env, not inline ${{ }}: a dispatch input interpolated straight into the
+        # script body would be a shell-injection vector.
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          CURRENT=$(sed -n -E \
+            's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
+            "$BINDING_PROJECT" | head -1)
+          # An empty parse would compare unequal to every upstream version and bump on
+          # every run, so treat it as fatal rather than as "changed".
+          if [[ -z "$CURRENT" ]]; then
+            echo "ERROR: could not parse the pinned Clarity version from $BINDING_PROJECT" >&2
+            exit 1
+          fi
+
+          TARGET="$INPUT_VERSION"
+          if [[ -z "$TARGET" ]]; then
+            META=https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/maven-metadata.xml
+            XML=$(curl -fsSL --retry 3 --retry-delay 2 "$META")
+            TARGET=$(printf '%s' "$XML" | sed -n -E 's|.*<latest>([^<]+)</latest>.*|\1|p')
+            # Some Maven metadata files carry only <release> rather than <latest>.
+            if [[ -z "$TARGET" ]]; then
+              TARGET=$(printf '%s' "$XML" | sed -n -E 's|.*<release>([^<]+)</release>.*|\1|p')
+            fi
+          fi
+          if [[ -z "$TARGET" ]]; then
+            echo "ERROR: could not determine a target Android version" >&2
+            exit 1
+          fi
+
+          if [[ "$CURRENT" != "$TARGET" ]]; then NEEDED=true; else NEEDED=false; fi
+          echo "pinned: $CURRENT / target: $TARGET / bump needed: $NEEDED"
+          {
+            echo "current=$CURRENT"
+            echo "target=$TARGET"
+            echo "needed=$NEEDED"
+          } >> "$GITHUB_OUTPUT"
+          if [[ "$NEEDED" == "false" ]]; then
+            echo "### Android: nothing to do - pinned \`$CURRENT\` is already the target" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  bump:
+    name: Android ${{ needs.detect.outputs.target }}
+    needs: detect
+    if: needs.detect.outputs.needed == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      PLATFORM: android
+      TARGET:   ${{ needs.detect.outputs.target }}
+      PREVIOUS: ${{ needs.detect.outputs.current }}
+      # Secrets cannot be tested in `if:` directly; an env flag derived from one can.
+      HAS_CLAUDE_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+    steps:
+      # A GitHub App token rather than GITHUB_TOKEN: pushes made with the default token
+      # raise no events, which would silently stop anything watching the bump branches.
+      - id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BUMP_BOT_APP_ID }}
+          private-key: ${{ secrets.BUMP_BOT_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+
+      - name: Pin .NET SDK
+        run: echo '{"sdk":{"version":"${{ env.DOTNET_SDK_VERSION }}"}}' > global.json
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install workloads
+        run: dotnet workload install android maui-android --ignore-failed-sources --version "$DOTNET_SDK_VERSION"
+
+      - id: bump
+        name: Bump the binding
+        run: |
+          chmod +x scripts/*.sh
+          scripts/bump-android.sh "$TARGET"
+
+      - id: build
+        name: Build the binding
+        continue-on-error: true
+        run: |
+          dotnet restore "$BINDING_PROJECT" 2>&1 | tee binding-build.log
+          dotnet build   "$BINDING_PROJECT" -c "$BUILD_CONFIGURATION" --no-restore 2>&1 | tee -a binding-build.log
+
+      - name: Snapshot the bump before any repair
+        if: steps.build.outcome != 'success'
+        run: |
+          git status --porcelain --untracked-files=all | cut -c4- > "$RUNNER_TEMP/after-bump.txt"
+          shasum -a 256 "$BINDING_DIR"/Transforms/*.xml > "$RUNNER_TEMP/allow-before.txt"
+
+      - id: claude
+        name: Repair the binding with Claude Code
+        if: steps.build.outcome != 'success' && env.HAS_CLAUDE_TOKEN == 'true'
+        continue-on-error: true
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ steps.app-token.outputs.token }}
+          prompt: |
+            The Android binding in this repository does not build against Clarity ${{ env.TARGET }}.
+            Read `.github/prompts/fix-android-binding.md` and follow it exactly.
+            The failing build log is `binding-build.log` in the repository root.
+          claude_args: >-
+            --max-turns 40
+            --allowedTools "Read,Grep,Glob,Edit,Write,Bash(dotnet build:*),Bash(dotnet restore:*),Bash(cat:*),Bash(grep:*),Bash(ls:*),Bash(find:*),Bash(head:*),Bash(tail:*)"
+
+      - name: Repair skipped - no CLAUDE_CODE_OAUTH_TOKEN
+        if: steps.build.outcome != 'success' && env.HAS_CLAUDE_TOKEN != 'true'
+        run: echo "::warning::The binding does not build and CLAUDE_CODE_OAUTH_TOKEN is not configured, so no repair was attempted (run 'claude setup-token' and add the secret)."
+
+      - name: Keep only allowed repair edits
+        if: steps.build.outcome != 'success'
+        run: scripts/keep-only-allowed-changes.sh "$RUNNER_TEMP/after-bump.txt" '^(src/Maui\.MicrosoftClarity\.Android/Transforms/[^/]+\.xml|fix-summary\.md)$'
+
+      - id: rebuild
+        name: Rebuild the binding after repair
+        if: steps.build.outcome != 'success'
+        continue-on-error: true
+        run: |
+          echo "===== rebuild after repair =====" | tee -a binding-build.log
+          dotnet build "$BINDING_PROJECT" -c "$BUILD_CONFIGURATION" 2>&1 | tee -a binding-build.log
+
+      - id: verdict
+        name: Binding verdict
+        env:
+          BUILD_OUTCOME:   ${{ steps.build.outcome }}
+          REBUILD_OUTCOME: ${{ steps.rebuild.outcome }}
+        run: |
+          REPAIRED=false
+          if [[ -f "$RUNNER_TEMP/allow-before.txt" ]] && ! shasum -a 256 -c --status "$RUNNER_TEMP/allow-before.txt"; then
+            REPAIRED=true
+          fi
+          if [[ "$BUILD_OUTCOME" == "success" ]]; then
+            BINDING_OK=true; CLAUDE_FIXED=false
+          elif [[ "$REBUILD_OUTCOME" == "success" ]]; then
+            BINDING_OK=true; CLAUDE_FIXED=$REPAIRED
+          else
+            BINDING_OK=false; CLAUDE_FIXED=false
+          fi
+          echo "binding_ok=$BINDING_OK / claude_fixed=$CLAUDE_FIXED"
+          { echo "binding_ok=$BINDING_OK"; echo "claude_fixed=$CLAUDE_FIXED"; } >> "$GITHUB_OUTPUT"
+
+      - id: pack
+        name: Pack the binding into a local feed
+        if: steps.verdict.outputs.binding_ok == 'true'
+        run: dotnet pack "$BINDING_PROJECT" -c "$BUILD_CONFIGURATION" --no-build --no-restore -o "$RUNNER_TEMP/bump-feed"
+
+      - id: wrapper
+        name: Compile the wrapper against the packed binding
+        if: steps.verdict.outputs.binding_ok == 'true'
+        continue-on-error: true
+        run: scripts/build-wrapper-against.sh android "$RUNNER_TEMP/bump-feed" "${{ steps.bump.outputs.binding_version }}" 2>&1 | tee wrapper-build.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: binding-build-log-android
+          path: binding-build.log
+          if-no-files-found: ignore
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wrapper-build-log-android
+          path: wrapper-build.log
+          if-no-files-found: ignore
+
+      - id: pr
+        name: Open or refresh the pull request
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BINDING_VERSION: ${{ steps.bump.outputs.binding_version }}
+          CHANGELOG_EXCERPT: ${{ steps.bump.outputs.changelog_excerpt }}
+          BASE_BRANCH: ${{ github.ref_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CLAUDE_FIXED: ${{ steps.verdict.outputs.claude_fixed }}
+          FIX_SUMMARY_FILE: fix-summary.md
+          BINDING_OK: ${{ steps.verdict.outputs.binding_ok }}
+          WRAPPER_OUTCOME: ${{ steps.wrapper.outcome }}
+        run: |
+          if [[ "$BINDING_OK" != "true" ]]; then
+            STATUS=binding-broken
+          elif [[ "$WRAPPER_OUTCOME" != "success" ]]; then
+            STATUS=wrapper-broken
+          else
+            STATUS=green
+          fi
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          STATUS="$STATUS" scripts/open-bump-pr.sh
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Android ${PREVIOUS} -> ${TARGET}: ${{ steps.pr.outputs.status || 'no PR opened' }}"
+            echo ""
+            echo "- Binding version: \`${{ steps.bump.outputs.binding_version }}\`"
+            echo "- PR: ${{ steps.pr.outputs.pr_url || 'none' }}"
+            echo "- Claude repaired the binding: ${{ steps.verdict.outputs.claude_fixed || 'n/a' }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail the run when the PR is not green
+        if: steps.pr.outputs.status != 'green'
+        run: |
+          echo "::error::Android bump to ${TARGET} is '${{ steps.pr.outputs.status }}'; the PR was left as a draft"
+          exit 1
