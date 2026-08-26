@@ -184,9 +184,12 @@ for label in "${LABELS[@]}"; do ADD_LABEL_ARGS+=(--add-label "$label"); done
 # --- 6. Create or refresh the PR -----------------------------------------------------
 NUM=$(gh pr list --head "$BRANCH" --base "$BASE_BRANCH" --state open --json number --jq '.[0].number // empty')
 if [[ -z "$NUM" ]]; then
+  # macOS runners ship bash 3.2, where expanding an EMPTY array under `set -u` is an
+  # "unbound variable" error; the ${arr[@]+"${arr[@]}"} idiom is safe on every bash.
   DRAFT_ARGS=()
   if [[ "$STATUS" != "green" ]]; then DRAFT_ARGS=(--draft); fi
-  URL=$(gh pr create --base "$BASE_BRANCH" --head "$BRANCH" --title "$TITLE" --body-file "$BODY_FILE" "${LABEL_ARGS[@]}" "${DRAFT_ARGS[@]}")
+  URL=$(gh pr create --base "$BASE_BRANCH" --head "$BRANCH" --title "$TITLE" --body-file "$BODY_FILE" \
+    "${LABEL_ARGS[@]}" ${DRAFT_ARGS[@]+"${DRAFT_ARGS[@]}"})
   NUM=$(printf '%s' "$URL" | grep -oE '[0-9]+$')
   echo "==> opened PR #$NUM"
 else
