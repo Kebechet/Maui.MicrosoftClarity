@@ -90,6 +90,13 @@ jobs:
             echo "ERROR: could not determine a target iOS version" >&2
             exit 1
           fi
+          # Whether it came from the dispatch input or from upstream metadata, the version
+          # ends up in URLs, a branch name and a PR title. Anything but a plain dotted
+          # number would fail later, further from the cause.
+          if [[ ! "$TARGET" =~ ^[0-9]+(\.[0-9]+){1,3}$ ]]; then
+            echo "ERROR: '$TARGET' is not a plain version number such as 3.9.0" >&2
+            exit 1
+          fi
 
           if [[ "$CURRENT" != "$TARGET" ]]; then NEEDED=true; else NEEDED=false; fi
           echo "pinned: $CURRENT / target: $TARGET / bump needed: $NEEDED"
