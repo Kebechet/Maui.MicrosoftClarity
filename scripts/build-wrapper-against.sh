@@ -7,13 +7,18 @@
 #
 # Usage: scripts/build-wrapper-against.sh <android|ios> <feed-dir> <binding-version>
 #
-# The wrapper csproj is never modified: its binding PackageReference versions are the
-# MSBuild properties ClarityAndroidBindingVersion / ClarityIosBindingVersion, overridden
-# here as global properties. The feed is wired through a throwaway nuget.config rather
-# than `--source`: when NuGet decides that any --source value is relative it resolves
-# ALL of them against the project directory, and the nuget.org URL turns into a
-# non-existent local path (NU1301) - which is what broke every wrapper build in the old
-# pipeline.
+# The wrapper's <PackageReference> version is rewritten in place for the duration of the
+# build and restored from a byte copy on exit - including when the build fails, when the
+# script is interrupted, and when a command under `set -e` aborts it. The bump itself
+# never carries that edit: open-bump-pr.sh commits only the binding directory and refuses
+# to commit at all unless this file is byte-identical to HEAD. The old pipeline made the
+# same edit without either guard, which is how two bump PRs ended up referencing a
+# package that did not exist.
+#
+# The feed is wired through a throwaway nuget.config rather than `--source`: when NuGet
+# decides that any --source value is relative it resolves ALL of them against the project
+# directory, and the nuget.org URL turns into a non-existent local path (NU1301) - which
+# is what broke every wrapper build in the old pipeline.
 
 set -euo pipefail
 
@@ -24,8 +29,8 @@ WRAPPER="src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj"
 CONFIGURATION="${BUILD_CONFIGURATION:-Release}"
 
 case "$PLATFORM" in
-  android) TFM="net10.0-android"; PROP="ClarityAndroidBindingVersion" ;;
-  ios)     TFM="net10.0-ios";     PROP="ClarityIosBindingVersion" ;;
+  android) TFM="net10.0-android"; PACKAGE_ID="Kebechet.Maui.MicrosoftClarity.Android" ;;
+  ios)     TFM="net10.0-ios";     PACKAGE_ID="Kebechet.Maui.MicrosoftClarity.iOS" ;;
   *) echo "ERROR: unknown platform '$PLATFORM' (expected android or ios)" >&2; exit 2 ;;
 esac
 
@@ -35,7 +40,7 @@ if ! ls "$FEED"/*.nupkg >/dev/null 2>&1; then
 fi
 
 FEED_ABS=$(cd "$FEED" && pwd)
-# Git Bash on Windows: dotnet needs a Windows path, not /c/... (only matters for local runs).
+# Git Bash on Windows: dotnet needs a Windows path, not /c/... (only matters locally).
 if command -v cygpath >/dev/null 2>&1; then
   FEED_ABS=$(cygpath -w "$FEED_ABS")
 fi
@@ -52,12 +57,33 @@ cat > "$CONFIG" <<EOF
 </configuration>
 EOF
 
-echo "==> Restoring wrapper ($TFM) with $PROP=$VERSION from $FEED_ABS"
-dotnet restore "$WRAPPER" --configfile "$CONFIG" \
-  -p:TargetFrameworks="$TFM" -p:"$PROP=$VERSION"
+# --- Point the wrapper at the unpublished version, and put it back no matter what -----
+BACKUP=$(mktemp)
+cp "$WRAPPER" "$BACKUP"
+restore_wrapper() {
+  local status=$?
+  cp "$BACKUP" "$WRAPPER"
+  rm -f "$BACKUP"
+  return $status
+}
+trap restore_wrapper EXIT
+
+PACKAGE_ID="$PACKAGE_ID" VERSION="$VERSION" perl -pi -e \
+  's|(<PackageReference\s+Include="\Q$ENV{PACKAGE_ID}\E"\s+Version=")[^"]+(")|$1$ENV{VERSION}$2|' \
+  "$WRAPPER"
+
+if ! grep -qF "\"$PACKAGE_ID\" Version=\"$VERSION\"" "$WRAPPER"; then
+  echo "ERROR: could not point $PACKAGE_ID at $VERSION in $WRAPPER" >&2
+  grep -n "$PACKAGE_ID" "$WRAPPER" >&2 || true
+  exit 1
+fi
+echo "==> $WRAPPER temporarily references $PACKAGE_ID $VERSION"
+
+echo "==> Restoring wrapper ($TFM) from $FEED_ABS"
+dotnet restore "$WRAPPER" --configfile "$CONFIG" -p:TargetFrameworks="$TFM"
 
 echo "==> Building wrapper ($TFM)"
 dotnet build "$WRAPPER" --no-restore -c "$CONFIGURATION" \
-  -p:TargetFrameworks="$TFM" -p:"$PROP=$VERSION" -p:GeneratePackageOnBuild=false
+  -p:TargetFrameworks="$TFM" -p:GeneratePackageOnBuild=false
 
-echo "==> Wrapper compiles against $PROP=$VERSION"
+echo "==> Wrapper compiles against $PACKAGE_ID $VERSION"

@@ -57,20 +57,12 @@
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 	</ItemGroup>
 
-  <PropertyGroup Label="Bindings">
-    <!--Defaults only: TryBumpAndroid / TryBumpIOS override these from the command line
-    (-p:ClarityAndroidBindingVersion=...) to compile the wrapper against a binding that
-    is not on nuget.org yet, without editing this file.-->
-    <ClarityAndroidBindingVersion Condition="'$(ClarityAndroidBindingVersion)' == ''">3.8.2.1</ClarityAndroidBindingVersion>
-    <ClarityIosBindingVersion Condition="'$(ClarityIosBindingVersion)' == ''">3.5.2</ClarityIosBindingVersion>
-  </PropertyGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
-    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.Android" Version="$(ClarityAndroidBindingVersion)" />
+    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.Android" Version="3.8.2.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
-    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.iOS" Version="$(ClarityIosBindingVersion)" />
+    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.iOS" Version="3.5.2" />
   </ItemGroup>
 
 </Project>
