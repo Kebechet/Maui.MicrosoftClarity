@@ -145,9 +145,32 @@ if grep -q '^using Clarity;' ApiDefinitions.cs || ! grep -q '^using UIKit;' ApiD
   exit 1
 fi
 
+# --- 5. Minimum iOS version the framework itself requires ------------------------------
+# Clarity 4.0.0 raised its floor to iOS 16 while the binding still claimed 14.2. That
+# mismatch compiles and packs cleanly and only breaks at deployment, so it is read from
+# the framework rather than trusted from the csproj.
+PLIST="nativelib/$FRAMEWORK_DIR/ios-arm64/Clarity.framework/Info.plist"
+NATIVE_MIN_OS=$(plutil -extract MinimumOSVersion raw -o - "$PLIST" 2>/dev/null || true)
+if [[ -z "$NATIVE_MIN_OS" ]]; then
+  NATIVE_MIN_OS=$(/usr/libexec/PlistBuddy -c "Print :MinimumOSVersion" "$PLIST" 2>/dev/null || true)
+fi
+if [[ -z "$NATIVE_MIN_OS" ]]; then
+  echo "ERROR: could not read MinimumOSVersion from $IOS_DIR/$PLIST" >&2
+  exit 1
+fi
+
 cd - > /dev/null
 
-# --- 5. Edit the csproj ----------------------------------------------------------------
+echo "==> Native framework requires iOS ${NATIVE_MIN_OS}"
+MIN_OS_OUTPUT=$("$SCRIPT_DIR/check-min-os.sh" "$IOS_CSPROJ" "$NATIVE_MIN_OS")
+MIN_OS_RAISED=$(printf '%s\n' "$MIN_OS_OUTPUT" | sed -n -E 's|^min_os_raised=(.*)$|\1|p')
+if [[ "$MIN_OS_RAISED" == "true" ]]; then
+  MIN_OS_PREVIOUS=$(printf '%s\n' "$MIN_OS_OUTPUT" | sed -n -E 's|^min_os_previous=(.*)$|\1|p')
+  NOTE+=" BREAKING: the minimum supported iOS version is now ${NATIVE_MIN_OS} (was ${MIN_OS_PREVIOUS}), as required by the native SDK."
+  echo "    release note: $NOTE"
+fi
+
+# --- 6. Edit the csproj ----------------------------------------------------------------
 NEW_BINDING_VERSION="$NEW_BINDING_VERSION" perl -pi -e \
   's|<Version>[^<]+</Version>|<Version>$ENV{NEW_BINDING_VERSION}</Version>|' \
   "$IOS_CSPROJ"

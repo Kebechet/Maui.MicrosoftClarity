@@ -68,7 +68,30 @@ else
 fi
 echo "    new     binding version: $NEW_BINDING_VERSION"
 
-# --- 4. Release note -----------------------------------------------------------------
+# --- 4. Minimum Android API the AAR itself requires ------------------------------------
+# An AAR's manifest is plain XML, so this needs no aapt. A native SDK that raises its
+# minSdk while the binding still claims a lower one compiles and packs cleanly and only
+# breaks at deployment.
+AAR_URL="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${NEW_VERSION}/clarity-${NEW_VERSION}.aar"
+AAR_TMP="$(mktemp -d)"
+trap 'rm -rf "$AAR_TMP"' EXIT
+if ! curl -fsSL --retry 3 --retry-delay 2 -o "$AAR_TMP/clarity.aar" "$AAR_URL"; then
+  echo "ERROR: could not download $AAR_URL to read its minSdkVersion" >&2
+  exit 1
+fi
+NATIVE_MIN_OS=$(unzip -p "$AAR_TMP/clarity.aar" AndroidManifest.xml 2>/dev/null \
+  | sed -n -E 's|.*android:minSdkVersion="([^"]+)".*|\1|p' | head -1)
+if [[ -z "$NATIVE_MIN_OS" ]]; then
+  echo "ERROR: could not read android:minSdkVersion from the AAR manifest" >&2
+  exit 1
+fi
+
+echo "==> Native AAR requires API ${NATIVE_MIN_OS}"
+MIN_OS_OUTPUT=$("$SCRIPT_DIR/check-min-os.sh" "$ANDROID_CSPROJ" "$NATIVE_MIN_OS")
+MIN_OS_RAISED=$(printf '%s\n' "$MIN_OS_OUTPUT" | sed -n -E 's|^min_os_raised=(.*)$|\1|p')
+MIN_OS_PREVIOUS=$(printf '%s\n' "$MIN_OS_OUTPUT" | sed -n -E 's|^min_os_previous=(.*)$|\1|p')
+
+# --- 5. Release note -----------------------------------------------------------------
 EXCERPT=$("$SCRIPT_DIR/changelog-excerpt.sh" android "$NEW_VERSION" || true)
 if [[ "$CURRENT_NATIVE" == "$NEW_VERSION" ]]; then
   NOTE="${NEW_BINDING_VERSION}: rebuilt the binding for native Clarity Android SDK ${NEW_VERSION} (binding revision only, no native change)."
@@ -78,10 +101,13 @@ fi
 if [[ -n "$EXCERPT" ]]; then
   NOTE+=" Upstream: ${EXCERPT}"
 fi
+if [[ "$MIN_OS_RAISED" == "true" ]]; then
+  NOTE+=" BREAKING: the minimum supported Android API level is now ${NATIVE_MIN_OS} (was ${MIN_OS_PREVIOUS}), as required by the native SDK."
+fi
 NOTE+=" Changelog: ${CHANGELOG_URL}"
 echo "    release note: $NOTE"
 
-# --- 5. Edit the csproj ----------------------------------------------------------------
+# --- 6. Edit the csproj ----------------------------------------------------------------
 NEW_VERSION="$NEW_VERSION" perl -pi -e \
   's|(<AndroidMavenLibrary\s+Include="com\.microsoft\.clarity:clarity"\s+Version=")[^"]+(")|$1$ENV{NEW_VERSION}$2|' \
   "$ANDROID_CSPROJ"
@@ -91,7 +117,7 @@ NEW_BINDING_VERSION="$NEW_BINDING_VERSION" perl -pi -e \
 # Only the version being published: the notes are not a changelog of past releases.
 perl "$SCRIPT_DIR/set-release-note.pl" "$ANDROID_CSPROJ" "$NOTE"
 
-# --- 6. Read everything back: a silently missed edit would ship "3.9.0.0" containing
+# --- 7. Read everything back: a silently missed edit would ship "3.9.0.0" containing
 #        Clarity 3.8.2, which is worse than failing here. ------------------------------
 WRITTEN_NATIVE=$(sed -n -E \
   's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \

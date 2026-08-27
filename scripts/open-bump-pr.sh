@@ -12,7 +12,10 @@
 #   PREVIOUS, TARGET  native SDK versions
 #   BINDING_VERSION   <native>.<binding-rev>
 #   BASE_BRANCH       branch the PR targets (main on the schedule; the dispatched ref otherwise)
-#   STATUS            green | binding-broken | wrapper-broken
+#   STATUS            green | binding-broken | wrapper-broken | min-os-raised
+#   MIN_OS_RAISED, MIN_OS_PREVIOUS, MIN_OS_CURRENT
+#                     from scripts/check-min-os.sh; a raised floor is breaking for
+#                     consumers, so that PR opens as a draft even though it builds
 #   CHANGELOG_EXCERPT optional upstream changelog line for TARGET
 #   CLAUDE_FIXED      true when the Claude repair step changed sources that then built
 #   FIX_SUMMARY_FILE  optional markdown written by the repair step
@@ -26,6 +29,10 @@ set -euo pipefail
 
 : "${PLATFORM:?}" "${PREVIOUS:?}" "${TARGET:?}" "${BINDING_VERSION:?}" "${BASE_BRANCH:?}" "${STATUS:?}"
 CHANGELOG_EXCERPT="${CHANGELOG_EXCERPT:-}"
+MIN_OS_RAISED="${MIN_OS_RAISED:-false}"
+MIN_OS_PREVIOUS="${MIN_OS_PREVIOUS:-}"
+MIN_OS_CURRENT="${MIN_OS_CURRENT:-}"
+WRAPPER_OK="${WRAPPER_OK:-true}"
 CLAUDE_FIXED="${CLAUDE_FIXED:-false}"
 FIX_SUMMARY_FILE="${FIX_SUMMARY_FILE:-}"
 RUN_URL="${RUN_URL:-}"
@@ -34,12 +41,12 @@ DRY_RUN="${DRY_RUN:-0}"
 WRAPPER_CSPROJ="src/Maui.MicrosoftClarity/Maui.MicrosoftClarity.csproj"
 case "$PLATFORM" in
   android)
-    PLATFORM_NAME="Android"; WORKFLOW="TryBumpAndroid"
+    PLATFORM_NAME="Android"; WORKFLOW="TryBumpAndroid"; OS_NAME="Android API level"
     BINDING_DIR="src/Maui.MicrosoftClarity.Android"; TFM="net10.0-android"
     SOURCE_URL="https://central.sonatype.com/artifact/com.microsoft.clarity/clarity/${TARGET}"
     CHANGELOG_URL="https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#android-sdk-changelog" ;;
   ios)
-    PLATFORM_NAME="iOS"; WORKFLOW="TryBumpIOS"
+    PLATFORM_NAME="iOS"; WORKFLOW="TryBumpIOS"; OS_NAME="iOS"
     BINDING_DIR="src/Maui.MicrosoftClarity.iOS"; TFM="net10.0-ios"
     SOURCE_URL="https://github.com/microsoft/clarity-apps/blob/main/Package.swift"
     CHANGELOG_URL="https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#ios-sdk-changelog" ;;
@@ -62,6 +69,9 @@ fi
 COMMIT_BODY="From ${PREVIOUS} to ${TARGET}. Binding only - the wrapper moves onto ${BINDING_VERSION} once it is live on nuget.org."
 if [[ -n "$CHANGELOG_EXCERPT" ]]; then
   COMMIT_BODY+=$'\n\n'"Upstream ${TARGET}: ${CHANGELOG_EXCERPT}"
+fi
+if [[ "$MIN_OS_RAISED" == "true" ]]; then
+  COMMIT_BODY+=$'\n\n'"BREAKING: the native SDK raised its floor, so the binding's SupportedOSPlatformVersion moves from ${MIN_OS_PREVIOUS} to ${MIN_OS_CURRENT}."
 fi
 if [[ "$CLAUDE_FIXED" == "true" ]]; then
   COMMIT_BODY+=$'\n\n'"Binding sources were repaired by Claude Code so they compile against ${TARGET}; see the pull request description."
@@ -95,6 +105,16 @@ elif [[ "$STATUS" == "binding-broken" ]]; then
   STATUS_LINE="🛑 **DRAFT - the binding does not build.** Do not merge. Fix it on this branch (or wait for the next run to retry) and mark the PR ready."
   BUILD_LINE="❌ Binding does NOT build - see the \`binding-build-log-${PLATFORM}\` artifact on the run"
   WRAPPER_LINE="⏭️ Wrapper check skipped because the binding is broken"
+elif [[ "$STATUS" == "min-os-raised" ]]; then
+  STATUS_LINE="🛑 **DRAFT - this bump raises the minimum ${OS_NAME} to \`${MIN_OS_CURRENT}\` (was \`${MIN_OS_PREVIOUS}\`).** The binding builds, but raising the floor is a breaking change for consumers, so it is a human decision rather than an automatic merge. Decide whether the wrapper's own \`SupportedOSPlatformVersion\` moves with it, then mark the PR ready."
+  BUILD_LINE="✅ Binding builds (\`dotnet build -c Release\`)"
+  if [[ "$WRAPPER_OK" == "true" ]]; then
+    WRAPPER_LINE="✅ Wrapper compiles against the packed binding (\`${TFM}\`, wrapper csproj untouched)"
+  else
+    # Expected: NuGet will not hand a net10.0-ios16.0 asset to a project whose own
+    # platform floor is lower, so this fails until the wrapper's floor moves too.
+    WRAPPER_LINE="❌ Wrapper does NOT compile against it - expected while the wrapper's own floor is below \`${MIN_OS_CURRENT}\`; see the \`wrapper-build-log-${PLATFORM}\` artifact"
+  fi
 else
   STATUS_LINE="🛑 **DRAFT - the wrapper does not compile against this binding.** The native API changed in a way the wrapper depends on; that is a wrapper change for a human, not something to merge as-is."
   BUILD_LINE="✅ Binding builds"
@@ -103,8 +123,18 @@ fi
 
 if [[ -n "$CHANGELOG_EXCERPT" ]]; then
   EXCERPT_BLOCK="$CHANGELOG_EXCERPT"
+elif [[ "$PLATFORM" == "ios" ]]; then
+  EXCERPT_BLOCK="_No notes published yet - neither a \`microsoft/clarity-apps\` release nor Microsoft Learn has an entry for this version._"
 else
   EXCERPT_BLOCK="_Not published on Microsoft Learn yet._"
+fi
+
+if [[ "$MIN_OS_RAISED" == "true" ]]; then
+  MIN_OS_ROW="⚠️ raised \`${MIN_OS_PREVIOUS}\` → \`${MIN_OS_CURRENT}\` (required by the native SDK)"
+elif [[ -n "$MIN_OS_CURRENT" ]]; then
+  MIN_OS_ROW="\`${MIN_OS_CURRENT}\` (unchanged)"
+else
+  MIN_OS_ROW="unchanged"
 fi
 
 if [[ "$CLAUDE_FIXED" == "true" ]]; then
@@ -131,6 +161,7 @@ Binding-only bump produced by \`${WORKFLOW}\`. The wrapper is moved onto \`${BIN
 | Previous | \`${PREVIOUS}\` |
 | Target | \`${TARGET}\` |
 | Binding version | \`${BINDING_VERSION}\` (nuget.org shows it as \`${PUBLISHED_VERSION}\`) |
+| Minimum ${OS_NAME} | ${MIN_OS_ROW} |
 | Source | ${SOURCE_URL} |
 | Changelog | ${CHANGELOG_URL} |
 
@@ -175,6 +206,7 @@ gh label create bump           --color 0E8A16 --description "Native Clarity SDK 
 gh label create claude-fixed   --color 5319E7 --description "Binding sources were repaired by Claude Code - review them" --force >/dev/null
 gh label create binding-broken --color B60205 --description "The binding does not build against the new native SDK" --force >/dev/null
 gh label create wrapper-broken --color B60205 --description "The wrapper does not compile against the new binding" --force >/dev/null
+gh label create min-os-raised  --color D93F0B --description "The native SDK raised the minimum OS version - breaking for consumers" --force >/dev/null
 
 LABEL_ARGS=()
 for label in "${LABELS[@]}"; do LABEL_ARGS+=(--label "$label"); done
@@ -195,7 +227,8 @@ if [[ -z "$NUM" ]]; then
 else
   echo "==> refreshing existing PR #$NUM"
   gh pr edit "$NUM" --title "$TITLE" --body-file "$BODY_FILE" \
-    --remove-label claude-fixed --remove-label binding-broken --remove-label wrapper-broken >/dev/null || true
+    --remove-label claude-fixed --remove-label binding-broken --remove-label wrapper-broken \
+    --remove-label min-os-raised >/dev/null || true
   gh pr edit "$NUM" "${ADD_LABEL_ARGS[@]}" >/dev/null
   if [[ "$STATUS" == "green" ]]; then
     gh pr ready "$NUM" || true
