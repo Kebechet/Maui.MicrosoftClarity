@@ -15,7 +15,7 @@
 #   STATUS            green | binding-broken | wrapper-broken | min-os-raised |
 #                     upstream-breaking
 #   MIN_OS_RAISED, MIN_OS_PREVIOUS, MIN_OS_CURRENT
-#                     from scripts/check-min-os.sh; a raised floor is breaking for
+#                     from clarity.cs check-min-os; a raised floor is breaking for
 #                     consumers, so that PR opens as a draft even though it builds
 #   CHANGELOG_EXCERPT optional upstream changelog line for TARGET
 #   CLAUDE_FIXED      true when the Claude repair step changed sources that then built

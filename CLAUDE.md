@@ -46,10 +46,18 @@ singleton registration; consumers do not need to manage disposal manually.
 
 ## Scripts and workflows
 
-`scripts/*.sh` run on ubuntu, macOS and Windows Git Bash runners, so keep them portable:
-no `grep -P`, no `find -quit`, XML values via `sed -n -E 's|.*<Tag>([^<]+)</Tag>.*|\1|p'`.
-In-place edits use `perl -pi` - Git Bash's `sed -i` strips CRLF line endings, which is
-how a csproj silently lost its line endings once.
+**No second scripting language.** This is a .NET repository: anything beyond thin shell
+glue is a **.NET 10 file-based app** - a plain `.cs` run with `dotnet run script.cs -- args`,
+no csproj, no project file. Do NOT reach for Perl, Python, Ruby or Node to parse XML,
+JSON or HTML; `scripts/clarity.cs` is the one place that logic belongs, and it grows new
+subcommands instead of new languages. The SDK is already installed on every runner and on
+every machine that builds this repo, so there is nothing extra to provision.
+
+`scripts/*.sh` stay thin: `curl`, `gh`, `git`, `dotnet`, `unzip`, `sharpie`, control flow.
+They run on ubuntu, macOS and Windows Git Bash, so keep them portable - no `grep -P`, no
+`find -quit`. Never rewrite a file in place with `sed -i`: Git Bash's sed strips CRLF line
+endings, which silently rewrote every line of a csproj once. File rewriting goes through
+`clarity.cs`, which preserves each file's BOM and line endings byte-for-byte.
 
 The automated SDK bumps live in `.github/workflows/try-bump-android.yml` and
 `try-bump-ios.yml`; the prompts Claude Code follows when a bumped binding does not build

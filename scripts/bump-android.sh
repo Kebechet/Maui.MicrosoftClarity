@@ -11,39 +11,34 @@
 #      its POM) when the binding is built; nothing is committed to the repo.
 #   3. Bumps <Version> (<native>.<binding-rev>: the revision resets to .0 when the native
 #      version changes and increments otherwise).
-#   4. Sets <PackageReleaseNotes> to a single entry for the version being published,
-#      with Microsoft's changelog text for the native version when it is published.
+#   4. Compares the AAR's own minSdkVersion with <SupportedOSPlatformVersion> and raises
+#      the csproj when the native library requires more.
+#   5. Sets <PackageReleaseNotes> to a single entry for the version being published, with
+#      Microsoft's changelog text for the native version when it is published.
 #
 # It deliberately does NOT touch the wrapper's <PackageReference>: the wrapper is only
 # moved onto a binding that is already live on nuget.org, which is a separate step.
 #
-# In-place edits go through perl: Git Bash's sed -i strips CRLF line endings, so a local
-# run on Windows would otherwise rewrite every line of the csproj. Runs on ubuntu, macOS
-# and Windows Git Bash.
+# Reading and rewriting files is delegated to scripts/clarity.cs, a .NET file-based app,
+# so this stays shell glue and the repo keeps one language (see CLAUDE.md). `sed -i` here
+# would strip CRLF line endings under Git Bash.
 
 set -euo pipefail
 
 NEW_VERSION="${1:?usage: bump-android.sh <new-version>}"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ANDROID_CSPROJ="src/Maui.MicrosoftClarity.Android/Maui.MicrosoftClarity.Android.csproj"
 POM_URL="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${NEW_VERSION}/clarity-${NEW_VERSION}.pom"
+AAR_URL="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${NEW_VERSION}/clarity-${NEW_VERSION}.aar"
 CHANGELOG_URL="https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#android-sdk-changelog"
+
+clarity() { (cd "$REPO_ROOT" && dotnet run scripts/clarity.cs -- "$@"); }
 
 echo "==> Bumping Android Clarity SDK to ${NEW_VERSION}"
 
 # --- 1. Current versions from the csproj -----------------------------------------
-CURRENT_NATIVE=$(sed -n -E \
-  's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
-  "$ANDROID_CSPROJ" | head -1)
-if [[ -z "$CURRENT_NATIVE" ]]; then
-  echo "ERROR: no <AndroidMavenLibrary Include=\"com.microsoft.clarity:clarity\" .../> found in $ANDROID_CSPROJ" >&2
-  exit 1
-fi
-CURRENT_BINDING_VERSION=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' "$ANDROID_CSPROJ" | head -1)
-if [[ -z "$CURRENT_BINDING_VERSION" ]]; then
-  echo "ERROR: no <Version> found in $ANDROID_CSPROJ" >&2
-  exit 1
-fi
+CURRENT_NATIVE=$(clarity get-maven-pin "$ANDROID_CSPROJ")
+CURRENT_BINDING_VERSION=$(clarity get-version "$ANDROID_CSPROJ")
 echo "    current native version:  $CURRENT_NATIVE"
 echo "    current binding version: $CURRENT_BINDING_VERSION"
 echo "    target  native version:  $NEW_VERSION"
@@ -60,9 +55,7 @@ fi
 
 # --- 3. New binding version --------------------------------------------------------
 if [[ "$CURRENT_NATIVE" == "$NEW_VERSION" ]]; then
-  REV=$(echo "$CURRENT_BINDING_VERSION" | awk -F. '{print $NF + 1}')
-  PREFIX=$(echo "$CURRENT_BINDING_VERSION" | awk -F. 'BEGIN{OFS="."} {NF--; print}')
-  NEW_BINDING_VERSION="${PREFIX}.${REV}"
+  NEW_BINDING_VERSION="${CURRENT_BINDING_VERSION%.*}.$(( ${CURRENT_BINDING_VERSION##*.} + 1 ))"
 else
   NEW_BINDING_VERSION="${NEW_VERSION}.0"
 fi
@@ -72,7 +65,6 @@ echo "    new     binding version: $NEW_BINDING_VERSION"
 # An AAR's manifest is plain XML, so this needs no aapt. A native SDK that raises its
 # minSdk while the binding still claims a lower one compiles and packs cleanly and only
 # breaks at deployment.
-AAR_URL="https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/${NEW_VERSION}/clarity-${NEW_VERSION}.aar"
 AAR_TMP="$(mktemp -d)"
 trap 'rm -rf "$AAR_TMP"' EXIT
 if ! curl -fsSL --retry 3 --retry-delay 2 -o "$AAR_TMP/clarity.aar" "$AAR_URL"; then
@@ -87,12 +79,12 @@ if [[ -z "$NATIVE_MIN_OS" ]]; then
 fi
 
 echo "==> Native AAR requires API ${NATIVE_MIN_OS}"
-MIN_OS_OUTPUT=$("$SCRIPT_DIR/check-min-os.sh" "$ANDROID_CSPROJ" "$NATIVE_MIN_OS")
+MIN_OS_OUTPUT=$(clarity check-min-os "$ANDROID_CSPROJ" "$NATIVE_MIN_OS")
 MIN_OS_RAISED=$(printf '%s\n' "$MIN_OS_OUTPUT" | sed -n -E 's|^min_os_raised=(.*)$|\1|p')
 MIN_OS_PREVIOUS=$(printf '%s\n' "$MIN_OS_OUTPUT" | sed -n -E 's|^min_os_previous=(.*)$|\1|p')
 
 # --- 5. Release note -----------------------------------------------------------------
-EXCERPT=$("$SCRIPT_DIR/changelog-excerpt.sh" android "$NEW_VERSION" || true)
+EXCERPT=$(clarity changelog-excerpt android "$NEW_VERSION" || true)
 if [[ "$CURRENT_NATIVE" == "$NEW_VERSION" ]]; then
   NOTE="${NEW_BINDING_VERSION}: rebuilt the binding for native Clarity Android SDK ${NEW_VERSION} (binding revision only, no native change)."
 else
@@ -106,10 +98,11 @@ if [[ "$MIN_OS_RAISED" == "true" ]]; then
 fi
 NOTE+=" Changelog: ${CHANGELOG_URL}"
 echo "    release note: $NOTE"
-# Microsoft marks breaking releases in the note itself, and that claim can be broader
-# than anything measurable in the artifact: Clarity iOS 4.0.0 announced "minimum
-# supported iOS version 16" while the framework and Package.swift both still declared
-# 13.0. A release upstream calls breaking is never auto-merged.
+
+# Microsoft marks breaking releases in the note itself, and that claim can be broader than
+# anything measurable in the artifact: Clarity iOS 4.0.0 announced "minimum supported iOS
+# version 16" while the framework and Package.swift both still declared 13.0. A release
+# upstream calls breaking is never auto-merged.
 UPSTREAM_BREAKING=false
 if printf '%s' "$EXCERPT" | grep -qi '\[breaking\]'; then
   UPSTREAM_BREAKING=true
@@ -117,30 +110,23 @@ if printf '%s' "$EXCERPT" | grep -qi '\[breaking\]'; then
 fi
 
 # --- 6. Edit the csproj ----------------------------------------------------------------
-NEW_VERSION="$NEW_VERSION" perl -pi -e \
-  's|(<AndroidMavenLibrary\s+Include="com\.microsoft\.clarity:clarity"\s+Version=")[^"]+(")|$1$ENV{NEW_VERSION}$2|' \
-  "$ANDROID_CSPROJ"
-NEW_BINDING_VERSION="$NEW_BINDING_VERSION" perl -pi -e \
-  's|<Version>[^<]+</Version>|<Version>$ENV{NEW_BINDING_VERSION}</Version>|' \
-  "$ANDROID_CSPROJ"
-# Only the version being published: the notes are not a changelog of past releases.
-perl "$SCRIPT_DIR/set-release-note.pl" "$ANDROID_CSPROJ" "$NOTE"
+clarity set-maven-pin "$ANDROID_CSPROJ" "$NEW_VERSION"
+clarity set-version "$ANDROID_CSPROJ" "$NEW_BINDING_VERSION"
+clarity set-release-note "$ANDROID_CSPROJ" "$NOTE"
 
 # --- 7. Read everything back: a silently missed edit would ship "3.9.0.0" containing
 #        Clarity 3.8.2, which is worse than failing here. ------------------------------
-WRITTEN_NATIVE=$(sed -n -E \
-  's|.*<AndroidMavenLibrary +Include="com\.microsoft\.clarity:clarity" +Version="([^"]+)".*|\1|p' \
-  "$ANDROID_CSPROJ" | head -1)
+WRITTEN_NATIVE=$(clarity get-maven-pin "$ANDROID_CSPROJ")
 if [[ "$WRITTEN_NATIVE" != "$NEW_VERSION" ]]; then
   echo "ERROR: failed to update the <AndroidMavenLibrary> pin (still '${WRITTEN_NATIVE}')" >&2
   exit 1
 fi
-WRITTEN_BINDING=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' "$ANDROID_CSPROJ" | head -1)
+WRITTEN_BINDING=$(clarity get-version "$ANDROID_CSPROJ")
 if [[ "$WRITTEN_BINDING" != "$NEW_BINDING_VERSION" ]]; then
   echo "ERROR: failed to update <Version> (still '${WRITTEN_BINDING}')" >&2
   exit 1
 fi
-if ! grep -qF "<PackageReleaseNotes>${NOTE}</PackageReleaseNotes>" "$ANDROID_CSPROJ"; then
+if ! grep -qF "<PackageReleaseNotes>${NOTE}</PackageReleaseNotes>" "$REPO_ROOT/$ANDROID_CSPROJ"; then
   echo "ERROR: failed to write the <PackageReleaseNotes> entry" >&2
   exit 1
 fi

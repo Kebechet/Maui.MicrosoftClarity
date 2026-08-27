@@ -15,6 +15,9 @@
 # same edit without either guard, which is how two bump PRs ended up referencing a
 # package that did not exist.
 #
+# The version rewrite goes through scripts/clarity.cs, a .NET file-based app (see
+# CLAUDE.md), so the repo keeps one language and the file's BOM and CRLF survive.
+#
 # The feed is wired through a throwaway nuget.config rather than `--source`: when NuGet
 # decides that any --source value is relative it resolves ALL of them against the project
 # directory, and the nuget.org URL turns into a non-existent local path (NU1301) - which
@@ -68,9 +71,7 @@ restore_wrapper() {
 }
 trap restore_wrapper EXIT
 
-PACKAGE_ID="$PACKAGE_ID" VERSION="$VERSION" perl -pi -e \
-  's|(<PackageReference\s+Include="\Q$ENV{PACKAGE_ID}\E"\s+Version=")[^"]+(")|$1$ENV{VERSION}$2|' \
-  "$WRAPPER"
+dotnet run scripts/clarity.cs -- set-package-version "$WRAPPER" "$PACKAGE_ID" "$VERSION"
 
 if ! grep -qF "\"$PACKAGE_ID\" Version=\"$VERSION\"" "$WRAPPER"; then
   echo "ERROR: could not point $PACKAGE_ID at $VERSION in $WRAPPER" >&2

@@ -22,6 +22,10 @@ name: TryBumpIOS
 # The wrapper csproj is asserted byte-identical before anything is committed.
 
 on:
+  # TEMPORARY - remove before merging: workflow_dispatch only works once the file is on
+  # the default branch, so the feature branch exercises the workflow on push instead.
+  push:
+    branches: [feat/binding-pipeline]
   schedule:
     - cron: '10 6 * * *'   # 06:10 UTC daily, offset from TryBumpAndroid
   workflow_dispatch:
@@ -158,7 +162,7 @@ jobs:
         name: Bump the binding
         env:
           # Authenticates the microsoft/clarity-apps release lookup in
-          # changelog-excerpt.sh; unauthenticated it shares the runner IP's hourly budget.
+          # clarity.cs changelog-excerpt; unauthenticated it shares the runner IP's budget.
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           chmod +x scripts/*.sh
