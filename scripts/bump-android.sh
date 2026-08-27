@@ -11,8 +11,8 @@
 #      its POM) when the binding is built; nothing is committed to the repo.
 #   3. Bumps <Version> (<native>.<binding-rev>: the revision resets to .0 when the native
 #      version changes and increments otherwise).
-#   4. Prepends a <PackageReleaseNotes> entry for the new binding version, with
-#      Microsoft's changelog text for the native version when it is published.
+#   4. Sets <PackageReleaseNotes> to a single entry for the version being published,
+#      with Microsoft's changelog text for the native version when it is published.
 #
 # It deliberately does NOT touch the wrapper's <PackageReference>: the wrapper is only
 # moved onto a binding that is already live on nuget.org, which is a separate step.
@@ -88,8 +88,8 @@ NEW_VERSION="$NEW_VERSION" perl -pi -e \
 NEW_BINDING_VERSION="$NEW_BINDING_VERSION" perl -pi -e \
   's|<Version>[^<]+</Version>|<Version>$ENV{NEW_BINDING_VERSION}</Version>|' \
   "$ANDROID_CSPROJ"
-# One entry per line, newest first; earlier entries stay (nuget.org shows the history).
-perl "$SCRIPT_DIR/prepend-release-note.pl" "$ANDROID_CSPROJ" "$NOTE"
+# Only the version being published: the notes are not a changelog of past releases.
+perl "$SCRIPT_DIR/set-release-note.pl" "$ANDROID_CSPROJ" "$NOTE"
 
 # --- 6. Read everything back: a silently missed edit would ship "3.9.0.0" containing
 #        Clarity 3.8.2, which is worse than failing here. ------------------------------
@@ -105,8 +105,8 @@ if [[ "$WRITTEN_BINDING" != "$NEW_BINDING_VERSION" ]]; then
   echo "ERROR: failed to update <Version> (still '${WRITTEN_BINDING}')" >&2
   exit 1
 fi
-if ! grep -qE "^${NEW_BINDING_VERSION//./\\.}: " "$ANDROID_CSPROJ"; then
-  echo "ERROR: failed to prepend the <PackageReleaseNotes> entry" >&2
+if ! grep -qF "<PackageReleaseNotes>${NOTE}</PackageReleaseNotes>" "$ANDROID_CSPROJ"; then
+  echo "ERROR: failed to write the <PackageReleaseNotes> entry" >&2
   exit 1
 fi
 

@@ -13,8 +13,9 @@
 #   2. Regenerates ApiDefinitions.cs + StructsAndEnums.cs with Objective Sharpie.
 #   3. Strips the advisory [Verify(...)] attributes and normalizes the using directives
 #      (see step 4 below - this is the whole reason 3.5.3, 3.5.4 and 4.0.0 never built).
-#   4. Bumps <Version> (<native>.<binding-rev>) and prepends a <PackageReleaseNotes>
-#      entry with Microsoft's changelog text for the native version when it is published.
+#   4. Bumps <Version> (<native>.<binding-rev>) and sets <PackageReleaseNotes> to a
+#      single entry for the version being published, with Microsoft's changelog text for
+#      the native version when it is published.
 #
 # It deliberately does NOT touch the wrapper's <PackageReference>: the wrapper is only
 # moved onto a binding that is already live on nuget.org, which is a separate step.
@@ -150,16 +151,16 @@ cd - > /dev/null
 NEW_BINDING_VERSION="$NEW_BINDING_VERSION" perl -pi -e \
   's|<Version>[^<]+</Version>|<Version>$ENV{NEW_BINDING_VERSION}</Version>|' \
   "$IOS_CSPROJ"
-# One entry per line, newest first; earlier entries stay (nuget.org shows the history).
-perl "$SCRIPT_DIR/prepend-release-note.pl" "$IOS_CSPROJ" "$NOTE"
+# Only the version being published: the notes are not a changelog of past releases.
+perl "$SCRIPT_DIR/set-release-note.pl" "$IOS_CSPROJ" "$NOTE"
 
 WRITTEN_BINDING=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' "$IOS_CSPROJ" | head -1)
 if [[ "$WRITTEN_BINDING" != "$NEW_BINDING_VERSION" ]]; then
   echo "ERROR: failed to update <Version> (still '${WRITTEN_BINDING}')" >&2
   exit 1
 fi
-if ! grep -qE "^${NEW_BINDING_VERSION//./\\.}: " "$IOS_CSPROJ"; then
-  echo "ERROR: failed to prepend the <PackageReleaseNotes> entry" >&2
+if ! grep -qF "<PackageReleaseNotes>${NOTE}</PackageReleaseNotes>" "$IOS_CSPROJ"; then
+  echo "ERROR: failed to write the <PackageReleaseNotes> entry" >&2
   exit 1
 fi
 
