@@ -56,49 +56,53 @@ So that you dont have to specify platform for this package and it's calls, also 
 
 ## Automated SDK updates
 
-This repo runs a daily pipeline that watches Microsoft's Clarity Android and iOS SDKs and tries to bump + re-wire this package automatically. The flow:
+Two independent workflows watch Microsoft's native Clarity SDKs and each turn a new
+release into **one standalone pull request that is ready to merge when it opens**:
+
+| Workflow | Watches | Runner |
+|---|---|---|
+| `TryBumpAndroid` (`.github/workflows/try-bump-android.yml`) | `com.microsoft.clarity:clarity` on Maven Central | ubuntu |
+| `TryBumpIOS` (`.github/workflows/try-bump-ios.yml`) | `Clarity-<version>` in `microsoft/clarity-apps` `Package.swift` | macOS + Objective Sharpie |
+
+Both run daily and on demand (`workflow_dispatch` takes an optional explicit version).
+A run bumps the **binding** csproj only. The wrapper csproj is asserted byte-identical
+before anything is committed, so `main` never references a binding that is not on
+nuget.org yet.
 
 ```mermaid
 flowchart TD
-    A[Microsoft ships new Clarity SDK] --> B[06:00 UTC daily<br/>automatic-detect-sdk-updates.yml]
-    B --> C[Bump PR opened<br/>label: auto-bump]
-    C --> D[automatic-bump-and-wire.yml:<br/>build binding + diff API + build wrapper]
-
-    D --> E{Outcome?}
-
-    E -->|API unchanged<br/>wrapper compiles| F[Auto-merge as<br/>stable release]
-    E -->|API additions<br/>or wrapper breaks| G[Label: needs-wiring<br/>Ping @copilot<br/>with API diff]
-    E -->|Binding itself broken| H[Label: binding-broken<br/>Ping @copilot<br/>with binding-fix guide]
-
-    G --> K[Agent commits wiring]
-    H --> L{Agent can fix?}
-    L -->|yes| K
-    L -->|no| M[Agent adds label:<br/>needs-human]
-
-    K --> N[Human review + merge]
-    M --> N
-    F --> O[main updated]
-    N --> O
-
-    O --> R[release-please<br/>maintains release PR<br/>for wrapper version]
-    R --> S[Merge release PR<br/>tags vX.Y.Z]
-    S --> T[Manually run<br/>publish-*.yml workflows]
-    T --> U[NuGet.org]
+    A[Microsoft ships a new native SDK] --> B{detect: newest upstream<br/>== pinned version?}
+    B -->|yes| Z[Nothing to do]
+    B -->|no| C[bump-*.sh: pin, Version,<br/>PackageReleaseNotes + changelog excerpt]
+    C --> D{Binding builds?}
+    D -->|no| E[Claude Code repairs<br/>Transforms / ApiDefinitions,<br/>then a deterministic rebuild]
+    E --> F{Builds now?}
+    D -->|yes| G{Wrapper compiles against<br/>the packed binding?}
+    F -->|yes| G
+    F -->|no| H[DRAFT PR<br/>label binding-broken<br/>run fails]
+    G -->|yes| I[PR ready to merge<br/>bump/platform-version]
+    G -->|no| J[DRAFT PR<br/>label wrapper-broken<br/>run fails]
 
     classDef happy fill:#d4edda,stroke:#155724,color:#000
     classDef warn fill:#fff3cd,stroke:#856404,color:#000
-    classDef human fill:#f8d7da,stroke:#721c24,color:#000
-    class F,O,U happy
-    class G,H,K warn
-    class M,N human
+    classDef bad fill:#f8d7da,stroke:#721c24,color:#000
+    class I,Z happy
+    class E warn
+    class H,J bad
 ```
 
-The only manual steps for you:
-1. Review and merge agent wiring PRs when `needs-wiring` is applied
-2. Fix binding-generator failures the agent escalates as `needs-human` (rare)
-3. Trigger the three `publish-*.yml` workflows after each release tag
+What a green PR guarantees: `<Version>` follows `<native>.<binding-rev>`,
+`PackageReleaseNotes` starts with an entry for that version (with Microsoft's changelog
+text when it is published), the binding builds, and the wrapper compiles against the
+packed nupkg from a local feed. When Claude Code had to repair the binding sources the
+PR carries the `claude-fixed` label and a summary of the edits - review those like any
+hand-written change.
 
-See `.github/COPILOT_INSTRUCTIONS.md` for the rules the agent follows.
+Secrets: `BUMP_BOT_APP_ID` / `BUMP_BOT_APP_PRIVATE_KEY` (the bot that pushes and opens
+PRs) and `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`; without it a broken
+binding simply lands as a draft PR with the build log attached).
+
+Merging and publishing the binding, and moving the wrapper onto it, are separate steps.
 
 ## Contributions
 Feel free to create an issue or pull request. In case you would like to do massive changes in the package please firstly discuss them in the issue because otherwise there is high chance that such big PR would be rejected.
