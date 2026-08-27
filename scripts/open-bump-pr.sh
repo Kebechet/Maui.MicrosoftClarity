@@ -12,7 +12,8 @@
 #   PREVIOUS, TARGET  native SDK versions
 #   BINDING_VERSION   <native>.<binding-rev>
 #   BASE_BRANCH       branch the PR targets (main on the schedule; the dispatched ref otherwise)
-#   STATUS            green | binding-broken | wrapper-broken | min-os-raised
+#   STATUS            green | binding-broken | wrapper-broken | min-os-raised |
+#                     upstream-breaking
 #   MIN_OS_RAISED, MIN_OS_PREVIOUS, MIN_OS_CURRENT
 #                     from scripts/check-min-os.sh; a raised floor is breaking for
 #                     consumers, so that PR opens as a draft even though it builds
@@ -115,6 +116,10 @@ elif [[ "$STATUS" == "min-os-raised" ]]; then
     # platform floor is lower, so this fails until the wrapper's floor moves too.
     WRAPPER_LINE="❌ Wrapper does NOT compile against it - expected while the wrapper's own floor is below \`${MIN_OS_CURRENT}\`; see the \`wrapper-build-log-${PLATFORM}\` artifact"
   fi
+elif [[ "$STATUS" == "upstream-breaking" ]]; then
+  STATUS_LINE="🛑 **DRAFT - Microsoft marked this release \`[Breaking]\`.** Everything builds and the binding's own minimum OS version is unchanged, but read the upstream note above before merging: the break may be a support-policy change rather than anything visible in the artifact. Mark the PR ready once you have decided it is safe for consumers."
+  BUILD_LINE="✅ Binding builds (\`dotnet build -c Release\`)"
+  WRAPPER_LINE="✅ Wrapper compiles against the packed binding (\`${TFM}\`, wrapper csproj untouched)"
 else
   STATUS_LINE="🛑 **DRAFT - the wrapper does not compile against this binding.** The native API changed in a way the wrapper depends on; that is a wrapper change for a human, not something to merge as-is."
   BUILD_LINE="✅ Binding builds"
@@ -207,6 +212,7 @@ gh label create claude-fixed   --color 5319E7 --description "Binding sources wer
 gh label create binding-broken --color B60205 --description "The binding does not build against the new native SDK" --force >/dev/null
 gh label create wrapper-broken --color B60205 --description "The wrapper does not compile against the new binding" --force >/dev/null
 gh label create min-os-raised  --color D93F0B --description "The native SDK raised the minimum OS version - breaking for consumers" --force >/dev/null
+gh label create upstream-breaking --color D93F0B --description "Microsoft marked this native SDK release [Breaking]" --force >/dev/null
 
 LABEL_ARGS=()
 for label in "${LABELS[@]}"; do LABEL_ARGS+=(--label "$label"); done
@@ -228,7 +234,7 @@ else
   echo "==> refreshing existing PR #$NUM"
   gh pr edit "$NUM" --title "$TITLE" --body-file "$BODY_FILE" \
     --remove-label claude-fixed --remove-label binding-broken --remove-label wrapper-broken \
-    --remove-label min-os-raised >/dev/null || true
+    --remove-label min-os-raised --remove-label upstream-breaking >/dev/null || true
   gh pr edit "$NUM" "${ADD_LABEL_ARGS[@]}" >/dev/null
   if [[ "$STATUS" == "green" ]]; then
     gh pr ready "$NUM" || true

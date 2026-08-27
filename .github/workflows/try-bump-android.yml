@@ -267,6 +267,7 @@ jobs:
           MIN_OS_RAISED: ${{ steps.bump.outputs.min_os_raised }}
           MIN_OS_PREVIOUS: ${{ steps.bump.outputs.min_os_previous }}
           MIN_OS_CURRENT: ${{ steps.bump.outputs.min_os_current }}
+          UPSTREAM_BREAKING: ${{ steps.bump.outputs.upstream_breaking }}
         run: |
           # A raised OS floor is checked before the wrapper result: it is the likely
           # cause of a wrapper failure (NuGet will not serve a higher-platform asset to a
@@ -277,6 +278,8 @@ jobs:
             STATUS=min-os-raised
           elif [[ "$WRAPPER_OUTCOME" != "success" ]]; then
             STATUS=wrapper-broken
+          elif [[ "$UPSTREAM_BREAKING" == "true" ]]; then
+            STATUS=upstream-breaking
           else
             STATUS=green
           fi

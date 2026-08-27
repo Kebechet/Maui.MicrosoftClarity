@@ -68,6 +68,15 @@ if [[ -n "$EXCERPT" ]]; then
 fi
 NOTE+=" Changelog: ${CHANGELOG_URL}"
 echo "    release note: $NOTE"
+# Microsoft marks breaking releases in the note itself, and that claim can be broader
+# than anything measurable in the artifact: Clarity iOS 4.0.0 announced "minimum
+# supported iOS version 16" while the framework and Package.swift both still declared
+# 13.0. A release upstream calls breaking is never auto-merged.
+UPSTREAM_BREAKING=false
+if printf '%s' "$EXCERPT" | grep -qi '\[breaking\]'; then
+  UPSTREAM_BREAKING=true
+  echo "==> upstream marked this release [Breaking]"
+fi
 
 # --- 3. Download and replace the xcframework -------------------------------------
 cd "$IOS_DIR"
@@ -201,5 +210,6 @@ if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
     echo "previous_native_version=${CURRENT_NATIVE}"
     echo "changelog_excerpt=${EXCERPT}"
     echo "release_note=${NOTE}"
+    echo "upstream_breaking=${UPSTREAM_BREAKING}"
   } >> "$GITHUB_OUTPUT"
 fi
