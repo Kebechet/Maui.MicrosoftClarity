@@ -249,6 +249,42 @@ if [[ -z "$NUM" ]]; then
   exit 1
 fi
 
+# --- 7. Close bump PRs this one supersedes ------------------------------------------
+# Microsoft can ship 3.9.1 while the 3.9.0 PR is still open. Both are opened against the
+# pin on the base branch, so they coexist and the older one is dead weight.
+#
+# Two deliberate limits:
+#   - only when THIS PR is green: a draft (broken build, breaking release) must not close
+#     an older bump that is actually mergeable.
+#   - only strictly older versions, so an explicitly dispatched older bump never closes a
+#     newer one.
+# The branch is deleted only when the superseded PR is an untouched single bot commit;
+# anything else may carry a fix worth cherry-picking, and closing already makes it inert.
+if [[ "$STATUS" == "green" ]]; then
+  gh pr list --state open --base "$BASE_BRANCH" --json number,headRefName,isDraft \
+      --jq ".[] | select(.headRefName | startswith(\"bump/${PLATFORM}-\")) | select(.number != ${NUM}) | \"\(.number) \(.headRefName) \(.isDraft)\"" \
+    | while read -r old_num old_branch old_draft; do
+        old_version="${old_branch##*-}"
+        if [[ "$(dotnet run scripts/clarity.cs -- compare-versions "$old_version" "$TARGET")" != "-1" ]]; then
+          echo "==> leaving PR #${old_num} (${old_version}) open: not older than ${TARGET}"
+          continue
+        fi
+
+        commits=$(gh pr view "$old_num" --json commits --jq '.commits | length')
+        if [[ "$old_draft" == "false" && "$commits" == "1" ]]; then
+          delete_note="Its branch \`${old_branch}\` has been deleted."
+          delete_flag=(--delete-branch)
+        else
+          delete_note="Its branch \`${old_branch}\` is kept, because it carries work beyond the original bump commit."
+          delete_flag=()
+        fi
+
+        echo "==> superseding PR #${old_num} (${old_version} -> ${TARGET})"
+        gh pr close "$old_num" --comment "Superseded by ${URL} - Clarity ${PLATFORM_NAME} \`${TARGET}\` is now the newest release upstream, so this bump to \`${old_version}\` will not be merged. ${delete_note}" \
+          "${delete_flag[@]+"${delete_flag[@]}"}" || echo "WARN: could not close PR #${old_num}" >&2
+      done
+fi
+
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
   {
     echo "pr_number=${NUM}"

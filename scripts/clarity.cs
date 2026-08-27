@@ -18,6 +18,7 @@
 //   set-release-note <csproj> <note>                replace <PackageReleaseNotes> with one entry
 //   set-package-version <csproj> <pkgId> <version>  rewrite one <PackageReference> version
 //   check-min-os <csproj> <native-min>              raise the floor when the native lib needs more
+//   compare-versions <a> <b>                        print -1, 0 or 1 (dotted numeric)
 //   changelog-excerpt <android|ios> <version>       Microsoft's note for that version, one line
 //   strip-verify <file>                             drop Sharpie's advisory [Verify(...)] attrs
 //   normalize-usings <ApiDefinitions.cs>            drop `using Clarity;`, ensure `using UIKit;`
@@ -46,6 +47,7 @@ try
         "set-release-note" => SetReleaseNote(Arg(1), Arg(2)),
         "set-package-version" => SetPackageVersion(Arg(1), Arg(2), Arg(3)),
         "check-min-os" => CheckMinOs(Arg(1), Arg(2)),
+        "compare-versions" => Print(CompareVersions(Arg(1), Arg(2)).ToString(CultureInfo.InvariantCulture)),
         "changelog-excerpt" => await ChangelogExcerpt(Arg(1), Arg(2)),
         "strip-verify" => StripVerify(Arg(1)),
         "normalize-usings" => NormalizeUsings(Arg(1)),
@@ -158,6 +160,20 @@ static int SetReleaseNote(string csproj, string note)
 
 // --- minimum OS ------------------------------------------------------------------------
 
+// Dotted numeric comparison: "16.0" > "14.2", "21" > "19", "3.9.1" > "3.9.0".
+static int CompareVersions(string left, string right)
+{
+    var a = left.Split('.');
+    var b = right.Split('.');
+    for (var i = 0; i < Math.Max(a.Length, b.Length); i++)
+    {
+        var x = i < a.Length && int.TryParse(a[i], NumberStyles.Integer, CultureInfo.InvariantCulture, out var pa) ? pa : 0;
+        var y = i < b.Length && int.TryParse(b[i], NumberStyles.Integer, CultureInfo.InvariantCulture, out var pb) ? pb : 0;
+        if (x != y) return x < y ? -1 : 1;
+    }
+    return 0;
+}
+
 // A native SDK that raises its floor while the binding still claims a lower one compiles,
 // packs and passes every build check - it only breaks at deployment. So the floor is read
 // from the artifact and the binding is raised to match. Whether the WRAPPER follows is
@@ -166,7 +182,7 @@ static int SetReleaseNote(string csproj, string note)
 static int CheckMinOs(string csproj, string nativeMin)
 {
     var current = ReadElement(csproj, "SupportedOSPlatformVersion");
-    var raised = Compare(nativeMin, current) > 0;
+    var raised = CompareVersions(nativeMin, current) > 0;
     var updated = raised ? nativeMin : current;
 
     if (raised)
@@ -191,20 +207,6 @@ static int CheckMinOs(string csproj, string nativeMin)
         Console.WriteLine(line);
         var output = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
         if (!string.IsNullOrEmpty(output)) File.AppendAllText(output, line + Environment.NewLine);
-    }
-
-    // Dotted numeric comparison: "16.0" > "14.2", and "21" > "19".
-    static int Compare(string left, string right)
-    {
-        var a = left.Split('.');
-        var b = right.Split('.');
-        for (var i = 0; i < Math.Max(a.Length, b.Length); i++)
-        {
-            var x = i < a.Length && int.TryParse(a[i], NumberStyles.Integer, CultureInfo.InvariantCulture, out var pa) ? pa : 0;
-            var y = i < b.Length && int.TryParse(b[i], NumberStyles.Integer, CultureInfo.InvariantCulture, out var pb) ? pb : 0;
-            if (x != y) return x.CompareTo(y);
-        }
-        return 0;
     }
 }
 
