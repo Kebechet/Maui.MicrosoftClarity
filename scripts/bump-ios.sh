@@ -150,17 +150,15 @@ cd - > /dev/null
 NEW_BINDING_VERSION="$NEW_BINDING_VERSION" perl -pi -e \
   's|<Version>[^<]+</Version>|<Version>$ENV{NEW_BINDING_VERSION}</Version>|' \
   "$IOS_CSPROJ"
-# Prepend, keeping the earlier entries: nuget.org shows the notes as history.
-NOTE="$NOTE" perl -pi -e \
-  's|(<PackageReleaseNotes>)(.*?)(</PackageReleaseNotes>)|$1 . $ENV{NOTE} . (length $2 ? " $2" : "") . $3|e' \
-  "$IOS_CSPROJ"
+# One entry per line, newest first; earlier entries stay (nuget.org shows the history).
+perl "$SCRIPT_DIR/prepend-release-note.pl" "$IOS_CSPROJ" "$NOTE"
 
 WRITTEN_BINDING=$(sed -n -E 's|.*<Version>([^<]+)</Version>.*|\1|p' "$IOS_CSPROJ" | head -1)
 if [[ "$WRITTEN_BINDING" != "$NEW_BINDING_VERSION" ]]; then
   echo "ERROR: failed to update <Version> (still '${WRITTEN_BINDING}')" >&2
   exit 1
 fi
-if ! grep -qF "<PackageReleaseNotes>${NEW_BINDING_VERSION}: " "$IOS_CSPROJ"; then
+if ! grep -qE "^${NEW_BINDING_VERSION//./\\.}: " "$IOS_CSPROJ"; then
   echo "ERROR: failed to prepend the <PackageReleaseNotes> entry" >&2
   exit 1
 fi

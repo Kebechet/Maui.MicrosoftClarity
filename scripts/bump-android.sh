@@ -88,10 +88,8 @@ NEW_VERSION="$NEW_VERSION" perl -pi -e \
 NEW_BINDING_VERSION="$NEW_BINDING_VERSION" perl -pi -e \
   's|<Version>[^<]+</Version>|<Version>$ENV{NEW_BINDING_VERSION}</Version>|' \
   "$ANDROID_CSPROJ"
-# Prepend, keeping the earlier entries: nuget.org shows the notes as history.
-NOTE="$NOTE" perl -pi -e \
-  's|(<PackageReleaseNotes>)(.*?)(</PackageReleaseNotes>)|$1 . $ENV{NOTE} . (length $2 ? " $2" : "") . $3|e' \
-  "$ANDROID_CSPROJ"
+# One entry per line, newest first; earlier entries stay (nuget.org shows the history).
+perl "$SCRIPT_DIR/prepend-release-note.pl" "$ANDROID_CSPROJ" "$NOTE"
 
 # --- 6. Read everything back: a silently missed edit would ship "3.9.0.0" containing
 #        Clarity 3.8.2, which is worse than failing here. ------------------------------
@@ -107,7 +105,7 @@ if [[ "$WRITTEN_BINDING" != "$NEW_BINDING_VERSION" ]]; then
   echo "ERROR: failed to update <Version> (still '${WRITTEN_BINDING}')" >&2
   exit 1
 fi
-if ! grep -qF "<PackageReleaseNotes>${NEW_BINDING_VERSION}: " "$ANDROID_CSPROJ"; then
+if ! grep -qE "^${NEW_BINDING_VERSION//./\\.}: " "$ANDROID_CSPROJ"; then
   echo "ERROR: failed to prepend the <PackageReleaseNotes> entry" >&2
   exit 1
 fi
