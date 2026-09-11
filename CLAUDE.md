@@ -71,3 +71,39 @@ This package uses release-please. The `<Version>` line in
 `<!-- x-release-please-version -->` and is updated automatically — never bump it
 in a feature PR. Use conventional commit prefixes (`feat:`, `fix:`, `feat!:` for
 breaking, etc.); release-please derives the version bump and changelog from there.
+
+## Testing a wrapper change on real devices
+
+The demo (`demo/DemoApp`) references the wrapper by `ProjectReference`, so it builds
+whatever is in the working tree — but it still restores the **binding packages from
+nuget.org**, so a wrapper move onto a new binding cannot be device-tested until that
+binding is actually published and indexed.
+
+**Android** (Pixel 6, serial `1B261FDF600DBL`):
+
+```bash
+dotnet build demo/DemoApp/DemoApp/DemoApp.csproj -f net10.0-android -c Debug \
+  -p:EmbedAssembliesIntoApk=true -p:AndroidSdkDirectory="$LOCALAPPDATA\Android\Sdk"
+adb -s 1B261FDF600DBL install -r demo/DemoApp/DemoApp/bin/Debug/net10.0-android/com.companyname.demoapp-Signed.apk
+adb -s 1B261FDF600DBL shell am start -n com.companyname.demoapp/crc6450bbe13713f94727.MainActivity
+adb -s 1B261FDF600DBL logcat -d | grep -i clarity | grep -v om.satisfit
+```
+
+⚠️ **`-p:EmbedAssembliesIntoApk=true` is required when installing with `adb install`.** A
+default Debug build uses Fast Deployment, which ships an APK with no assemblies and expects
+them to be pushed separately; installing that APK by hand aborts at launch with
+`No assemblies found in ... .__override__`, which looks like a binding failure and is not.
+
+⚠️ **Filter `om.satisfit` out of logcat.** SatisFIT is installed on the same phone and runs
+its own Clarity, so an unfiltered `grep -i clarity` shows *its* SDK, not the demo's. A real
+pass looks like `Initialize Clarity` → `Request response code (...): 200` → `Clarity started`
+→ `Upload job started for session '<id>'` → `Uploaded payload ...`, plus
+`Received web view analytics event Click` for the BlazorWebView path.
+
+🛑 **iOS: sign with the existing `*` wildcard App ID, and never with `com.satisfit.app`.**
+Those profiles are explicit-id, so reusing one forces the demo to take that bundle id and
+overwrites the SatisFIT install on the iPhone. A wildcard development profile signs any
+bundle id, so the demo keeps `com.companyname.demoapp` and nothing is replaced. Reuse an
+existing DEVELOPMENT certificate: `~/satisfit-signing/asc-dev-signing.cs` on the Mac always
+mints a *new* one, Apple caps them, and three already exist. Rig details are in the SatisFIT
+repo's `.claude/rules/app-automation.md`.
