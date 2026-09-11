@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.0.1](https://github.com/Kebechet/Maui.MicrosoftClarity/compare/v4.0.0...v4.0.1) (2026-09-11)
+
+
+### Bug Fixes
+
+* **deps:** move onto Clarity Android 3.10.0 and iOS 4.0.0 ([ab7cb53](https://github.com/Kebechet/Maui.MicrosoftClarity/commit/ab7cb538dad0085d53df5350842ba58afc39cb3d))
+* **deps:** move onto Clarity Android 3.10.0 and iOS 4.0.0 ([b1bc09e](https://github.com/Kebechet/Maui.MicrosoftClarity/commit/b1bc09e4699a1323134483af95d1e8caa8924776)), closes [#62](https://github.com/Kebechet/Maui.MicrosoftClarity/issues/62)
+
 ## [4.0.0](https://github.com/Kebechet/Maui.MicrosoftClarity/compare/v3.0.2...v4.0.0) (2026-05-12)
 
 
