@@ -32,7 +32,10 @@
     <DebugType>embedded</DebugType>
     <PackageIcon>icon.png</PackageIcon>
     <Version>4.0.0</Version> <!-- x-release-please-version -->
-    <PackageReleaseNotes>Fixed Android memory leak: properly dispose SessionStartedCallbackAdapter Java interop objects</PackageReleaseNotes>
+    <PackageReleaseNotes>Moved onto the Clarity Android 3.10.0 and Clarity iOS 4.0.0 bindings.
+Android, since 3.8.2: enhanced session upload reliability (3.8.3); Android 17 (API 37) and Jetpack Compose 1.11 support plus a skia shader rendering fix (3.9.0); MaskingMode.Strict honored for React Native apps (3.10.0, no effect here - this package always configures ApplicationFramework.Native).
+iOS, since 3.5.2: ComPDFKit PDF annotation crash fix (3.5.3); session upload fix (3.5.4); optimized screen capture (4.0.0).
+iOS 13 to 15: Clarity 4.0.0 still links and builds there but stays idle, so there is no recording below iOS 16. The minimum stays at 11.0, so no consumer has to raise their own floor. See https://github.com/microsoft/clarity-apps/issues/289</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -58,11 +61,11 @@
 	</ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
-    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.Android" Version="3.8.2.1" />
+    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.Android" Version="3.10.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-ios'">
-    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.iOS" Version="3.5.2" />
+    <PackageReference Include="Kebechet.Maui.MicrosoftClarity.iOS" Version="4.0.0.0" />
   </ItemGroup>
 
 </Project>
