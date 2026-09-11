@@ -21,7 +21,12 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
     <Version>4.0.0.0</Version>
-    <PackageReleaseNotes>4.0.0.0: bumped native Clarity iOS SDK from 3.5.2 to 4.0.0. Upstream: [Breaking] Updated the minimum supported iOS version to 16. [Enhancement] Optimized screen capture performance. Changelog: https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#ios-sdk-changelog</PackageReleaseNotes>
+    <PackageReleaseNotes>4.0.0.0: bumped native Clarity iOS SDK from 3.5.2 to 4.0.0.
+3.5.3: [BugFix] Fixed a crash during PDF annotation in ComPDFKit-based views.
+3.5.4: [BugFix] Fixed an issue with session uploads.
+4.0.0: [Breaking] Updated the minimum supported iOS version to 16. [Enhancement] Optimized screen capture performance.
+On iOS 13 to 15 the SDK still links and builds but stays idle, so this binding's minimum stays at 14.2 and no consumer has to raise their own floor. See https://github.com/microsoft/clarity-apps/issues/289
+Changelog: https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#ios-sdk-changelog</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

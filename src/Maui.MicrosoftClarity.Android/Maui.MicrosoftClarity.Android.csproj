@@ -19,7 +19,11 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
     <Version>3.10.0.0</Version>
-    <PackageReleaseNotes>3.10.0.0: bumped native Clarity Android SDK from 3.9.0 to 3.10.0. Changelog: https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#android-sdk-changelog</PackageReleaseNotes>
+    <PackageReleaseNotes>3.10.0.0: bumped native Clarity Android SDK from 3.8.2 to 3.10.0.
+3.8.3: [Enhancement] Enhanced session upload reliability.
+3.9.0: [Feature] Support Android 17 (API 37). [Feature] Support Jetpack Compose 1.11. [BugFix] Fixed a skia shader rendering issue.
+3.10.0: no upstream note published.
+Changelog: https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#android-sdk-changelog</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

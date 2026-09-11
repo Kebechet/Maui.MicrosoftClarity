@@ -17,7 +17,9 @@
 #   MIN_OS_RAISED, MIN_OS_PREVIOUS, MIN_OS_CURRENT
 #                     from clarity.cs check-min-os; a raised floor is breaking for
 #                     consumers, so that PR opens as a draft even though it builds
-#   CHANGELOG_EXCERPT optional upstream changelog line for TARGET
+#   CHANGELOG_EXCERPT optional upstream changelog, one line per version in the range
+#   NOTE_FROM         native version the release note is anchored to: the newest binding on
+#                     nuget.org, which is not PREVIOUS once a bump merges unpublished
 #   CLAUDE_FIXED      true when the Claude repair step changed sources that then built
 #   FIX_SUMMARY_FILE  optional markdown written by the repair step
 #   RUN_URL           link to the workflow run (build logs are attached there)
@@ -30,6 +32,7 @@ set -euo pipefail
 
 : "${PLATFORM:?}" "${PREVIOUS:?}" "${TARGET:?}" "${BINDING_VERSION:?}" "${BASE_BRANCH:?}" "${STATUS:?}"
 CHANGELOG_EXCERPT="${CHANGELOG_EXCERPT:-}"
+NOTE_FROM="${NOTE_FROM:-}"
 MIN_OS_RAISED="${MIN_OS_RAISED:-false}"
 MIN_OS_PREVIOUS="${MIN_OS_PREVIOUS:-}"
 MIN_OS_CURRENT="${MIN_OS_CURRENT:-}"
@@ -69,7 +72,7 @@ fi
 # --- 2. Commit only the binding directory ---------------------------------------
 COMMIT_BODY="From ${PREVIOUS} to ${TARGET}. Binding only - the wrapper moves onto ${BINDING_VERSION} once it is live on nuget.org."
 if [[ -n "$CHANGELOG_EXCERPT" ]]; then
-  COMMIT_BODY+=$'\n\n'"Upstream ${TARGET}: ${CHANGELOG_EXCERPT}"
+  COMMIT_BODY+=$'\n\n'"Upstream, since the binding that is live on nuget.org:"$'\n'"${CHANGELOG_EXCERPT}"
 fi
 if [[ "$MIN_OS_RAISED" == "true" ]]; then
   COMMIT_BODY+=$'\n\n'"BREAKING: the native SDK raised its floor, so the binding's SupportedOSPlatformVersion moves from ${MIN_OS_PREVIOUS} to ${MIN_OS_CURRENT}."
@@ -134,6 +137,20 @@ else
   EXCERPT_BLOCK="_Not published on Microsoft Learn yet._"
 fi
 
+# The notes cover every release since what is actually on nuget.org, which is not the repo's
+# previous pin whenever a bump merged without being published. Both rows are shown so a
+# reviewer can see the gap rather than infer it.
+if [[ -n "$NOTE_FROM" && "$NOTE_FROM" != "$TARGET" ]]; then
+  EXCERPT_HEADING="\`${NOTE_FROM}\` → \`${TARGET}\`"
+  PUBLISHED_FROM_ROW="\`${NOTE_FROM}\`"
+  if [[ "$NOTE_FROM" != "$PREVIOUS" ]]; then
+    PUBLISHED_FROM_ROW+=" ⚠️ the repo is ahead of nuget.org, so this bump also carries every release in between"
+  fi
+else
+  EXCERPT_HEADING="${TARGET}"
+  PUBLISHED_FROM_ROW="_nothing published yet_"
+fi
+
 if [[ "$MIN_OS_RAISED" == "true" ]]; then
   MIN_OS_ROW="⚠️ raised \`${MIN_OS_PREVIOUS}\` → \`${MIN_OS_CURRENT}\` (required by the native SDK)"
 elif [[ -n "$MIN_OS_CURRENT" ]]; then
@@ -163,14 +180,15 @@ Binding-only bump produced by \`${WORKFLOW}\`. The wrapper is moved onto \`${BIN
 
 | | |
 |---|---|
-| Previous | \`${PREVIOUS}\` |
+| Previous (in repo) | \`${PREVIOUS}\` |
+| Previous (on nuget.org) | ${PUBLISHED_FROM_ROW} |
 | Target | \`${TARGET}\` |
 | Binding version | \`${BINDING_VERSION}\` (nuget.org shows it as \`${PUBLISHED_VERSION}\`) |
 | Minimum ${OS_NAME} | ${MIN_OS_ROW} |
 | Source | ${SOURCE_URL} |
 | Changelog | ${CHANGELOG_URL} |
 
-### Upstream changelog ${TARGET}
+### Upstream changelog ${EXCERPT_HEADING}
 ${EXCERPT_BLOCK}
 
 ### Verification

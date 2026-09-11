@@ -15,8 +15,11 @@
 #      last step is the whole reason 3.5.3, 3.5.4 and 4.0.0 never built.
 #   3. Compares the framework's own MinimumOSVersion with <SupportedOSPlatformVersion>
 #      and raises the csproj when the native library requires more.
-#   4. Bumps <Version> (<native>.<binding-rev>) and sets <PackageReleaseNotes> to a single
-#      entry for the version being published.
+#   4. Bumps <Version> (<native>.<binding-rev>) and sets <PackageReleaseNotes> to cover
+#      every native release since the binding that is live on nuget.org, one line per
+#      version, so releases this bump jumps over are still described somewhere. An
+#      unreadable upstream source fails the run rather than guessing - the note cannot be
+#      corrected once it is published.
 #
 # It deliberately does NOT touch the wrapper's <PackageReference>: the wrapper is only
 # moved onto a binding that is already live on nuget.org, which is a separate step.
@@ -30,6 +33,7 @@ NEW_VERSION="${1:?usage: bump-ios.sh <new-version>}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 IOS_DIR="src/Maui.MicrosoftClarity.iOS"
 IOS_CSPROJ="$IOS_DIR/Maui.MicrosoftClarity.iOS.csproj"
+BINDING_PACKAGE_ID="Kebechet.Maui.MicrosoftClarity.iOS"
 FRAMEWORK_ZIP_URL="https://www.clarity.ms/apps/resources/ios/Clarity-${NEW_VERSION}.xcframework.zip"
 FRAMEWORK_ZIP="Clarity-${NEW_VERSION}.xcframework.zip"
 FRAMEWORK_DIR="Clarity.xcframework"
@@ -45,8 +49,15 @@ echo "==> Bumping iOS Clarity SDK to ${NEW_VERSION}"
 # --- 1. Current versions from the csproj -----------------------------------------
 CURRENT_BINDING_VERSION=$(clarity get-version "$IOS_CSPROJ")
 CURRENT_NATIVE="${CURRENT_BINDING_VERSION%.*}"
+
+# Empty only when the package has never been published; any other failure exits non-zero
+# and set -e stops here, because falling back to the csproj would quietly reintroduce the
+# wrong anchor this lookup exists to replace.
+LAST_PUBLISHED_NATIVE=$(clarity last-published-native "$BINDING_PACKAGE_ID")
+
 echo "    current native version:  $CURRENT_NATIVE"
 echo "    current binding version: $CURRENT_BINDING_VERSION"
+echo "    last published native:   ${LAST_PUBLISHED_NATIVE:-<nothing published yet>}"
 echo "    target  native version:  $NEW_VERSION"
 
 if [[ "$CURRENT_NATIVE" == "$NEW_VERSION" ]]; then
@@ -136,25 +147,42 @@ MIN_OS_RAISED=$(printf '%s\n' "$MIN_OS_OUTPUT" | sed -n -E 's|^min_os_raised=(.*
 MIN_OS_PREVIOUS=$(printf '%s\n' "$MIN_OS_OUTPUT" | sed -n -E 's|^min_os_previous=(.*)$|\1|p')
 
 # --- 5. Release note -----------------------------------------------------------------
-EXCERPT=$(clarity changelog-excerpt ios "$NEW_VERSION" || true)
-if [[ "$CURRENT_NATIVE" == "$NEW_VERSION" ]]; then
+# Anchored to the newest binding on nuget.org, not to the csproj: the two agree only while
+# every bump gets published, and a version skipped in between has no package of its own, so
+# its upstream notes appear here or nowhere.
+#
+# No `|| true`: an unreadable source exits non-zero and set -e stops the bump. A note is
+# permanent once it reaches nuget.org, so a guess is worse than a failed run.
+if [[ -n "$LAST_PUBLISHED_NATIVE" ]]; then
+  NOTE_FROM="$LAST_PUBLISHED_NATIVE"
+else
+  NOTE_FROM="$CURRENT_NATIVE"
+fi
+
+if [[ "$NOTE_FROM" == "$NEW_VERSION" ]]; then
+  EXCERPT=""
   NOTE="${NEW_BINDING_VERSION}: rebuilt the binding for native Clarity iOS SDK ${NEW_VERSION} (binding revision only, no native change)."
 else
-  NOTE="${NEW_BINDING_VERSION}: bumped native Clarity iOS SDK from ${CURRENT_NATIVE} to ${NEW_VERSION}."
+  EXCERPT=$(clarity changelog-range ios "$NOTE_FROM" "$NEW_VERSION")
+  NOTE="${NEW_BINDING_VERSION}: bumped native Clarity iOS SDK from ${NOTE_FROM} to ${NEW_VERSION}."
 fi
 if [[ -n "$EXCERPT" ]]; then
-  NOTE+=" Upstream: ${EXCERPT}"
+  NOTE+=$'\n'"${EXCERPT}"
 fi
 if [[ "$MIN_OS_RAISED" == "true" ]]; then
-  NOTE+=" BREAKING: the minimum supported iOS version is now ${NATIVE_MIN_OS} (was ${MIN_OS_PREVIOUS}), as required by the native SDK."
+  NOTE+=$'\n'"BREAKING: the minimum supported iOS version is now ${NATIVE_MIN_OS} (was ${MIN_OS_PREVIOUS}), as required by the native SDK."
 fi
-NOTE+=" Changelog: ${CHANGELOG_URL}"
-echo "    release note: $NOTE"
+NOTE+=$'\n'"Changelog: ${CHANGELOG_URL}"
+echo "    release note:"
+printf '%s\n' "$NOTE" | sed 's/^/      /'
 
 # Microsoft marks breaking releases in the note itself, and that claim can be broader than
 # anything measurable in the artifact: 4.0.0 announced "minimum supported iOS version 16"
 # while the framework and Package.swift both still declared 13.0. A release upstream calls
 # breaking is never auto-merged.
+#
+# This scans the whole range, not just the target. A [Breaking] in a version the bump jumps
+# over is still a break the consumer takes.
 UPSTREAM_BREAKING=false
 if printf '%s' "$EXCERPT" | grep -qi '\[breaking\]'; then
   UPSTREAM_BREAKING=true
@@ -183,12 +211,19 @@ echo "      - $IOS_DIR/ApiDefinitions.cs, $IOS_DIR/StructsAndEnums.cs"
 echo "      - $IOS_DIR/nativelib/$FRAMEWORK_DIR"
 
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
+  # The note and the excerpt are multi-line from here on, and a bare `name=value` carrying
+  # newlines makes the runner reject the whole output file - so those two go in heredoc form.
   {
     echo "native_version=${NEW_VERSION}"
     echo "binding_version=${NEW_BINDING_VERSION}"
     echo "previous_native_version=${CURRENT_NATIVE}"
-    echo "changelog_excerpt=${EXCERPT}"
-    echo "release_note=${NOTE}"
+    echo "note_from=${NOTE_FROM}"
     echo "upstream_breaking=${UPSTREAM_BREAKING}"
+    echo "changelog_excerpt<<CLARITY_BUMP_EOF"
+    printf '%s\n' "$EXCERPT"
+    echo "CLARITY_BUMP_EOF"
+    echo "release_note<<CLARITY_BUMP_EOF"
+    printf '%s\n' "$NOTE"
+    echo "CLARITY_BUMP_EOF"
   } >> "$GITHUB_OUTPUT"
 fi

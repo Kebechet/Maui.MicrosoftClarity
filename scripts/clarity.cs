@@ -15,19 +15,22 @@
 //   get-min-os <csproj>                             print <SupportedOSPlatformVersion>
 //   set-version <csproj> <version>                  rewrite <Version>
 //   set-maven-pin <csproj> <version>                rewrite the AndroidMavenLibrary pin
-//   set-release-note <csproj> <note>                replace <PackageReleaseNotes> with one entry
+//   set-release-note <csproj> <note>                replace <PackageReleaseNotes>, newlines allowed
 //   set-package-version <csproj> <pkgId> <version>  rewrite one <PackageReference> version
 //   check-min-os <csproj> <native-min>              raise the floor when the native lib needs more
 //   compare-versions <a> <b>                        print -1, 0 or 1 (dotted numeric)
-//   changelog-excerpt <android|ios> <version>       Microsoft's note for that version, one line
+//   last-published-native <pkgId>                   native version behind the newest nuget.org release
+//   changelog-range <android|ios> <after> <through> Microsoft's notes for (after, through], one per line
 //   strip-verify <file>                             drop Sharpie's advisory [Verify(...)] attrs
 //   normalize-usings <ApiDefinitions.cs>            drop `using Clarity;`, ensure `using UIKit;`
 
 using System.Globalization;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 if (args.Length == 0)
 {
@@ -48,7 +51,8 @@ try
         "set-package-version" => SetPackageVersion(Arg(1), Arg(2), Arg(3)),
         "check-min-os" => CheckMinOs(Arg(1), Arg(2)),
         "compare-versions" => Print(CompareVersions(Arg(1), Arg(2)).ToString(CultureInfo.InvariantCulture)),
-        "changelog-excerpt" => await ChangelogExcerpt(Arg(1), Arg(2)),
+        "last-published-native" => Print(await LastPublishedNative(Arg(1))),
+        "changelog-range" => Print(await ChangelogRange(Arg(1), Arg(2), Arg(3))),
         "strip-verify" => StripVerify(Arg(1)),
         "normalize-usings" => NormalizeUsings(Arg(1)),
         var other => Fail($"unknown command '{other}'"),
@@ -58,6 +62,14 @@ catch (UsageException ex)
 {
     Console.Error.WriteLine($"ERROR: {ex.Message}");
     return 2;
+}
+// Exit 3 so a caller can tell "upstream is down" from "the arguments were wrong". A bump
+// that cannot read a source must stop: the note it would otherwise invent gets published
+// once and then cannot be corrected.
+catch (SourceUnavailableException ex)
+{
+    Console.Error.WriteLine($"ERROR: {ex.Message}");
+    return 3;
 }
 
 string Arg(int index) => index < args.Length
@@ -116,11 +128,11 @@ static string ReadMavenPin(string csproj)
 
 // --- csproj writes ---------------------------------------------------------------------
 
-static int Replace(string path, string pattern, string replacement, string what)
+static int Replace(string path, string pattern, string replacement, string what, RegexOptions options = RegexOptions.None)
 {
     var (bom, _, text) = ReadFile(path);
-    var updated = Regex.Replace(text, pattern, replacement);
-    if (updated == text && !Regex.IsMatch(text, pattern))
+    var updated = Regex.Replace(text, pattern, replacement, options);
+    if (updated == text && !Regex.IsMatch(text, pattern, options))
         return Fail($"{what} not found in {path}");
 
     WriteFile(path, bom, updated);
@@ -144,18 +156,31 @@ static int SetPackageVersion(string csproj, string packageId, string version) =>
         $"${{1}}{version}${{2}}",
         $"a <PackageReference> for {packageId}");
 
-// The notes are metadata for the version being published, not a changelog of past
-// releases: nuget.org already shows every earlier version's own notes.
+// The note covers every native release since the binding that is actually on nuget.org,
+// which is not the same as "since the previous commit". A bump can merge and never be
+// published - Android 3.9.0.0 was merged and superseded by 3.10.0.0 before anyone ran
+// publish-android - and the versions skipped that way have no package of their own, so
+// nuget.org will never show their notes anywhere else. Anchoring to the published version
+// is what keeps them from disappearing.
+//
+// Singleline matters: the note is multi-line from here on, and without it the *next* bump
+// cannot match across the newlines and dies claiming <PackageReleaseNotes> is missing.
 static int SetReleaseNote(string csproj, string note)
 {
     if (note.AsSpan().IndexOfAny('<', '>', '&') >= 0)
         return Fail($"the note must not contain XML markup: {note}");
 
+    // The note's own newlines take the file's line endings. Leaving them as LF inside a CRLF
+    // csproj is what makes an editor "fix" the whole file later and bury the real change.
+    var eol = ReadFile(csproj).Eol;
+    var normalized = note.Replace("\r\n", "\n").Replace("\n", eol);
+
     return Replace(
         csproj,
         "(<PackageReleaseNotes>).*?(</PackageReleaseNotes>)",
-        $"${{1}}{note.Replace("$", "$$")}${{2}}",
-        "<PackageReleaseNotes>");
+        $"${{1}}{normalized.Replace("$", "$$")}${{2}}",
+        "<PackageReleaseNotes>",
+        RegexOptions.Singleline);
 }
 
 // --- minimum OS ------------------------------------------------------------------------
@@ -251,26 +276,125 @@ static int NormalizeUsings(string path)
 
 // --- changelog -------------------------------------------------------------------------
 
-// Sources, in order of preference:
+// The range is (after, through], never just `through`: binding versions get skipped - merged,
+// superseded, published never - and a skipped version has no package of its own, so its
+// upstream notes would exist nowhere on nuget.org at all.
+//
+// The version list comes from the release source itself rather than from the notes, so a
+// release Microsoft has shipped but not yet written up is still enumerated and says so.
+// Android 3.10.0 was exactly that for four days.
+//
+// Sources for the note text, in order of preference:
 //   ios      microsoft/clarity-apps GitHub releases, then Microsoft Learn. The releases
 //            carry per-version notes the moment the SDK ships, while Learn lags by days or
 //            weeks - iOS 4.0.0 had release notes on GitHub while Learn still stopped at
 //            3.5.4.
 //   android  Microsoft Learn only. Those releases are iOS-only (all 51 of them), and
 //            neither Maven Central nor the AAR carries notes.
-// Never throws: a missing changelog must not block a bump.
-static async Task<int> ChangelogExcerpt(string platform, string version)
+//
+// Every fetch either answers or throws. "Unreachable" and "nothing published" are different
+// facts, and only one of them is safe to write into a package version that can never be
+// edited again - so a source that cannot be read stops the bump instead of being guessed at.
+static async Task<string> ChangelogRange(string platform, string after, string through)
 {
-    if (platform is not ("android" or "ios")) return Fail($"unknown platform '{platform}'");
+    if (platform is not ("android" or "ios")) throw new UsageException($"unknown platform '{platform}'");
 
     using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
     http.DefaultRequestHeaders.UserAgent.ParseAdd("Kebechet.Maui.MicrosoftClarity-bump/1.0");
 
-    var excerpt = platform == "ios" ? await FromGitHubReleases(http, version) : null;
-    excerpt ??= await FromLearn(http, platform, version);
+    // One releases request serves both the version list and the notes.
+    var releases = platform == "ios" ? await Releases(http) : [];
+    var released = platform == "ios" ? IosVersions(releases) : await AndroidVersions(http);
+    var inRange = released
+        .Where(x => CompareVersions(x, after) > 0 && CompareVersions(x, through) <= 0)
+        .Order(Comparer<string>.Create(CompareVersions))
+        .ToList();
 
-    if (!string.IsNullOrWhiteSpace(excerpt)) Console.WriteLine(Sanitize(excerpt));
-    return 0;
+    if (inRange.Count == 0)
+        throw new SourceUnavailableException(
+            $"upstream lists no {platform} release in ({after}, {through}] - the version list is incomplete, so the range cannot be described");
+
+    var fromGitHub = GitHubNotes(releases);
+
+    // Learn is only worth a request when GitHub left a gap; on Android it is the only source.
+    var missing = inRange.Where(x => !fromGitHub.ContainsKey(x)).ToList();
+    var fromLearn = missing.Count > 0 ? await LearnNotes(http, platform) : [];
+
+    var lines = inRange.Select(version =>
+    {
+        var note = fromGitHub.GetValueOrDefault(version) ?? fromLearn.GetValueOrDefault(version);
+        return note is null
+            ? $"{version}: no upstream note published."
+            : $"{version}: {Sanitize(note)}";
+    });
+
+    return string.Join("\n", lines);
+}
+
+// nuget.org, not the working tree, is what a consumer upgrades from, and the two diverge the
+// moment a bump merges without being published. A 404 is the one legitimate "nothing
+// published yet"; every other failure throws, because falling back to the csproj pin would
+// silently recreate the bug this exists to prevent.
+static async Task<string> LastPublishedNative(string packageId)
+{
+    using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+    http.DefaultRequestHeaders.UserAgent.ParseAdd("Kebechet.Maui.MicrosoftClarity-bump/1.0");
+
+    var url = $"https://api.nuget.org/v3-flatcontainer/{packageId.ToLowerInvariant()}/index.json";
+    using var response = await Get(http, url, "nuget.org");
+    if (response.StatusCode == HttpStatusCode.NotFound) return string.Empty;
+    if (!response.IsSuccessStatusCode)
+        throw new SourceUnavailableException($"nuget.org returned {(int)response.StatusCode} for {packageId}");
+
+    using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+    var published = json.RootElement.GetProperty("versions")
+        .EnumerateArray()
+        .Select(x => x.GetString() ?? string.Empty)
+        .Where(x => x.Length > 0 && !x.Contains('-'))
+        .ToList();
+
+    if (published.Count == 0) return string.Empty;
+
+    // Binding versions are <native>.<revision>, and nuget.org normalises a trailing ".0" away:
+    // 3.10.0.0 comes back as 3.10.0 while 3.8.2.1 stays 3.8.2.1. Dropping only a fourth
+    // component reads both correctly.
+    var newest = published.Aggregate((a, b) => CompareVersions(a, b) >= 0 ? a : b);
+    var parts = newest.Split('.');
+    return parts.Length >= 4 ? string.Join('.', parts.Take(3)) : newest;
+}
+
+static async Task<HttpResponseMessage> Get(HttpClient http, string url, string source)
+{
+    try
+    {
+        return await http.GetAsync(url);
+    }
+    catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+    {
+        throw new SourceUnavailableException($"could not reach {source}: {ex.Message}");
+    }
+}
+
+// Maven Central is the release list for Android; the AAR carries no notes, only versions.
+static async Task<List<string>> AndroidVersions(HttpClient http)
+{
+    using var response = await Get(http, "https://repo1.maven.org/maven2/com/microsoft/clarity/clarity/maven-metadata.xml", "Maven Central");
+    if (!response.IsSuccessStatusCode)
+        throw new SourceUnavailableException($"Maven Central returned {(int)response.StatusCode} for com.microsoft.clarity:clarity");
+
+    var metadata = XDocument.Parse(await response.Content.ReadAsStringAsync());
+    return metadata.Descendants("version")
+        .Select(x => x.Value.Trim())
+        .Where(x => x.Length > 0 && !x.Contains('-'))
+        .ToList();
+}
+
+static List<string> IosVersions(List<JsonElement> releases)
+{
+    return releases
+        .Select(release => (release.TryGetProperty("tag_name", out var tag) ? tag.GetString() : null)?.TrimStart('v') ?? string.Empty)
+        .Where(x => Regex.IsMatch(x, @"^\d+(\.\d+)*$"))
+        .ToList();
 }
 
 // The result is written into <PackageReleaseNotes>, which set-release-note refuses to fill
@@ -278,69 +402,98 @@ static async Task<int> ChangelogExcerpt(string platform, string version)
 static string Sanitize(string value) =>
     Regex.Replace(value.Replace("&", "and").Replace("<", string.Empty).Replace(">", string.Empty), @"\s+", " ").Trim();
 
-static async Task<string?> FromGitHubReleases(HttpClient http, string version)
+static async Task<List<JsonElement>> Releases(HttpClient http)
 {
+    using var request = new HttpRequestMessage(
+        HttpMethod.Get,
+        "https://api.github.com/repos/microsoft/clarity-apps/releases?per_page=100");
+    request.Headers.Accept.ParseAdd("application/vnd.github+json");
+    request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
+
+    // Unauthenticated this shares the runner IP's hourly budget.
+    var token = Environment.GetEnvironmentVariable("GH_TOKEN")
+                ?? Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+    if (!string.IsNullOrEmpty(token))
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+    HttpResponseMessage response;
     try
     {
-        using var request = new HttpRequestMessage(
-            HttpMethod.Get,
-            "https://api.github.com/repos/microsoft/clarity-apps/releases?per_page=100");
-        request.Headers.Accept.ParseAdd("application/vnd.github+json");
-        request.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
-
-        // Unauthenticated this shares the runner IP's hourly budget.
-        var token = Environment.GetEnvironmentVariable("GH_TOKEN")
-                    ?? Environment.GetEnvironmentVariable("GITHUB_TOKEN");
-        if (!string.IsNullOrEmpty(token))
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        using var response = await http.SendAsync(request);
-        if (!response.IsSuccessStatusCode) return null;
-
-        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-        foreach (var release in json.RootElement.EnumerateArray())
-        {
-            var tag = (release.TryGetProperty("tag_name", out var t) ? t.GetString() : null)?.TrimStart('v') ?? string.Empty;
-            var name = (release.TryGetProperty("name", out var n) ? n.GetString() : null) ?? string.Empty;
-            if (tag != version && !name.Contains($"v{version}", StringComparison.OrdinalIgnoreCase)) continue;
-
-            var body = (release.TryGetProperty("body", out var b) ? b.GetString() : null) ?? string.Empty;
-            var items = body.Split('\n')
-                .Select(line => line.Trim())
-                .Where(line => line.StartsWith("- ") || line.StartsWith("* "))
-                .Select(line => line[2..].Replace("**", string.Empty).Trim())
-                .Where(line => line.Length > 0 && !line.StartsWith("Full Changelog", StringComparison.OrdinalIgnoreCase))
-                .Select(line => line.EndsWith('.') ? line : line + ".")
-                .ToList();
-
-            return items.Count > 0 ? string.Join(" ", items) : null;
-        }
-    }
-    catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
-    {
-        // Fall through to Learn.
-    }
-
-    return null;
-}
-
-static async Task<string?> FromLearn(HttpClient http, string platform, string version)
-{
-    var heading = platform == "ios" ? "iOS SDK Changelog" : "Android SDK Changelog";
-    string html;
-    try
-    {
-        // Learn serves the page as static HTML, but only to browser-like user agents.
-        using var request = new HttpRequestMessage(HttpMethod.Get, "https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog");
-        request.Headers.UserAgent.Clear();
-        request.Headers.UserAgent.ParseAdd("Mozilla/5.0");
-        using var response = await http.SendAsync(request);
-        if (!response.IsSuccessStatusCode) return null;
-        html = await response.Content.ReadAsStringAsync();
+        response = await http.SendAsync(request);
     }
     catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
     {
-        return null;
+        throw new SourceUnavailableException($"could not reach the microsoft/clarity-apps releases API: {ex.Message}");
+    }
+
+    using (response)
+    {
+        if (!response.IsSuccessStatusCode)
+            throw new SourceUnavailableException($"the microsoft/clarity-apps releases API returned {(int)response.StatusCode}");
+
+        try
+        {
+            using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+
+            // Clone: the elements outlive the document they were parsed from.
+            return json.RootElement.EnumerateArray().Select(x => x.Clone()).ToList();
+        }
+        catch (JsonException ex)
+        {
+            throw new SourceUnavailableException($"the microsoft/clarity-apps releases API returned unreadable JSON: {ex.Message}");
+        }
+    }
+}
+
+static Dictionary<string, string> GitHubNotes(List<JsonElement> releases)
+{
+    var notes = new Dictionary<string, string>();
+    foreach (var release in releases)
+    {
+        var tag = (release.TryGetProperty("tag_name", out var t) ? t.GetString() : null)?.TrimStart('v') ?? string.Empty;
+        if (tag.Length == 0 || notes.ContainsKey(tag)) continue;
+
+        var body = (release.TryGetProperty("body", out var b) ? b.GetString() : null) ?? string.Empty;
+        var items = body.Split('\n')
+            .Select(line => line.Trim())
+            .Where(line => line.StartsWith("- ") || line.StartsWith("* "))
+            .Select(line => line[2..].Replace("**", string.Empty).Trim())
+            .Where(line => line.Length > 0 && !line.StartsWith("Full Changelog", StringComparison.OrdinalIgnoreCase))
+            .Select(line => line.EndsWith('.') ? line : line + ".")
+            .ToList();
+
+        if (items.Count > 0) notes[tag] = string.Join(" ", items);
+    }
+
+    return notes;
+}
+
+static async Task<Dictionary<string, string>> LearnNotes(HttpClient http, string platform)
+{
+    var heading = platform == "ios" ? "iOS SDK Changelog" : "Android SDK Changelog";
+
+    // Learn serves the page as static HTML, but only to browser-like user agents.
+    using var request = new HttpRequestMessage(HttpMethod.Get, "https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog");
+    request.Headers.UserAgent.Clear();
+    request.Headers.UserAgent.ParseAdd("Mozilla/5.0");
+
+    HttpResponseMessage response;
+    try
+    {
+        response = await http.SendAsync(request);
+    }
+    catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+    {
+        throw new SourceUnavailableException($"could not reach the Microsoft Learn changelog: {ex.Message}");
+    }
+
+    string html;
+    using (response)
+    {
+        if (!response.IsSuccessStatusCode)
+            throw new SourceUnavailableException($"the Microsoft Learn changelog returned {(int)response.StatusCode}");
+
+        html = await response.Content.ReadAsStringAsync();
     }
 
     // Flatten to one text node per line, then walk: platform section -> version block. A
@@ -348,37 +501,53 @@ static async Task<string?> FromLearn(HttpClient http, string platform, string ve
     // sentences around inline <code> elements.
     var lines = Regex.Replace(html, "<[^>]*>", "\n")
         .Split('\n')
-        .Select(line => System.Net.WebUtility.HtmlDecode(line).Trim())
+        .Select(line => WebUtility.HtmlDecode(line).Trim())
         .Where(line => line.Length > 0)
         .ToList();
 
+    var notes = new Dictionary<string, string>();
     var items = new List<string>();
     var current = new StringBuilder();
-    bool inSection = false, inBlock = false;
+    var version = string.Empty;
+    var inSection = false;
 
-    void Flush()
+    void FlushItem()
     {
         if (current.Length == 0) return;
         items.Add(Regex.Replace(current.ToString(), @"\s+", " ").Trim());
         current.Clear();
     }
 
+    void FlushBlock()
+    {
+        FlushItem();
+        if (version.Length > 0 && items.Count > 0 && !notes.ContainsKey(version))
+            notes[version] = string.Join(" ", items);
+
+        items.Clear();
+        version = string.Empty;
+    }
+
     foreach (var line in lines)
     {
-        if (line.StartsWith(heading, StringComparison.Ordinal)) { inSection = true; continue; }
-        if (inSection && line.EndsWith("SDK Changelog", StringComparison.Ordinal)) { inSection = false; }
+        if (line.StartsWith(heading, StringComparison.Ordinal)) { FlushBlock(); inSection = true; continue; }
+        if (inSection && line.EndsWith("SDK Changelog", StringComparison.Ordinal)) { FlushBlock(); inSection = false; }
         if (!inSection) continue;
 
-        if (line.StartsWith($"{version} (", StringComparison.Ordinal)) { inBlock = true; continue; }
-        if (inBlock && Regex.IsMatch(line, @"^\d+\.\d+\.\d+ \(")) { inBlock = false; }
-        if (!inBlock) continue;
+        var header = Regex.Match(line, @"^(\d+(?:\.\d+)+) \(");
+        if (header.Success) { FlushBlock(); version = header.Groups[1].Value; continue; }
+        if (version.Length == 0) continue;
 
-        if (Regex.IsMatch(line, @"^\[[A-Za-z ]+\]$")) { Flush(); current.Append(line).Append(' '); }
+        if (Regex.IsMatch(line, @"^\[[A-Za-z ]+\]$")) { FlushItem(); current.Append(line).Append(' '); }
         else current.Append(current.Length > 0 && !current.ToString().EndsWith(' ') ? " " : string.Empty).Append(line);
     }
 
-    Flush();
-    return items.Count > 0 ? string.Join(" ", items) : null;
+    FlushBlock();
+    return notes;
 }
 
 file sealed class UsageException(string message) : Exception(message);
+
+// An upstream source that cannot be read, as opposed to one that answers "nothing here".
+// Only the second is safe to describe in a package version that can never be edited again.
+file sealed class SourceUnavailableException(string message) : Exception(message);
