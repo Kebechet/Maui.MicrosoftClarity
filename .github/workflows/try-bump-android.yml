@@ -261,6 +261,7 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           BINDING_VERSION: ${{ steps.bump.outputs.binding_version }}
           CHANGELOG_EXCERPT: ${{ steps.bump.outputs.changelog_excerpt }}
+          NOTE_FROM: ${{ steps.bump.outputs.note_from }}
           BASE_BRANCH: ${{ github.ref_name }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           CLAUDE_FIXED: ${{ steps.verdict.outputs.claude_fixed }}
