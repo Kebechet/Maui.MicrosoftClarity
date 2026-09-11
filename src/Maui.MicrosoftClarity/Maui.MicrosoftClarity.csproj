@@ -31,7 +31,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>4.0.0</Version> <!-- x-release-please-version -->
+    <Version>4.0.1</Version> <!-- x-release-please-version -->
     <PackageReleaseNotes>Moved onto the Clarity Android 3.10.0 and Clarity iOS 4.0.0 bindings.
 Android, since 3.8.2: enhanced session upload reliability (3.8.3); Android 17 (API 37) and Jetpack Compose 1.11 support plus a skia shader rendering fix (3.9.0); MaskingMode.Strict honored for React Native apps (3.10.0, no effect here - this package always configures ApplicationFramework.Native).
 iOS, since 3.5.2: ComPDFKit PDF annotation crash fix (3.5.3); session upload fix (3.5.4); optimized screen capture (4.0.0).
