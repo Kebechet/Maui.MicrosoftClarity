@@ -4,7 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
-    <SupportedOSPlatformVersion>14.2</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <!--<NoBindingEmbedding>false</NoBindingEmbedding>-->
   </PropertyGroup>
 
@@ -20,12 +20,10 @@
     <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>4.0.0.0</Version>
-    <PackageReleaseNotes>4.0.0.0: bumped native Clarity iOS SDK from 3.5.2 to 4.0.0.
-3.5.3: [BugFix] Fixed a crash during PDF annotation in ComPDFKit-based views.
-3.5.4: [BugFix] Fixed an issue with session uploads.
-4.0.0: [Breaking] Updated the minimum supported iOS version to 16. [Enhancement] Optimized screen capture performance.
-On iOS 13 to 15 the SDK still links and builds but stays idle, so this binding's minimum stays at 14.2 and no consumer has to raise their own floor. See https://github.com/microsoft/clarity-apps/issues/289
+    <Version>4.1.0.0</Version>
+    <PackageReleaseNotes>4.1.0.0: bumped native Clarity iOS SDK from 4.0.0 to 4.1.0.
+4.1.0: [Feature] Added support for iOS 27. [Breaking] Updated the minimum deployment target from iOS 13 to iOS 15. [BugFix] Fixed a crash involving image layers with invalid dimensions.
+BREAKING: the minimum supported iOS version is now 15.0 (was 14.2), as required by the native SDK.
 Changelog: https://learn.microsoft.com/en-us/clarity/mobile-sdk/sdk-changelog#ios-sdk-changelog</PackageReleaseNotes>
   </PropertyGroup>
 
