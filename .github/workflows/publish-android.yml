@@ -14,10 +14,16 @@ env:
 
   ARTIFACT_FOLDER: D:\a\artifacts
 
+  # nuget.org profile name (not the email) that owns the trusted publishing policy
+  NUGET_USER: Kebechet
+
 jobs:
   publish-android:
     name: Build and publish Android binary
     runs-on: windows-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -59,6 +65,16 @@ jobs:
           name: nuget-package
           path: ${{env.ARTIFACT_FOLDER}}/*.nupkg
 
+      # Trusted publishing (https://learn.microsoft.com/nuget/nuget-org/trusted-publishing): nuget.org
+      # trades this job's GitHub OIDC token for an API key that expires after an hour, so the login sits
+      # right before the push. The nuget.org policy names this repository and the file name
+      # publish-android.yml - renaming this file stops publishing until the policy is updated to match.
+      - name: NuGet login (trusted publishing)
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ env.NUGET_USER }}
+
       - name: Publish Nuget
         # --skip-duplicate covers two cases: the .symbols.nupkg that
         # `dotnet pack` produces alongside the main nupkg (same id+version,
@@ -66,6 +82,6 @@ jobs:
         # already-published version.
         run: >
           dotnet nuget push "${{env.ARTIFACT_FOLDER}}\*.nupkg"
-          --api-key ${{ secrets.NUGET_API_KEY }}
+          --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
