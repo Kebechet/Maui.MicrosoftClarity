@@ -21,8 +21,7 @@ jobs:
     name: Build and publish wrapper package
     runs-on: windows-latest
     permissions:
-      contents: write
-      packages: write
+      contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v4
